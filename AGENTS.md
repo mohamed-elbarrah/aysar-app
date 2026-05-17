@@ -253,3 +253,98 @@ See `DashboardMockup.tsx` for complete working example with:
 - Hover lift effects on cards
 - Animated number counting
 - Animated progress bars
+
+---
+
+## Feature Section Pattern (Split Layout)
+
+For feature sections that alternate between text-content + mockup visuals:
+
+### File Structure
+```
+app/components/
+  FeatureSection.tsx       # Reusable split layout component
+  StagesMockup.tsx         # Feature 1: Construction progress
+  MaintenanceMockup.tsx    # Feature 2: Maintenance table
+  BookingsMockup.tsx       # Feature 3: Bookings table
+  TemplatesMockup.tsx      # Feature 4: Stage templates
+```
+
+### Architecture Rules
+
+1. **"use client" directive** - Required for Framer Motion
+2. **Layout direction**: `layout="text-left"` or `layout="text-right"` prop
+3. **Background colors**: Alternate between `bg-white` and `bg-[#f7f8fa]`
+4. **Container**: Uses `section-aysar` and `sec-inner` classes
+5. **Data structure**: Pass features as array with icon color
+
+### FeatureSection Props
+
+```tsx
+interface FeatureSectionProps {
+  eyebrow: string;              // "01 — Feature name"
+  title: string;                // Main title (before <br />)
+  titleAccent: string;           // Colored accent text
+  description: string;           // Paragraph text
+  features: {                   // Checklist items
+    iconColor: string;          // Hex color for check circle
+    text: string;                // "Bold text — description"
+  }[];
+  mockup: ReactNode;            // The mockup component
+  layout: "text-left" | "text-right";
+  bgColor?: string;            // Section background
+}
+```
+
+### Animation Pattern
+
+```tsx
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+```
+
+### Usage Example
+
+```tsx
+// page.tsx
+<FeatureSection
+  eyebrow="01 — تتبع مراحل الإنشاء"
+  title="تتبع مراحل الإنشاء"
+  titleAccent="خطوة بخطوة"
+  description="..."
+  features={[
+    { iconColor: "#1a9a5a", text: "صور وفيديو — من الموقع" },
+    { iconColor: "#1a9a5a", text: "إشعارات فورية — عند كل تحديث" },
+  ]}
+  mockup={<StagesMockup />}
+  layout="text-left"
+  bgColor="bg-white"
+/>
+```
+
+### Mockup Guidelines
+
+Each mockup follows the DashboardMockup pattern:
+- **Gradient background** matching feature theme color
+- **Browser chrome** with navy header
+- **Table/card content** with scroll-triggered animations
+- **Progress bars** animate from 0 to target width
+- **Rows stagger** in with delay
+
+### Reference Implementation
+
+See existing mockups:
+- `StagesMockup.tsx` - Progress bars + KPI cards
+- `MaintenanceMockup.tsx` - Data table with status badges
+- `BookingsMockup.tsx` - Booking management table
+- `TemplatesMockup.tsx` - Stage templates with progress
