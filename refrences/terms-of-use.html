@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>شروط الاستخدام — أيسَر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#0c2954;
+  --indigo:#2d2e83;
+  --white:#ffffff;
+  --bg:#f5f6f9;
+  --border:rgba(0,0,0,.08);
+  --text:#0c1829;
+  --muted:#6b7a94;
+  --light-border:rgba(255,255,255,.12);
+  --green:#1a9a5a;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Kufi Arabic',sans-serif;color:var(--text);background:#fff;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:62px;
+  display:flex;align-items:center;
+  padding:0 40px;
+  background:rgba(8,16,36,.85);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(20px);
+}
+.nav-inner{max-width:1200px;margin:0 auto;width:100%;display:flex;align-items:center;gap:24px}
+.nav-logo img{height:32px;width:auto;max-width:110px;display:block;object-fit:contain}
+.nav-links{display:flex;gap:2px;list-style:none;margin-right:auto}
+.nav-links a{color:rgba(255,255,255,.7);font-size:14px;font-weight:400;text-decoration:none;padding:6px 14px;border-radius:8px;transition:color .15s,background .15s}
+.nav-links a:hover{color:#fff;background:rgba(255,255,255,.08)}
+.nav-btns{display:flex;gap:8px;align-items:center}
+.btn-ghost-nav{color:rgba(255,255,255,.7);font-size:13px;font-weight:500;text-decoration:none;padding:8px 18px;border-radius:9px;border:1px solid rgba(255,255,255,.18);transition:all .15s;font-family:'Noto Kufi Arabic',sans-serif}
+.btn-ghost-nav:hover{background:rgba(255,255,255,.1);color:#fff}
+.btn-solid-nav{background:#fff;color:var(--navy);font-size:13px;font-weight:700;text-decoration:none;padding:8px 20px;border-radius:9px;transition:opacity .15s;font-family:'Noto Kufi Arabic',sans-serif}
+.btn-solid-nav:hover{opacity:.9}
+
+/* ── HERO BANNER ── */
+.page-hero{
+  background:linear-gradient(160deg,#0c2954 0%,#0f1e3d 50%,#1a1f4e 100%);
+  padding:120px 40px 72px;
+  position:relative;overflow:hidden;
+}
+.page-hero::after{
+  content:'';position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.4;pointer-events:none;
+}
+.glow-1{position:absolute;width:600px;height:400px;border-radius:50%;background:radial-gradient(ellipse,rgba(45,46,131,.22) 0%,transparent 70%);top:-80px;right:-80px;pointer-events:none}
+.glow-2{position:absolute;width:400px;height:300px;border-radius:50%;background:radial-gradient(ellipse,rgba(93,223,184,.06) 0%,transparent 70%);bottom:0;left:20%;pointer-events:none}
+.page-hero-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1}
+.page-breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.45);margin-bottom:20px}
+.page-breadcrumb a{color:rgba(255,255,255,.45);text-decoration:none;transition:color .15s}
+.page-breadcrumb a:hover{color:#fff}
+.page-breadcrumb-sep{opacity:.3}
+.page-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:30px;padding:5px 16px 5px 12px;
+  font-size:12px;font-weight:500;color:rgba(255,255,255,.7);
+  margin-bottom:20px;
+}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:#5ddfb8;flex-shrink:0}
+.page-hero h1{
+  font-size:clamp(28px,4vw,48px);
+  font-weight:700;color:#fff;
+  line-height:1.2;letter-spacing:-.3px;
+  margin-bottom:16px;
+}
+.page-hero-desc{
+  font-size:17px;color:rgba(255,255,255,.55);
+  line-height:1.75;max-width:600px;margin-bottom:28px;
+}
+.page-meta{display:flex;gap:24px;flex-wrap:wrap}
+.meta-item{display:flex;align-items:center;gap:7px;font-size:13px;color:rgba(255,255,255,.5)}
+.meta-item strong{color:rgba(255,255,255,.8);font-weight:600}
+
+/* ── CONTENT LAYOUT ── */
+.content-wrap{max-width:1200px;margin:0 auto;padding:64px 40px 80px;display:grid;grid-template-columns:260px 1fr;gap:48px;align-items:start}
+@media(max-width:900px){.content-wrap{grid-template-columns:1fr;padding:40px 24px 60px}}
+
+/* ── TOC SIDEBAR ── */
+.toc{position:sticky;top:82px}
+.toc-title{font-size:11px;font-weight:700;color:var(--indigo);letter-spacing:.8px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.toc-title::before{content:'';width:16px;height:2px;background:var(--indigo);border-radius:2px}
+.toc-list{list-style:none;display:flex;flex-direction:column;gap:2px}
+.toc-list a{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);text-decoration:none;padding:7px 12px;border-radius:8px;transition:all .15s;border-right:2px solid transparent;font-weight:500}
+.toc-list a:hover{color:var(--navy);background:var(--bg);border-right-color:rgba(45,46,131,.3)}
+.toc-list a.active{color:var(--indigo);background:rgba(45,46,131,.06);border-right-color:var(--indigo);font-weight:600}
+.toc-num{font-size:11px;font-weight:700;color:var(--indigo);opacity:.5;min-width:18px}
+.toc-card{background:rgba(45,46,131,.04);border:1px solid rgba(45,46,131,.1);border-radius:14px;padding:20px;margin-top:24px}
+.toc-card-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.toc-card-desc{font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:14px}
+.toc-card-btn{display:block;text-align:center;background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:9px 16px;border-radius:8px;text-decoration:none;transition:background .15s;font-family:'Noto Kufi Arabic',sans-serif}
+.toc-card-btn:hover{background:var(--indigo)}
+
+/* ── TERMS CONTENT ── */
+.terms-body{min-width:0}
+.terms-section{margin-bottom:52px;scroll-margin-top:82px}
+.sec-eyebrow{font-size:11px;font-weight:700;color:var(--indigo);letter-spacing:.7px;text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.sec-eyebrow::before{content:'';width:16px;height:2px;background:var(--indigo);border-radius:2px}
+.terms-section h2{font-size:clamp(20px,2.5vw,26px);font-weight:700;color:var(--text);line-height:1.3;margin-bottom:16px;letter-spacing:-.2px}
+.terms-section p{font-size:15px;color:#3a4a60;line-height:1.85;margin-bottom:14px}
+.terms-section p:last-child{margin-bottom:0}
+
+/* قوائم */
+.terms-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin:16px 0}
+.terms-list li{display:flex;align-items:flex-start;gap:12px;font-size:15px;color:#3a4a60;line-height:1.75}
+.terms-list li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--indigo);flex-shrink:0;margin-top:9px}
+
+/* بطاقة تنبيه */
+.alert-card{border-radius:14px;padding:20px 24px;margin:24px 0;display:flex;gap:16px;align-items:flex-start}
+.alert-card.blue{background:rgba(45,46,131,.05);border:1px solid rgba(45,46,131,.14)}
+.alert-card.green{background:rgba(26,154,90,.05);border:1px solid rgba(26,154,90,.14)}
+.alert-card.amber{background:rgba(176,112,0,.05);border:1px solid rgba(176,112,0,.14)}
+.alert-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.alert-body p{font-size:14px;color:#3a4a60;line-height:1.75;margin:0}
+.alert-body strong{color:var(--navy);display:block;font-size:15px;margin-bottom:5px}
+
+/* فاصل قسم */
+.section-divider{height:1px;background:var(--border);margin:0 0 52px}
+
+/* جدول */
+.terms-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+.terms-table th{background:var(--bg);font-size:12px;font-weight:700;color:var(--muted);padding:10px 14px;text-align:right;border-bottom:2px solid var(--border);letter-spacing:.3px}
+.terms-table td{padding:12px 14px;border-bottom:1px solid rgba(0,0,0,.05);color:#3a4a60;vertical-align:top;line-height:1.6}
+.terms-table tr:last-child td{border-bottom:none}
+.terms-table tr:hover td{background:var(--bg)}
+
+/* شريط نهاية الصفحة */
+.terms-footer-bar{background:var(--bg);border-top:1px solid var(--border);padding:32px 40px;margin-top:0}
+.terms-footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.terms-footer-text{font-size:13px;color:var(--muted);line-height:1.6}
+.terms-footer-actions{display:flex;gap:10px;flex-wrap:wrap}
+.tfooter-btn{font-size:13px;font-weight:600;padding:9px 20px;border-radius:9px;text-decoration:none;transition:all .15s;font-family:'Noto Kufi Arabic',sans-serif;cursor:pointer;border:none}
+.tfooter-btn.primary{background:var(--navy);color:#fff}
+.tfooter-btn.primary:hover{background:var(--indigo)}
+.tfooter-btn.ghost{background:#fff;color:var(--navy);border:1px solid var(--border)}
+.tfooter-btn.ghost:hover{border-color:var(--navy)}
+
+/* ── FOOTER ── */
+footer{background:var(--navy);padding:64px 40px 0}
+.footer-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.6fr repeat(3,1fr);gap:40px;padding-bottom:48px}
+@media(max-width:900px){.footer-inner{grid-template-columns:1fr 1fr}}
+.footer-brand{}
+.footer-logo img{height:34px;margin-bottom:16px;display:block}
+.footer-desc{font-size:14px;color:rgba(255,255,255,.45);line-height:1.75;max-width:260px;margin-bottom:20px}
+.footer-social{display:flex;gap:10px}
+.soc-btn{width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;transition:background .15s;text-decoration:none}
+.soc-btn:hover{background:rgba(255,255,255,.14)}
+.soc-btn img{width:16px;height:16px;object-fit:contain;filter:brightness(0) invert(1)}
+.f-col-t{font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.7px;text-transform:uppercase;margin-bottom:16px}
+.f-col-l{display:flex;flex-direction:column;gap:10px}
+.f-col-l a{font-size:14px;color:rgba(255,255,255,.55);text-decoration:none;transition:color .15s}
+.f-col-l a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding:20px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.footer-bottom span{font-size:12px;color:rgba(255,255,255,.3)}
+.footer-bottom a{font-size:12px;color:rgba(255,255,255,.35);text-decoration:none;transition:color .15s}
+.footer-bottom a:hover{color:rgba(255,255,255,.7)}
+
+/* fade-in animation */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{opacity:0;animation:fadeUp .6s ease forwards}
+.delay-1{animation-delay:.1s}
+.delay-2{animation-delay:.2s}
+.delay-3{animation-delay:.3s}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="aysar_home_v8-3.html" class="nav-logo">
+      <img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/686edec02d665deedc0abb16_aysar%20no%20backgroand%201.avif" alt="أيسَر">
+    </a>
+    <ul class="nav-links">
+      <li><a href="home.html">الرئيسية</a></li>
+      <li><a href="plans.html">الأسعار</a></li>
+      <li><a href="contact.html">اتصل بنا</a></li>
+    </ul>
+    <div class="nav-btns">
+      <a href="https://platform.aysar.sa/" target="_blank" class="btn-ghost-nav">تسجيل دخول</a>
+      <a href="#" class="btn-solid-nav">ابدأ مجاناً</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO BANNER -->
+<section class="page-hero">
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+  <div class="page-hero-inner">
+    <div class="page-breadcrumb fade-up">
+      <a href="aysar_home_v8-3.html">الرئيسية</a>
+      <span class="page-breadcrumb-sep">›</span>
+      <span>شروط الاستخدام</span>
+    </div>
+    <div class="page-badge fade-up delay-1"><span class="badge-dot"></span>آخر تحديث: مايو 2025</div>
+    <h1 class="fade-up delay-1">شروط الاستخدام</h1>
+    <p class="page-hero-desc fade-up delay-2">يرجى قراءة هذه الشروط بعناية قبل استخدام منصة أيسَر أو الاشتراك فيها. باستخدامك للمنصة فإنك توافق على الالتزام بجميع ما ورد فيها.</p>
+    <div class="page-meta fade-up delay-3">
+      <div class="meta-item">📄 <strong>الإصدار:</strong> 2.1</div>
+      <div class="meta-item">📅 <strong>تاريخ السريان:</strong> 1 مايو 2025</div>
+      <div class="meta-item">🏢 <strong>الجهة:</strong> مؤسسة أيسر المتطورة لتقنية المعلومات</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<div class="content-wrap">
+
+  <!-- جدول المحتويات -->
+  <aside class="toc">
+    <div class="toc-title">المحتويات</div>
+    <ul class="toc-list" id="toc-list">
+      <li><a href="#sec-intro" class="active"><span class="toc-num">01</span>تعريف الأطراف والمنصة</a></li>
+      <li><a href="#sec-accept"><span class="toc-num">02</span>شروط القبول والتسجيل</a></li>
+      <li><a href="#sec-use"><span class="toc-num">03</span>الاستخدام المسموح به</a></li>
+      <li><a href="#sec-forbidden"><span class="toc-num">04</span>الاستخدامات المحظورة</a></li>
+      <li><a href="#sec-data"><span class="toc-num">05</span>البيانات والخصوصية</a></li>
+      <li><a href="#sec-payment"><span class="toc-num">06</span>الاشتراكات والدفع</a></li>
+      <li><a href="#sec-ip"><span class="toc-num">07</span>الملكية الفكرية</a></li>
+      <li><a href="#sec-liability"><span class="toc-num">08</span>حدود المسؤولية</a></li>
+      <li><a href="#sec-termination"><span class="toc-num">09</span>إيقاف الخدمة والإنهاء</a></li>
+      <li><a href="#sec-law"><span class="toc-num">10</span>القانون الحاكم وتسوية النزاعات</a></li>
+      <li><a href="#sec-changes"><span class="toc-num">11</span>تعديل الشروط</a></li>
+      <li><a href="#sec-contact"><span class="toc-num">12</span>التواصل معنا</a></li>
+    </ul>
+    <div class="toc-card">
+      <div class="toc-card-title">لديك استفسار قانوني؟</div>
+      <div class="toc-card-desc">فريقنا جاهز للإجابة على أي أسئلة تتعلق بشروط استخدام المنصة.</div>
+      <a href="mailto:legal@aysar.sa" class="toc-card-btn">تواصل معنا</a>
+    </div>
+  </aside>
+
+  <!-- محتوى الشروط -->
+  <main class="terms-body">
+
+    <!-- 01 -->
+    <section class="terms-section" id="sec-intro">
+      <div class="sec-eyebrow">01 — التعريفات</div>
+      <h2>تعريف الأطراف والمنصة</h2>
+      <p>هذه الاتفاقية ("الشروط") مبرمة بين <strong>مؤسسة أيسر المتطورة لتقنية المعلومات</strong> ("أيسَر"، "نحن"، "الشركة")، ومقرها المملكة العربية السعودية، رقم السجل التجاري: 4030620045 — وبين الشخص الطبيعي أو الاعتباري الذي يستخدم المنصة ("المستخدم"، "أنت").</p>
+      <p>تشمل "المنصة" موقع أيسَر الإلكتروني، تطبيق الجوال، لوحة تحكم المطوّر، نظام CRM، وجميع الخدمات والأدوات المرتبطة.</p>
+      <div class="alert-card blue">
+        <div class="alert-icon">ℹ️</div>
+        <div class="alert-body">
+          <strong>للعلم</strong>
+          <p>تُعدّ هذه الشروط ملزمة لجميع مستخدمي المنصة بمجرد التسجيل أو البدء في الاستخدام، بصرف النظر عن طريقة الوصول.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 02 -->
+    <section class="terms-section" id="sec-accept">
+      <div class="sec-eyebrow">02 — التسجيل</div>
+      <h2>شروط القبول والتسجيل</h2>
+      <p>للاشتراك في منصة أيسَر والاستفادة من خدماتها يجب استيفاء الشروط التالية:</p>
+      <ul class="terms-list">
+        <li>أن يكون المستخدم شركة أو مؤسسة أو شخصاً اعتبارياً مرخّصاً لمزاولة نشاط التطوير العقاري في المملكة العربية السعودية.</li>
+        <li>تقديم بيانات تسجيل صحيحة وكاملة وحديثة، والالتزام بتحديثها فور حدوث أي تغيير.</li>
+        <li>الحفاظ على سرية بيانات الدخول (اسم المستخدم وكلمة المرور) وعدم مشاركتها مع أطراف غير مخوّلة.</li>
+        <li>قبول هذه الشروط وسياسة الخصوصية بشكل صريح قبل بدء الاستخدام.</li>
+        <li>ألا يكون المستخدم قد سبق إيقاف حسابه أو حظره من المنصة لأي سبب.</li>
+      </ul>
+      <p>تتحمل المنشأة المُسجَّلة المسؤولية الكاملة عن جميع الأنشطة التي تجري تحت حسابها، بما في ذلك تصرفات موظفيها ومستخدميها الفرعيين.</p>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 03 -->
+    <section class="terms-section" id="sec-use">
+      <div class="sec-eyebrow">03 — الاستخدام</div>
+      <h2>الاستخدام المسموح به</h2>
+      <p>تُتيح منصة أيسَر للمستخدمين استخدام خدماتها ضمن النطاق التالي حصراً:</p>
+      <ul class="terms-list">
+        <li>إدارة المشاريع العقارية وتتبع مراحل الإنشاء وتحديثها.</li>
+        <li>التواصل مع العملاء والمشترين وإدارة علاقاتهم عبر نظام CRM المدمج.</li>
+        <li>إنشاء صفحات هبوط احترافية واستقبال الحجوزات الإلكترونية.</li>
+        <li>إصدار الإشعارات والتقارير الإنشائية الدورية وتوزيعها على العملاء.</li>
+        <li>إدارة طلبات الصيانة ومتابعة تنفيذها بعد التسليم.</li>
+        <li>الاستفادة من التقارير والإحصاءات التحليلية لاتخاذ قرارات مدروسة.</li>
+      </ul>
+      <div class="alert-card green">
+        <div class="alert-icon">✅</div>
+        <div class="alert-body">
+          <strong>استخدام مشروع</strong>
+          <p>يقتصر الاستخدام المصرّح به على الأنشطة التجارية العقارية المشروعة والمتوافقة مع أنظمة المملكة العربية السعودية.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 04 -->
+    <section class="terms-section" id="sec-forbidden">
+      <div class="sec-eyebrow">04 — المحظورات</div>
+      <h2>الاستخدامات المحظورة</h2>
+      <p>يُحظر على المستخدمين القيام بالأنشطة التالية أو السماح بها تحت أي ظرف:</p>
+      <ul class="terms-list">
+        <li>نسخ المنصة أو أجزاء منها أو إعادة إنتاجها أو توزيعها دون إذن كتابي مسبق.</li>
+        <li>محاولة الوصول غير المصرّح به إلى أنظمة أيسَر أو بيانات مستخدمين آخرين.</li>
+        <li>استخدام المنصة لأغراض احتيالية أو مضللة أو مخالفة للأنظمة السعودية.</li>
+        <li>نشر أو إدخال برمجيات خبيثة أو محتوى ضار بأي شكل من الأشكال.</li>
+        <li>الاستخراج الآلي للبيانات (Scraping) أو استخدام واجهات برمجية غير رسمية دون إذن.</li>
+        <li>إعادة بيع الخدمة أو منح حق الوصول إليها لأطراف خارج المنشأة المشتركة.</li>
+        <li>التحايل على أي قيود تقنية أو إجراءات أمان مطبّقة على المنصة.</li>
+      </ul>
+      <div class="alert-card amber">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-body">
+          <strong>تحذير</strong>
+          <p>يُفضي انتهاك أي من هذه المحظورات إلى إيقاف الحساب فوراً دون إشعار مسبق، وقد تتخذ أيسَر الإجراءات القانونية اللازمة.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 05 -->
+    <section class="terms-section" id="sec-data">
+      <div class="sec-eyebrow">05 — البيانات</div>
+      <h2>البيانات والخصوصية</h2>
+      <p>تُعدّ جميع البيانات التي تُدخلها في المنصة ملكاً للمستخدم، وتلتزم أيسَر بحمايتها والحفاظ على سريتها وفقاً لسياسة الخصوصية المعتمدة ونظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL).</p>
+      <ul class="terms-list">
+        <li>تُخزَّن البيانات على خوادم آمنة داخل المملكة العربية السعودية.</li>
+        <li>لا تُباع بيانات المستخدمين أو تُشارَك مع أطراف ثالثة لأغراض تجارية.</li>
+        <li>يحق للمستخدم طلب نسخة من بياناته أو حذفها وفق ما تتيحه سياسة الخصوصية.</li>
+        <li>تُطبَّق تقنيات تشفير متقدمة لحماية البيانات أثناء النقل والتخزين.</li>
+      </ul>
+      <p>لمزيد من التفاصيل، يُرجى الاطلاع على <a href="https://www.aysar.sa/privacy-policy" style="color:var(--indigo);font-weight:600;text-decoration:none">سياسة الخصوصية</a> الخاصة بأيسَر.</p>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 06 -->
+    <section class="terms-section" id="sec-payment">
+      <div class="sec-eyebrow">06 — الاشتراكات</div>
+      <h2>الاشتراكات والدفع</h2>
+      <p>تعمل منصة أيسَر وفق نموذج اشتراك مدفوع، وتسري الشروط التالية على جميع المدفوعات:</p>
+
+      <table class="terms-table">
+        <thead>
+          <tr>
+            <th>البند</th>
+            <th>التفاصيل</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>دورة الفوترة</strong></td>
+            <td>شهرية أو سنوية حسب الخطة المختارة</td>
+          </tr>
+          <tr>
+            <td><strong>طرق الدفع</strong></td>
+            <td>بطاقات الائتمان والمدى، والتحويل البنكي للشركات</td>
+          </tr>
+          <tr>
+            <td><strong>التجديد التلقائي</strong></td>
+            <td>يُجدَّد الاشتراك تلقائياً ما لم يُلغَ قبل 48 ساعة من تاريخ التجديد</td>
+          </tr>
+          <tr>
+            <td><strong>سياسة الاسترداد</strong></td>
+            <td>لا يُسترد رسوم الاشتراك بعد تفعيله، إلا في حالات استثنائية تُقدّرها أيسَر</td>
+          </tr>
+          <tr>
+            <td><strong>الضريبة</strong></td>
+            <td>تخضع جميع الأسعار لضريبة القيمة المضافة 15% وفق نظام الزكاة والضريبة</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>في حال التأخر في السداد، تحتفظ أيسَر بحق تعليق الحساب مع إشعار مسبق، واستئناف الخدمة بعد تسوية المستحقات.</p>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 07 -->
+    <section class="terms-section" id="sec-ip">
+      <div class="sec-eyebrow">07 — الملكية الفكرية</div>
+      <h2>الملكية الفكرية</h2>
+      <p>جميع عناصر منصة أيسَر من تصميم وكود وواجهات وشعارات وخوارزميات ومحتوى مرئي — هي ملك حصري لمؤسسة أيسر المتطورة لتقنية المعلومات ومحمية بموجب قوانين الملكية الفكرية في المملكة العربية السعودية.</p>
+      <ul class="terms-list">
+        <li>لا يمنح الاشتراك في المنصة أي حقوق ملكية فكرية على أي من عناصرها.</li>
+        <li>يُمنح المستخدم ترخيص استخدام محدود وغير حصري وغير قابل للتحويل.</li>
+        <li>يحتفظ المستخدم بحقوق الملكية الكاملة على بياناته ومحتواه المُدخَل في المنصة.</li>
+        <li>يُحظر إزالة أي إشارات حقوق النشر أو العلامات التجارية من أي جزء من المنصة.</li>
+      </ul>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 08 -->
+    <section class="terms-section" id="sec-liability">
+      <div class="sec-eyebrow">08 — المسؤولية</div>
+      <h2>حدود المسؤولية</h2>
+      <p>تسعى أيسَر جاهدةً لتوفير خدمة موثوقة ومستمرة، غير أنها لا تتحمل المسؤولية عن:</p>
+      <ul class="terms-list">
+        <li>الأضرار غير المباشرة أو العرضية الناجمة عن استخدام المنصة أو عدم إمكانية الوصول إليها.</li>
+        <li>فقدان البيانات الناجم عن أخطاء المستخدم أو هجمات إلكترونية خارجة عن سيطرة أيسَر.</li>
+        <li>الانقطاعات المؤقتة في الخدمة الناجمة عن أعمال الصيانة المجدولة أو الطوارئ.</li>
+        <li>دقة البيانات المُدخَلة من قِبل المستخدم أو نتائج القرارات المبنية عليها.</li>
+      </ul>
+      <p>في جميع الأحوال، لا تتجاوز المسؤولية القصوى لأيسَر قيمة رسوم الاشتراك المدفوعة خلال الثلاثة أشهر السابقة للحادثة.</p>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 09 -->
+    <section class="terms-section" id="sec-termination">
+      <div class="sec-eyebrow">09 — الإنهاء</div>
+      <h2>إيقاف الخدمة والإنهاء</h2>
+      <p>يحق لأي من الطرفين إنهاء الاتفاقية وفق الآتي:</p>
+      <ul class="terms-list">
+        <li><strong>إنهاء المستخدم:</strong> يمكن إلغاء الاشتراك في أي وقت من لوحة الإعدادات، وتبقى الخدمة نشطة حتى نهاية الفترة المدفوعة.</li>
+        <li><strong>إنهاء أيسَر بسبب مشروع:</strong> في حال انتهاك الشروط يُوقَف الحساب فوراً مع إشعار بالبريد الإلكتروني.</li>
+        <li><strong>إنهاء أيسَر بدون سبب:</strong> تُخطر المستخدم قبل 30 يوماً وتُتيح له تصدير بياناته كاملاً.</li>
+        <li><strong>بعد الإنهاء:</strong> تُحتفظ البيانات 90 يوماً يمكن خلالها تصديرها، ثم تُحذف نهائياً.</li>
+      </ul>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 10 -->
+    <section class="terms-section" id="sec-law">
+      <div class="sec-eyebrow">10 — النزاعات</div>
+      <h2>القانون الحاكم وتسوية النزاعات</h2>
+      <p>تخضع هذه الاتفاقية وتُفسَّر وفقاً لأنظمة ولوائح المملكة العربية السعودية. وفي حال نشوء أي نزاع، يُتّبع المسار التالي:</p>
+      <ul class="terms-list">
+        <li><strong>التفاوض الودّي:</strong> يُمنح الطرفان 30 يوماً لتسوية النزاع وديّاً.</li>
+        <li><strong>الوساطة:</strong> عند تعذّر الحل الودّي يُلجأ إلى الوساطة عبر جهة معتمدة.</li>
+        <li><strong>التحكيم:</strong> في حال عدم الوصول إلى حل، يُحال النزاع إلى هيئة التحكيم التجاري السعودية.</li>
+        <li><strong>الاختصاص القضائي:</strong> تختص محاكم مدينة جدة بالفصل في أي نزاعات لم تُحسم بالطرق السابقة.</li>
+      </ul>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 11 -->
+    <section class="terms-section" id="sec-changes">
+      <div class="sec-eyebrow">11 — التعديلات</div>
+      <h2>تعديل الشروط</h2>
+      <p>تحتفظ أيسَر بحق تعديل هذه الشروط في أي وقت، وستُخطر المستخدمين المُسجَّلين بالتغييرات الجوهرية عبر:</p>
+      <ul class="terms-list">
+        <li>إشعار داخل المنصة قبل 14 يوماً على الأقل من سريان التعديلات.</li>
+        <li>رسالة بريد إلكتروني إلى العنوان المسجّل في الحساب.</li>
+      </ul>
+      <p>يُعدّ استمرار المستخدم في استخدام المنصة بعد سريان التعديلات قبولاً صريحاً للشروط المحدّثة. إن لم تكن موافقاً، يحق لك إنهاء اشتراكك قبل تاريخ السريان.</p>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- 12 -->
+    <section class="terms-section" id="sec-contact">
+      <div class="sec-eyebrow">12 — التواصل</div>
+      <h2>التواصل معنا</h2>
+      <p>لأي استفسار أو ملاحظة تتعلق بهذه الشروط، يمكن التواصل معنا عبر القنوات التالية:</p>
+      <ul class="terms-list">
+        <li>📧 البريد الإلكتروني: <a href="mailto:legal@aysar.sa" style="color:var(--indigo);font-weight:600;text-decoration:none">legal@aysar.sa</a></li>
+        <li>📞 الهاتف: <a href="tel:+966125101107" style="color:var(--indigo);font-weight:600;text-decoration:none">966125101107+</a></li>
+        <li>💬 واتساب: <a href="https://wa.me/966125101107" target="_blank" style="color:var(--indigo);font-weight:600;text-decoration:none">تواصل عبر واتساب</a></li>
+        <li>🌐 مركز المساعدة: <a href="https://support.aysar.sa/" target="_blank" style="color:var(--indigo);font-weight:600;text-decoration:none">support.aysar.sa</a></li>
+        <li>📍 العنوان: جدة، المملكة العربية السعودية</li>
+      </ul>
+      <div class="alert-card green">
+        <div class="alert-icon">✅</div>
+        <div class="alert-body">
+          <strong>شكراً لثقتك في أيسَر</strong>
+          <p>نحن ملتزمون بتقديم خدمة شفافة وموثوقة، وهذه الشروط تعكس التزامنا المشترك ببناء علاقة تجارية ناجحة ومستدامة.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- شريط الإجراءات السفلي -->
+<div class="terms-footer-bar">
+  <div class="terms-footer-inner">
+    <div class="terms-footer-text">
+      © 2025 مؤسسة أيسر المتطورة لتقنية المعلومات · رقم السجل التجاري: 4030620045<br>
+      آخر تحديث لهذه الشروط: مايو 2025 · الإصدار 2.1
+    </div>
+    <div class="terms-footer-actions">
+      <a href="https://www.aysar.sa/privacy-policy" class="tfooter-btn ghost">سياسة الخصوصية</a>
+      <a href="mailto:legal@aysar.sa" class="tfooter-btn primary">📧 اتصل بالفريق القانوني</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/686edec02d665deedc0abb16_aysar%20no%20backgroand%201.avif" alt="أيسَر">
+      </div>
+      <p class="footer-desc">أيسَر برنامج لإدارة العقارات وتتبع مراحل الإنشاء من أول طوبة لآخر لمسة.</p>
+      <div class="footer-social">
+        <a href="https://wa.me/966125101107" class="soc-btn" target="_blank"><img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/6909ff4f4cfaf893fa5531ba_whatsapp-white-icon.png" alt="واتساب"></a>
+        <a href="https://x.com/aysar_ksa" class="soc-btn" target="_blank"><img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/686f58163d6350e998381015_X.svg" alt="X"></a>
+        <a href="https://www.instagram.com/aysar_ksa/" class="soc-btn" target="_blank"><img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/686f581646ec4c97bf1eecb4_Insta.svg" alt="إنستغرام"></a>
+        <a href="https://www.tiktok.com/@aysar_sa" class="soc-btn" target="_blank"><img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/68e0d5460bf150d8b7f651f6_tiktok-white-icon.webp" alt="تيك توك"></a>
+      </div>
+    </div>
+    <div>
+      <div class="f-col-t">روابط سريعة</div>
+      <div class="f-col-l">
+          <a href="home.html">الرئيسية</a>
+          <a href="plans.html">الأسعار</a>
+          <a href="contact.html">اتصل بنا</a>
+      </div>
+    </div>
+    <div>
+      <div class="f-col-t">المساعدة</div>
+      <div class="f-col-l">
+          <a href="https://platform.aysar.sa/ar/company/dashboard/login" target="_blank">تسجيل دخول</a>
+          <a href="https://support.aysar.sa/" target="_blank">مركز المساعدة</a>
+          <a href="https://support.aysar.sa/page/update" target="_blank">التحديثات</a>
+          <a href="privacy-policy.html">سياسة الخصوصية</a>
+          <a href="terms-of-use.html">شروط الاستخدام</a>
+          <a href="return-policy.html">سياسة الاسترجاع</a>
+      </div>
+    </div>
+    <div>
+      <div class="f-col-t">التطبيق</div>
+      <div class="f-col-l">
+        <a href="https://apps.apple.com/sa/app/%D8%A3%D9%8A%D8%B3-%D8%B1/id6746420561?l=ar&platform=iphone" target="_blank">App Store</a>
+        <a href="https://play.google.com/store/apps/details?id=com.aysar.application" target="_blank">Google Play</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 مؤسسة أيسر المتطورة لتقنية المعلومات · رقم السجل التجاري: 4030620045</span>
+    <div style="display:flex;gap:16px">
+    </div>
+  </div>
+</footer>
+
+<script>
+// Nav scroll highlight for TOC
+const sections = document.querySelectorAll('.terms-section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.getAttribute('id');
+      tocLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

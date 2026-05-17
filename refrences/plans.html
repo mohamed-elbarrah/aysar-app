@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الباقات والأسعار — أيسَر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#0c2954;
+  --indigo:#2d2e83;
+  --white:#fff;
+  --bg:#f7f8fa;
+  --border:#e8edf5;
+  --text:#0c1829;
+  --muted:#6b7a94;
+  --green:#1a9a5a;
+  --green-light:#e9f9f0;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Kufi Arabic',sans-serif;color:var(--text);background:#fff;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ── NAV ── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:62px;display:flex;align-items:center;padding:0 40px;background:rgba(255,255,255,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(16px)}
+.nav-inner{max-width:1200px;margin:0 auto;width:100%;display:flex;align-items:center;gap:24px}
+.nav-logo img{height:32px;width:auto;max-width:110px;display:block;object-fit:contain}
+.nav-links{display:flex;gap:2px;list-style:none;margin-right:auto}
+.nav-links a{color:var(--muted);font-size:14px;font-weight:400;text-decoration:none;padding:6px 14px;border-radius:8px;transition:color .15s}
+.nav-links a:hover,.nav-links a.active{color:var(--navy);font-weight:600}
+.nav-links a.active{position:relative}
+.nav-links a.active::after{content:'';position:absolute;bottom:-2px;right:14px;left:14px;height:2px;background:var(--indigo);border-radius:2px}
+.nav-btns{display:flex;gap:8px;align-items:center}
+.btn-ghost-nav{color:var(--navy);font-size:13px;font-weight:500;text-decoration:none;padding:8px 18px;border-radius:9px;border:1px solid var(--border);transition:all .15s;font-family:'Noto Kufi Arabic',sans-serif}
+.btn-ghost-nav:hover{background:var(--bg)}
+.btn-solid-nav{background:var(--navy);color:#fff;font-size:13px;font-weight:700;text-decoration:none;padding:8px 20px;border-radius:9px;transition:opacity .15s;font-family:'Noto Kufi Arabic',sans-serif}
+.btn-solid-nav:hover{opacity:.88}
+
+/* ── HERO ── */
+.plans-hero{
+  background:linear-gradient(160deg,#0c2954 0%,#0f1e3d 50%,#1a1f4e 100%);
+  padding:130px 40px 80px;text-align:center;position:relative;overflow:hidden;
+}
+.plans-hero::after{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:.4;pointer-events:none;z-index:0}
+.glow-hero{position:absolute;width:600px;height:400px;border-radius:50%;background:radial-gradient(ellipse,rgba(45,46,131,.3) 0%,transparent 70%);top:-100px;left:50%;transform:translateX(-50%);pointer-events:none;z-index:0}
+.plans-hero-inner{position:relative;z-index:1;max-width:680px;margin:0 auto}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:30px;padding:5px 16px;font-size:12px;font-weight:500;color:rgba(255,255,255,.65);margin-bottom:22px}
+.plans-hero h1{font-size:clamp(32px,5vw,56px);font-weight:700;color:#fff;line-height:1.12;letter-spacing:-.3px;margin-bottom:16px}
+.plans-hero h1 span{color:rgba(255,255,255,.5)}
+.plans-hero p{font-size:17px;color:rgba(255,255,255,.5);line-height:1.75;margin-bottom:36px}
+
+/* ── TOGGLE شهري / سنوي ── */
+.billing-toggle{display:inline-flex;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:40px;padding:4px;gap:2px}
+.billing-btn{font-family:'Noto Kufi Arabic',sans-serif;font-size:14px;font-weight:500;padding:8px 24px;border-radius:36px;border:none;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.55);background:transparent}
+.billing-btn.active{background:#fff;color:var(--navy);font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.save-badge{display:inline-flex;align-items:center;background:rgba(93,223,184,.15);border:1px solid rgba(93,223,184,.25);color:#5ddfb8;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;margin-right:8px}
+
+/* ── PLANS SECTION ── */
+.plans-section{padding:64px 40px 96px;background:var(--bg)}
+.plans-grid{max-width:1140px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+
+/* ── PLAN CARD ── */
+.plan-card{background:#fff;border:2px solid var(--border);border-radius:22px;overflow:hidden;transition:transform .25s,box-shadow .25s;position:relative}
+.plan-card:hover{transform:translateY(-4px);box-shadow:0 20px 56px rgba(12,41,84,.1)}
+.plan-card.featured{border-color:var(--indigo);transform:translateY(-8px);box-shadow:0 24px 64px rgba(45,46,131,.18)}
+.plan-card.featured:hover{transform:translateY(-12px);box-shadow:0 32px 72px rgba(45,46,131,.22)}
+
+/* badge الأكثر رواجاً */
+.featured-badge{background:linear-gradient(135deg,var(--navy),var(--indigo));color:#fff;text-align:center;padding:10px;font-size:12px;font-weight:700;letter-spacing:.5px}
+
+/* card header -->*/
+.plan-header{padding:28px 28px 20px}
+.plan-name{font-size:22px;font-weight:700;color:var(--text);margin-bottom:5px}
+.plan-desc{font-size:13px;color:var(--muted);margin-bottom:24px}
+
+/* price -->*/
+.plan-price{display:flex;align-items:baseline;gap:4px;margin-bottom:6px}
+.plan-price-num{font-size:44px;font-weight:700;color:var(--text);letter-spacing:-1px;line-height:1}
+.plan-price-curr{font-size:18px;font-weight:600;color:var(--muted);margin-bottom:2px}
+.plan-price-period{font-size:13px;color:var(--muted);margin-right:4px}
+.plan-price-vat{font-size:12px;color:var(--muted);margin-bottom:20px}
+.plan-price-free{font-size:44px;font-weight:700;color:var(--green);letter-spacing:-1px;line-height:1;margin-bottom:6px}
+.plan-yearly{font-size:12px;color:var(--muted);margin-bottom:20px}
+.plan-yearly span{color:var(--green);font-weight:600}
+
+/* CTA button -->*/
+.plan-cta{display:block;text-align:center;font-family:'Noto Kufi Arabic',sans-serif;font-size:15px;font-weight:700;padding:13px;border-radius:11px;text-decoration:none;margin:0 28px 24px;transition:all .2s}
+.plan-cta.free{background:var(--bg);color:var(--navy);border:2px solid var(--border)}
+.plan-cta.free:hover{background:#e8edf5}
+.plan-cta.advanced{background:var(--bg);color:var(--navy);border:2px solid var(--border)}
+.plan-cta.advanced:hover{background:#e8edf5}
+.plan-cta.featured-btn{background:linear-gradient(135deg,var(--navy),var(--indigo));color:#fff;border:2px solid transparent;box-shadow:0 4px 16px rgba(45,46,131,.3)}
+.plan-cta.featured-btn:hover{opacity:.92;transform:translateY(-1px)}
+
+/* divider */
+.plan-divider{height:1px;background:var(--border);margin:0 28px 20px}
+
+/* features list -->*/
+.plan-features{padding:0 28px 28px;display:flex;flex-direction:column;gap:11px}
+.plan-features-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px}
+.feature-row{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--text)}
+.feature-row.disabled{color:#b0b8c8}
+.check-icon{width:18px;height:18px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.check-icon svg{width:10px;height:10px}
+.cross-icon{width:18px;height:18px;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cross-icon svg{width:8px;height:8px}
+.soon-badge{background:#f0f4ff;color:var(--indigo);border-radius:6px;padding:1px 7px;font-size:10px;font-weight:600;margin-right:4px;flex-shrink:0}
+
+/* ── COMPARE TABLE ── */
+.compare-section{padding:80px 40px;background:#fff}
+.compare-inner{max-width:1000px;margin:0 auto}
+.compare-header{text-align:center;margin-bottom:52px}
+.compare-header h2{font-size:clamp(26px,3.5vw,40px);font-weight:700;color:var(--text);margin-bottom:12px}
+.compare-header p{font-size:16px;color:var(--muted)}
+
+.compare-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.compare-table th{padding:16px 20px;font-size:13px;font-weight:700;text-align:center;background:#fff}
+.compare-table th:first-child{text-align:right;background:var(--bg)}
+.compare-table th.feat-col{text-align:right;width:38%}
+.compare-table th.plan-col{width:20.6%}
+.compare-table th.plan-featured{background:linear-gradient(135deg,rgba(12,41,84,.04),rgba(45,46,131,.06));color:var(--indigo);border-bottom:2px solid var(--indigo)}
+.compare-table td{padding:13px 20px;font-size:13px;text-align:center;border-top:1px solid var(--border)}
+.compare-table td:first-child{text-align:right;color:var(--text);font-weight:500}
+.compare-table td.featured-col{background:linear-gradient(135deg,rgba(12,41,84,.015),rgba(45,46,131,.025))}
+.compare-table tr:hover td{background:rgba(12,41,84,.02)}
+.compare-table tr:hover td.featured-col{background:linear-gradient(135deg,rgba(12,41,84,.04),rgba(45,46,131,.06))}
+.section-row td{background:var(--bg)!important;font-weight:700;color:var(--navy);font-size:12px;letter-spacing:.5px;text-transform:uppercase;padding:10px 20px}
+.check-cell{color:var(--green);font-size:16px}
+.dash-cell{color:#d0d5dd;font-size:14px;font-weight:700}
+.val-cell{font-size:12px;font-weight:600;color:var(--text)}
+.soon-cell span{background:#f0f4ff;color:var(--indigo);border-radius:6px;padding:2px 8px;font-size:10px;font-weight:600}
+
+/* ── FAQ ── */
+.faq-section{padding:80px 40px;background:var(--bg)}
+.faq-inner{max-width:720px;margin:0 auto}
+.faq-header{text-align:center;margin-bottom:48px}
+.faq-header h2{font-size:clamp(24px,3.5vw,38px);font-weight:700;color:var(--text);margin-bottom:12px}
+.faq-header p{font-size:16px;color:var(--muted)}
+.faq-item{background:#fff;border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:box-shadow .2s}
+.faq-item:hover{box-shadow:0 4px 16px rgba(12,41,84,.06)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;cursor:pointer;font-size:15px;font-weight:600;color:var(--text);gap:12px}
+.faq-icon{width:24px;height:24px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .2s,background .2s}
+.faq-item.open .faq-icon{transform:rotate(45deg);background:var(--navy)}
+.faq-item.open .faq-icon svg{stroke:#fff}
+.faq-a{display:none;padding:0 22px 18px;font-size:14px;color:var(--muted);line-height:1.78}
+.faq-item.open .faq-a{display:block}
+
+/* ── CTA ── */
+.cta-section{background:linear-gradient(160deg,#0c2954,#1a1f4e);padding:80px 40px;text-align:center;position:relative;overflow:hidden}
+.cta-glow{position:absolute;width:500px;height:300px;border-radius:50%;background:radial-gradient(ellipse,rgba(45,46,131,.4) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+.cta-inner{max-width:600px;margin:0 auto;position:relative;z-index:1}
+.cta-section h2{font-size:clamp(28px,4vw,44px);font-weight:700;color:#fff;margin-bottom:14px;letter-spacing:-.2px}
+.cta-section p{font-size:17px;color:rgba(255,255,255,.55);line-height:1.75;margin-bottom:32px}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-cta-white{background:#fff;color:var(--navy);font-size:15px;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;transition:opacity .15s,transform .15s;font-family:'Noto Kufi Arabic',sans-serif}
+.btn-cta-white:hover{opacity:.93;transform:translateY(-1px)}
+.btn-cta-wa{background:rgba(37,211,102,.1);color:#25d366;font-size:14px;font-weight:600;padding:14px 28px;border-radius:12px;text-decoration:none;border:1px solid rgba(37,211,102,.25);transition:background .15s;font-family:'Noto Kufi Arabic',sans-serif}
+.btn-cta-wa:hover{background:rgba(37,211,102,.18)}
+.cta-note{font-size:13px;color:rgba(255,255,255,.35);margin-top:16px}
+
+/* ── FOOTER ── */
+footer{background:#0c2954;padding:56px 40px 0}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.08)}
+.footer-logo img{height:26px;width:auto;max-width:100px}
+.footer-desc{font-size:13px;color:rgba(255,255,255,.38);line-height:1.75;margin-top:12px;max-width:260px}
+.footer-social{display:flex;gap:8px;margin-top:16px}
+.soc-btn{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;transition:background .15s;text-decoration:none}
+.soc-btn:hover{background:rgba(255,255,255,.14)}
+.soc-btn img{width:16px;height:16px;object-fit:contain;filter:brightness(10)}
+.f-col-t{font-size:11px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:.6px;text-transform:uppercase;margin-bottom:14px}
+.f-col-l{display:flex;flex-direction:column;gap:9px}
+.f-col-l a{font-size:13px;color:rgba(255,255,255,.55);text-decoration:none;transition:color .15s}
+.f-col-l a:hover{color:#fff}
+.footer-bottom{padding:20px 0;display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.28)}
+
+/* price data attributes */
+[data-monthly],[data-yearly]{transition:opacity .2s}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .6s ease both}
+.delay-1{animation-delay:.1s}
+.delay-2{animation-delay:.2s}
+.delay-3{animation-delay:.3s}
+
+@media(max-width:900px){
+  .plans-grid{grid-template-columns:1fr}
+  .plan-card.featured{transform:none}
+  .footer-top{grid-template-columns:1fr 1fr}
+  .compare-table th,.compare-table td{padding:10px 12px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="aysar_home_v7.html" class="nav-logo"><img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/686edec02d665deedc0abb16_aysar%20no%20backgroand%201.avif" alt="أيسَر" style="height:32px;width:auto;max-width:110px;display:block;object-fit:contain"></a>
+    <ul class="nav-links">
+      <li><a href="home.html">الرئيسية</a></li>
+      <li><a href="plans.html">الأسعار</a></li>
+      <li><a href="contact.html">اتصل بنا</a></li>
+    </ul>
+    <div class="nav-btns">
+      <a href="https://platform.aysar.sa/" target="_blank" class="btn-ghost-nav">تسجيل دخول</a>
+      <a href="https://platform.aysar.sa/ar/company/dashboard/register" target="_blank" class="btn-solid-nav">ابدأ مجاناً</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="plans-hero">
+  <div class="glow-hero"></div>
+  <div class="plans-hero-inner">
+    <div class="hero-badge fade-up">الأسعار والباقات</div>
+    <h1 class="fade-up delay-1">اختر الباقة<br><span>المناسبة لك</span></h1>
+    <p class="fade-up delay-2">باقات مرنة تساعدك على إدارة مشاريعك العقارية بكفاءة عالية — ابدأ مجاناً وطوّر متى تريد.</p>
+    <!-- toggle -->
+    <div class="billing-toggle fade-up delay-3" id="billingToggle">
+      <button class="billing-btn active" onclick="setBilling('monthly',this)">شهري</button>
+      <button class="billing-btn" onclick="setBilling('yearly',this)">
+        سنوي
+        <span class="save-badge" style="margin-right:6px">وفّر 15%</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- PLANS CARDS -->
+<div class="plans-section">
+  <div class="plans-grid">
+
+    <!-- الباقة المجانية -->
+    <div class="plan-card fade-up delay-1">
+      <div class="plan-header">
+        <div class="plan-name">المجانية</div>
+        <div class="plan-desc">لتجربة المنصة والبدء الأول</div>
+        <div class="plan-price">
+          <div class="plan-price-free">مجاناً</div>
+        </div>
+        <div class="plan-price-vat">بدون بطاقة ائتمان</div>
+      </div>
+      <a href="https://platform.aysar.sa/ar/company/dashboard/register" target="_blank" class="plan-cta free">ابدأ مجاناً</a>
+      <div class="plan-divider"></div>
+      <div class="plan-features">
+        <div class="plan-features-title">ما تحصل عليه</div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          مشروع واحد فقط
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          حتى 10 ملاك
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          تتبع مراحل الإنشاء
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          تطبيق iOS و Android
+        </div>
+        <div class="feature-row disabled">
+          <div class="cross-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3L3 9" stroke="#d0d5dd" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          طلبات الصيانة
+        </div>
+        <div class="feature-row disabled">
+          <div class="cross-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3L3 9" stroke="#d0d5dd" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          صفحات الهبوط
+        </div>
+        <div class="feature-row disabled">
+          <div class="cross-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3L3 9" stroke="#d0d5dd" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          استقبال الحجوزات
+        </div>
+        <div class="feature-row disabled">
+          <div class="cross-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3L3 9" stroke="#d0d5dd" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          نظام CRM
+        </div>
+      </div>
+    </div>
+
+
+    <!-- الباقة المتقدمة -->
+    <div class="plan-card fade-up delay-3">
+      <div class="plan-header">
+        <div class="plan-name">المتقدمة</div>
+        <div class="plan-desc">الأمثل للشركات الناشئة</div>
+        <div class="plan-price">
+          <span class="plan-price-curr">ر.س</span>
+          <span class="plan-price-num" id="price-advanced">1,379</span>
+          <span class="plan-price-period" id="period-advanced">/ شهرياً</span>
+        </div>
+        <div class="plan-price-vat">شامل الضريبة</div>
+        <div class="plan-yearly" id="yearly-advanced" style="display:none">يعادل <span id="monthly-equiv-advanced"></span> ر.س شهرياً · <span style="color:var(--green);font-weight:700">وفّر 15%</span></div>
+      </div>
+      <a href="https://platform.aysar.sa/ar/company/dashboard/register" target="_blank" class="plan-cta advanced">اختر الباقة</a>
+      <div class="plan-divider"></div>
+      <div class="plan-features">
+        <div class="plan-features-title">ما تحصل عليه</div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          نماذج مختلفة من المشاريع
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          حتى 10 مشاريع
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          حتى 100 مالك
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          حتى 2 مستثمرين
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          تتبع مراحل الإنشاء
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          تطبيق iOS و Android
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          تخصيص رسالة تسجيل بأسم الشركة
+        </div>
+        <div class="feature-row disabled">
+          <div class="cross-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3L3 9" stroke="#d0d5dd" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          طلبات الصيانة والمحادثة
+        </div>
+        <div class="feature-row disabled">
+          <div class="cross-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3L3 9" stroke="#d0d5dd" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          صفحات الهبوط
+        </div>
+        <div class="feature-row disabled">
+          <div class="cross-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3L3 9" stroke="#d0d5dd" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          استقبال الحجوزات
+        </div>
+        <div class="feature-row disabled">
+          <div class="cross-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3L3 9" stroke="#d0d5dd" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          ربط دومين مخصص
+        </div>
+      </div>
+    </div>
+
+
+    <!-- الباقة المميزة (الأكثر رواجاً) -->
+    <div class="plan-card featured fade-up delay-2">
+      <div class="featured-badge">الأكثر رواجاً</div>
+      <div class="plan-header">
+        <div class="plan-name">المميزة</div>
+        <div class="plan-desc">الأمثل للشركات الكبيرة</div>
+        <div class="plan-price">
+          <span class="plan-price-curr">ر.س</span>
+          <span class="plan-price-num" id="price-featured">2,395</span>
+          <span class="plan-price-period" id="period-featured">/ شهرياً</span>
+        </div>
+        <div class="plan-price-vat">شامل الضريبة</div>
+        <div class="plan-yearly" id="yearly-featured" style="display:none">يعادل <span id="monthly-equiv-featured"></span> ر.س شهرياً · <span style="color:var(--green);font-weight:700">وفّر 15%</span></div>
+      </div>
+      <a href="https://platform.aysar.sa/ar/company/dashboard/register" target="_blank" class="plan-cta featured-btn">اختر الباقة</a>
+      <div class="plan-divider"></div>
+      <div class="plan-features">
+        <div class="plan-features-title">كل شيء في المتقدمة، و+</div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          مشاريع غير محدودة
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          ملاك ومستثمرين غير محدود
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          موظف واحد
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          نظام طلبات صيانة + محادثة
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          قوالب جاهزة لمراحل الإنشاء
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          صفحات هبوط مع تحديثات الوحدات
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          استقبال الحجوزات + CRM
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          ربط دومين مخصص
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          مدير حساب شخصي
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          تقارير المشاريع قيد الإنشاء
+        </div>
+        <div class="feature-row">
+          <div class="check-icon"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#1a9a5a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          تكاملات خارجية عبر API
+        </div>
+        <div class="feature-row">
+          <div class="soon-badge">قريباً</div>
+          إدارة المدفوعات والمستحقات
+        </div>
+        <div class="feature-row">
+          <div class="soon-badge">قريباً</div>
+          التوقيع الإلكتروني المعتمد
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+<!-- COMPARE TABLE -->
+<div class="compare-section">
+  <div class="compare-inner">
+    <div class="compare-header">
+      <h2>قارن بين الباقات</h2>
+      <p>تفاصيل دقيقة لكل ما ستحصل عليه</p>
+    </div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th class="feat-col">الميزة</th>
+          <th class="plan-col">المجانية</th>
+          <th class="plan-col">المتقدمة</th>
+          <th class="plan-col plan-featured">المميزة</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- إدارة المشاريع -->
+        <tr class="section-row"><td colspan="4">إدارة المشاريع</td></tr>
+        <tr>
+          <td>نماذج المشاريع</td>
+          <td class="val-cell">واحد فقط</td>
+          <td class="val-cell">غير محدود</td>
+          <td class="val-cell featured-col">غير محدود</td>
+        </tr>
+        <tr>
+          <td>عدد المشاريع</td>
+          <td class="val-cell">1 مشروع</td>
+          <td class="val-cell">10 مشاريع</td>
+          <td class="val-cell featured-col">غير محدود</td>
+        </tr>
+        <tr>
+          <td>عدد الملاك</td>
+          <td class="val-cell">10 ملاك</td>
+          <td class="val-cell">100 مالك</td>
+          <td class="val-cell featured-col">غير محدود</td>
+        </tr>
+        <tr>
+          <td>عدد المستثمرين</td>
+          <td class="dash-cell">—</td>
+          <td class="val-cell">2 مستثمرين</td>
+          <td class="val-cell featured-col">غير محدود</td>
+        </tr>
+        <tr>
+          <td>عدد الموظفين</td>
+          <td class="val-cell featured-col">موظف واحد</td>
+          <td class="dash-cell">—</td>
+          <td class="val-cell featured-col">موظف واحد</td>
+        </tr>
+        <!-- المميزات الأساسية -->
+        <tr class="section-row"><td colspan="4">المميزات الأساسية</td></tr>
+        <tr>
+          <td>تتبع مراحل الإنشاء</td>
+          <td class="check-cell featured-col">✓</td>
+          <td class="check-cell">✓</td>
+          <td class="check-cell featured-col">✓</td>
+        </tr>
+        <tr>
+          <td>تطبيق iOS و Android</td>
+          <td class="check-cell featured-col">✓</td>
+          <td class="check-cell">✓</td>
+          <td class="check-cell featured-col">✓</td>
+        </tr>
+        <tr>
+          <td>قوالب جاهزة للمراحل</td>
+          <td class="check-cell featured-col">✓</td>
+          <td class="dash-cell">—</td>
+          <td class="check-cell featured-col">✓</td>
+        </tr>
+        <tr>
+          <td>نظام طلبات الصيانة</td>
+          <td class="check-cell featured-col">✓</td>
+          <td class="dash-cell">—</td>
+          <td class="check-cell featured-col">✓</td>
+        </tr>
+        <!-- صفحات هبوط -->
+        <tr class="section-row"><td colspan="4">صفحات الهبوط والحجوزات</td></tr>
+        <tr>
+          <td>صفحات هبوط للمشاريع</td>
+          <td class="check-cell featured-col">✓</td>
+          <td class="dash-cell">—</td>
+          <td class="check-cell featured-col">✓</td>
+        </tr>
+        <tr>
+          <td>استقبال الحجوزات</td>
+          <td class="check-cell featured-col">✓</td>
+          <td class="dash-cell">—</td>
+          <td class="check-cell featured-col">✓</td>
+        </tr>
+        <tr>
+          <td>نظام CRM</td>
+          <td class="check-cell featured-col">✓</td>
+          <td class="dash-cell">—</td>
+          <td class="check-cell featured-col">✓</td>
+        </tr>
+        <!-- تخصيص -->
+        <tr class="section-row"><td colspan="4">التخصيص والتكاملات</td></tr>
+        <tr>
+          <td>تخصيص رسالة تسجيل الملاك</td>
+          <td class="dash-cell">—</td>
+          <td class="check-cell">✓</td>
+          <td class="check-cell featured-col">✓</td>
+        </tr>
+        <tr>
+          <td>اسم نطاق مخصص</td>
+          <td class="check-cell featured-col">✓</td>
+          <td class="dash-cell">—</td>
+          <td class="check-cell featured-col">✓</td>
+        </tr>
+        <tr>
+          <td>تكاملات خارجية (API)</td>
+          <td class="check-cell featured-col">✓</td>
+          <td class="dash-cell">—</td>
+          <td class="check-cell featured-col">✓</td>
+        </tr>
+        <!-- قادم -->
+        <tr class="section-row"><td colspan="4">قادم قريباً</td></tr>
+        <tr>
+          <td>إدارة المدفوعات والمستحقات</td>
+          <td class="soon-cell featured-col"><span>قريباً</span></td>
+          <td class="dash-cell">—</td>
+          <td class="soon-cell featured-col"><span>قريباً</span></td>
+        </tr>
+        <tr>
+          <td>التوقيع الإلكتروني المعتمد</td>
+          <td class="soon-cell featured-col"><span>قريباً</span></td>
+          <td class="dash-cell">—</td>
+          <td class="soon-cell featured-col"><span>قريباً</span></td>
+        </tr>
+        <tr>
+          <td>نظام الفواتير والضرائب</td>
+          <td class="soon-cell featured-col"><span>قريباً</span></td>
+          <td class="dash-cell">—</td>
+          <td class="soon-cell featured-col"><span>قريباً</span></td>
+        </tr>
+        <!-- الدعم -->
+        <tr class="section-row"><td colspan="4">الدعم الفني</td></tr>
+        <tr>
+          <td>دعم عبر البريد الإلكتروني</td>
+          <td class="check-cell featured-col">✓</td>
+          <td class="check-cell">✓</td>
+          <td class="check-cell featured-col">✓</td>
+        </tr>
+        <tr>
+          <td>دعم مباشر (هاتف + محادثة)</td>
+          <td class="dash-cell">—</td>
+          <td class="check-cell">✓</td>
+          <td class="check-cell featured-col">✓</td>
+        </tr>
+        <tr>
+          <td>مدير حساب شخصي</td>
+          <td class="check-cell featured-col">✓</td>
+          <td class="dash-cell">—</td>
+          <td class="check-cell featured-col">✓</td>
+        </tr>
+        <tr>
+          <td>تدريب مجاني للفريق</td>
+          <td class="dash-cell">—</td>
+          <td class="val-cell">جلسة واحدة</td>
+          <td class="val-cell featured-col">جلسات متعددة</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section">
+  <div class="faq-inner">
+    <div class="faq-header">
+      <h2>أسئلة شائعة</h2>
+      <p>كل ما تريد معرفته عن باقات أيسَر</p>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        هل يمكنني الترقية من الباقة المجانية في أي وقت؟
+        <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="#0c2954" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="faq-a">نعم، يمكنك الترقية في أي وقت من لوحة التحكم. ستُحتسب الرسوم بشكل تناسبي من تاريخ الترقية.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        ما الفرق بين الاشتراك الشهري والسنوي؟
+        <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="#0c2954" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="faq-a">الاشتراك السنوي يوفر لك 15% مقارنةً بالشهري. يُدفع مرة واحدة في السنة ويشمل جميع المميزات نفسها.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        هل الأسعار شاملة الضريبة؟
+        <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="#0c2954" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="faq-a">نعم، جميع الأسعار المعروضة شاملة ضريبة القيمة المضافة بنسبة 15%.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        هل يمكن استخدام المنصة لأنواع مختلفة من المشاريع العقارية؟
+        <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="#0c2954" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="faq-a">نعم، تدعم أيسَر أنواعاً متعددة من المشاريع: فيلات، شقق، مجمعات سكنية، مبانٍ تجارية، ومشاريع متعددة النماذج.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        هل يحتاج العملاء (الملاك) إلى دفع أي رسوم؟
+        <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="#0c2954" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="faq-a">لا. التطبيق مجاني تماماً للملاك والمستثمرين. أنت كمطور عقاري تدفع الاشتراك، وعملاؤك يستخدمون التطبيق مجاناً.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        كيف تتم عملية الإلغاء؟
+        <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="#0c2954" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="faq-a">يمكنك إلغاء اشتراكك في أي وقت من لوحة التحكم أو بالتواصل مع فريق الدعم. تبقى بياناتك محفوظة لمدة 30 يوماً بعد الإلغاء.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="cta-inner">
+    <h2>جاهز تبدأ مع أيسَر؟</h2>
+    <p>انضم لمطورين عقاريين يستخدمون أيسَر لتوفير الوقت ورفع مستوى تجربة عملاءهم.</p>
+    <div class="cta-btns">
+      <a href="https://platform.aysar.sa/ar/company/dashboard/register" target="_blank" class="btn-cta-white">ابدأ مجاناً الآن</a>
+      <a href="http://wa.me/966125101107" target="_blank" class="btn-cta-wa">💬 تواصل على واتساب</a>
+    </div>
+    <p class="cta-note">لا بطاقة ائتمان · فريقنا يتواصل معك خلال 24 ساعة</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo"><img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/686edec02d665deedc0abb16_aysar%20no%20backgroand%201.avif" alt="أيسَر"></div>
+        <p class="footer-desc">أيسَر برنامج لإدارة العقارات وتتبع مراحل الإنشاء من أول طوبة لآخر لمسة.</p>
+        <div class="footer-social">
+          <a href="http://wa.me/966125101107" class="soc-btn" target="_blank"><img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/6909ff4f4cfaf893fa5531ba_whatsapp-white-icon.png" alt=""></a>
+          <a href="https://x.com/aysar_ksa" class="soc-btn" target="_blank"><img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/686f58163d6350e998381015_X.svg" alt=""></a>
+          <a href="https://www.instagram.com/aysar_ksa/" class="soc-btn" target="_blank"><img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/686f581646ec4c97bf1eecb4_Insta.svg" alt=""></a>
+          <a href="https://www.tiktok.com/@aysar_sa" class="soc-btn" target="_blank"><img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/68e0d5460bf150d8b7f651f6_tiktok-white-icon.webp" alt=""></a>
+        </div>
+      </div>
+      <div>
+        <div class="f-col-t">روابط سريعة</div>
+        <div class="f-col-l">
+          <a href="home.html">الرئيسية</a>
+          <a href="plans.html">الأسعار</a>
+          <a href="contact.html">اتصل بنا</a>
+        </div>
+      </div>
+      <div>
+        <div class="f-col-t">المساعدة</div>
+        <div class="f-col-l">
+          <a href="https://platform.aysar.sa/ar/company/dashboard/login" target="_blank">تسجيل دخول</a>
+          <a href="https://support.aysar.sa/" target="_blank">مركز المساعدة</a>
+          <a href="https://support.aysar.sa/page/update" target="_blank">التحديثات</a>
+          <a href="privacy-policy.html">سياسة الخصوصية</a>
+          <a href="terms-of-use.html">شروط الاستخدام</a>
+          <a href="return-policy.html">سياسة الاسترجاع</a>
+        </div>
+      </div>
+      <div>
+        <div class="f-col-t">التطبيق</div>
+        <div class="f-col-l">
+          <a href="https://apps.apple.com/sa/app/%D8%A3%D9%8A%D8%B3-%D8%B1/id6746420561?l=ar&platform=iphone" target="_blank">App Store</a>
+          <a href="https://play.google.com/store/apps/details?id=com.aysar.application" target="_blank">Google Play</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 مؤسسة أيسر المتطورة لتقنية المعلومات · رقم السجل التجاري: 4030620045</span>
+      <div style="display:flex;gap:16px">
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+let currentBilling = 'monthly';
+
+const prices = {
+  featured: { monthly: 2395, yearly: 28750 },
+  advanced: { monthly: 1379, yearly: 16100 }
+};
+
+function setBilling(type, btn) {
+  currentBilling = type;
+  // update toggle
+  document.querySelectorAll('.billing-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const isYearly = type === 'yearly';
+
+  // update featured price
+  if (isYearly) {
+    document.getElementById('price-featured').textContent = prices.featured.yearly.toLocaleString('en-US');
+    document.getElementById('period-featured').textContent = '/ سنوياً';
+    document.getElementById('monthly-equiv-featured').textContent = Math.round(prices.featured.yearly / 12).toLocaleString('en-US');
+    document.getElementById('yearly-featured').style.display = 'block';
+
+    document.getElementById('price-advanced').textContent = prices.advanced.yearly.toLocaleString('en-US');
+    document.getElementById('period-advanced').textContent = '/ سنوياً';
+    document.getElementById('monthly-equiv-advanced').textContent = Math.round(prices.advanced.yearly / 12).toLocaleString('en-US');
+    document.getElementById('yearly-advanced').style.display = 'block';
+  } else {
+    document.getElementById('price-featured').textContent = prices.featured.monthly.toLocaleString('en-US');
+    document.getElementById('period-featured').textContent = '/ شهرياً';
+    document.getElementById('yearly-featured').style.display = 'none';
+
+    document.getElementById('price-advanced').textContent = prices.advanced.monthly.toLocaleString('en-US');
+    document.getElementById('period-advanced').textContent = '/ شهرياً';
+    document.getElementById('yearly-advanced').style.display = 'none';
+  }
+}
+
+function toggleFaq(el) {
+  const item = el.parentElement;
+  item.classList.toggle('open');
+}
+
+// Nav scroll
+window.addEventListener('scroll', () => {
+  document.querySelector('.nav').style.boxShadow = window.scrollY > 10 ? '0 2px 20px rgba(12,41,84,.08)' : '';
+}, {passive:true});
+</script>
+</body>
+</html>
