@@ -1,6 +1,6 @@
 import HeroSection from "./sections/HeroSection";
 import CTASection from "./sections/CTASection";
-import { Container } from "./components/Container";
+import { DashboardMockup } from "./components/DashboardMockup";
 
 export default function Home() {
   return (
@@ -12,7 +12,9 @@ export default function Home() {
         subtitle="أيسَر تمنحك لوحة تحكم احترافية لإدارة مشاريعك وعملاءك — من تتبع مراحل الإنشاء وإشعارات فورية، حتى صفحات هبوط واستقبال حجوزات ونظام CRM متكامل."
         primaryCta={{ label: "اطلب تجربة مجانية", href: "#" }}
         secondaryCta={{ label: "اكتشف المميزات", href: "#features" }}
-      />
+      >
+        <DashboardMockup />
+      </HeroSection>
 
       <CTASection
         variant="dark"

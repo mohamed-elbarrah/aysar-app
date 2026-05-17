@@ -1,4 +1,6 @@
 import { Container } from "@/app/components/Container";
+import { Button } from "@/app/components/ui/Button";
+import { ReactNode } from "react";
 
 interface HeroProps {
   badge?: string;
@@ -8,6 +10,7 @@ interface HeroProps {
   primaryCta?: { label: string; href: string };
   secondaryCta?: { label: string; href: string };
   showNoise?: boolean;
+  children?: ReactNode;
 }
 
 export default function HeroSection({
@@ -18,6 +21,7 @@ export default function HeroSection({
   primaryCta,
   secondaryCta,
   showNoise = true,
+  children,
 }: HeroProps) {
   return (
     <section className={`relative min-h-[100dvh] gradient-hero flex flex-col items-center pt-[100px] pb-0 px-6 overflow-hidden ${showNoise ? "noise-overlay" : ""}`}>
@@ -54,22 +58,27 @@ export default function HeroSection({
           {(primaryCta || secondaryCta) && (
             <div className="flex flex-wrap items-center justify-center gap-3 anim-fade-in-up anim-delay-3">
               {primaryCta && (
-                <a href={primaryCta.href} className="btn-primary">
+                <Button variant="primary" href={primaryCta.href}>
                   {primaryCta.label}
-                </a>
+                </Button>
               )}
               {secondaryCta && (
-                <a href={secondaryCta.href} className="btn-secondary">
+                <Button variant="secondary" href={secondaryCta.href}>
                   {secondaryCta.label}
                   <span>←</span>
-                </a>
+                </Button>
               )}
             </div>
           )}
         </div>
       </Container>
 
-      {/* Child content (e.g. mockup) goes here via page */}
+      {/* Child content (e.g. mockup) - full width on mobile, container on lg */}
+      {children && (
+        <div className="relative z-[1] mt-12 w-full">
+          {children}
+        </div>
+      )}
     </section>
   );
 }

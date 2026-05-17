@@ -64,6 +64,40 @@
 - Responsive breakpoints: `sm:` ~640px, `md:` ~768px, `lg:` ~1024px, `xl:` ~1280px. Reference pages mostly use `max-width:900px` media queries; map these to `lg:`.
 - Static assets (logo, phone mockups, screenshots) go in `/public/`.
 
+## Component Design System (Atomic Principles)
+
+All visual UI primitives must exist as **reusable React components** in `app/components/ui/` — never hardcode buttons, inputs, badges, cards, or alerts inline in pages. This ensures single-source-of-truth for the design system.
+
+### File structure
+```
+app/components/
+  ui/               # atomic building blocks (no business logic)
+    Button.tsx      # primary / secondary / ghost / solid variants
+    Input.tsx       # text, textarea, select, with focus states
+    Badge.tsx         # hero badge, light badge, dot badge
+    Card.tsx          # bento card, feature card, pricing card
+    Alert.tsx         # info (blue), success (green), warning (amber)
+    Section.tsx       # responsive section wrapper
+    Container.tsx     # max-width wrapper
+    Eyebrow.tsx       # section label with accent line
+    CheckList.tsx     # checklist row with green circle icon
+  Navbar.tsx        # organism (composed of ui + layout)
+  Footer.tsx        # organism
+app/sections/       # page-specific section assemblies
+  HeroSection.tsx
+  CTASection.tsx
+  PlansSection.tsx
+  ...
+```
+
+### Component rules
+- Every UI atom must accept `className` prop for Tailwind overrides.
+- Buttons must support both `href` (render `<a>`) and `onClick` (render `<button>`).
+- Inputs must be fully controlled with `value` + `onChange`.
+- Use `...rest` to forward native attributes (e.g., `type`, `placeholder`, `disabled`).
+- Keep business logic (pricing toggle, FAQ state, form validation) in **section or page** components, not in `ui/` atoms.
+- Export named components only (no default exports in `ui/` to force explicit imports).
+
 ## Common Gotchas
 
 - The HTML references contain **inline SVG icons** and **inline data-URI images** — extract these into standalone SVG files in `/public/icons/` or inline React components for clarity.
@@ -88,3 +122,134 @@ pnpm build
 # Lint
 pnpm lint
 ```
+
+---
+
+## Mockup Component Pattern (DashboardMockup Example)
+
+For static visual mockups (dashboard previews, feature illustrations) that demonstrate the platform UI:
+
+### File Structure
+```
+app/components/
+  DashboardMockup.tsx      # Hero dashboard (9 KPI cards + sidebar + rating)
+  FeatureMockups/          # Feature section mockups
+    StagesMockup.tsx       # Construction stages tracking
+    MaintenanceMockup.tsx  # Maintenance requests table
+    BookingsMockup.tsx     # Bookings management table
+    TemplatesMockup.tsx    # Stage templates list
+```
+
+### Architecture Rules for Mockups
+
+1. **"use client" directive** - Required for Framer Motion animations
+2. **Responsive Strategy**:
+   - **sm/md**: Full width (`w-full`), simplified layout (hide sidebar, reduce columns)
+   - **lg+**: Constrained (`lg:max-w-[1200px] lg:mx-auto`), full desktop layout
+3. **Never use Container wrapper** - Mockups control their own responsive behavior
+4. **Data as constants** - Define menu items, cards, table rows as top-level const arrays
+5. **Icons from lucide-react** - Match reference icons closely (Home, Users, Target, etc.)
+
+### Animation Pattern (Framer Motion)
+
+```tsx
+// 1. Scroll-triggered entrance
+const containerRef = useRef(null);
+const isInView = useInView(containerRef, { once: true, margin: "-100px" });
+
+// 2. Container variants with stagger
+const containerVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut",
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+// 3. Item variants
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+// 4. Card hover variants
+const cardHoverVariants = {
+  rest: { y: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.04)" },
+  hover: { y: -4, boxShadow: "0 12px 28px rgba(0,0,0,0.08)" },
+};
+```
+
+### Key Components
+
+1. **AnimatedNumber** - Counts up from 0 when in view
+2. **AnimatedProgressBar** - Width animates from 0 to target percentage
+3. **useInView** from "framer-motion" - Trigger animations on scroll
+
+### Styling Guidelines
+
+- **Colors**: Match exact hex values from reference (#eef5ff, #3b82f6, etc.)
+- **Shadows**: Use inline styles for complex gradients/box-shadows
+- **Spacing**: Scale down on mobile (px-2/py-2 → px-5/py-4)
+- **Text**: Truncate long labels (`truncate` class)
+- **RTL**: Add `style={{ direction: "rtl" }}` to dashboard content areas
+
+### Example: DashboardMockup Structure
+
+```tsx
+"use client";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
+import { Home, Users, Eye } from "lucide-react";
+
+const statCards = [
+  { icon: Home, color: "#3b82f6", bg: "#eef5ff", value: 7, label: "العقارات" },
+  // ... more cards
+];
+
+export function DashboardMockup() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  
+  return (
+    <motion.div ref={ref} className="w-full lg:max-w-[1200px] lg:mx-auto">
+      {/* Browser chrome with topbar */}
+      {/* Sidebar (hidden lg:flex) */}
+      {/* Stats grid (grid-cols-2 lg:grid-cols-3) */}
+      {/* Rating card with animated progress bars */}
+    </motion.div>
+  );
+}
+```
+
+### Integration in HeroSection
+
+```tsx
+// HeroSection.tsx - NO Container wrapper for mockup
+{children && (
+  <div className="relative z-[1] mt-12 w-full">
+    {children}
+  </div>
+)}
+
+// page.tsx
+<HeroSection ...>
+  <DashboardMockup />
+</HeroSection>
+```
+
+### Reference Implementation
+
+See `DashboardMockup.tsx` for complete working example with:
+- Topbar with logo and user avatar
+- 10-item sidebar with hover states
+- 9 KPI stat cards with color-coded icons
+- Customer rating card with 5-star breakdown
+- Smooth entrance animations with stagger
+- Hover lift effects on cards
+- Animated number counting
+- Animated progress bars
