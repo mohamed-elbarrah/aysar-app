@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" className={`${notoKufi.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <Navbar variant="hero" />
+        <Navbar />
         <main className="flex-1 flex flex-col">{children}</main>
         <Footer />
       </body>

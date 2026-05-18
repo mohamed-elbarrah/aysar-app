@@ -6,6 +6,9 @@ import { StagesMockup } from "./components/StagesMockup";
 import { MaintenanceMockup } from "./components/MaintenanceMockup";
 import { BookingsMockup } from "./components/BookingsMockup";
 import { TemplatesMockup } from "./components/TemplatesMockup";
+import { FeaturesGrid } from "./sections/FeaturesGrid";
+import { ProjectOverview } from "./sections/ProjectOverview";
+import { AppSection } from "./sections/AppSection";
 
 export default function Home() {
   return (
@@ -98,10 +101,19 @@ export default function Home() {
         badgeBgColor="#fff7ed"
       />
 
+      {/* Features Grid (Bento) */}
+      <FeaturesGrid />
+
+      {/* Project Overview (Split Dashboard) */}
+      <ProjectOverview />
+
+      {/* App Download */}
+      <AppSection />
+
       <CTASection
         variant="dark"
         title="جاهز تبدأ مع أيسَر؟"
-        subtitle="انضم لمطورين عقاريين يستخدمون أيسَر لتوفير الوقت ورفع مستوى تجربة عملاءهم."
+        subtitle="انضم لمطورين عقاريين يستخدمون أيسَر لتوفير الوقت ورفع مستوى تجربة عملائهم."
         primaryCta={{
           label: "ابدأ مجاناً الآن",
           href: "https://platform.aysar.sa/ar/company/dashboard/register",

@@ -11,29 +11,30 @@ const navLinks = [
   { href: "/contact", label: "اتصل بنا" },
 ];
 
-type Variant = "hero" | "light";
-
-interface NavbarProps {
-  variant?: Variant;
-}
-
-export default function Navbar({ variant = "light" }: NavbarProps) {
+export default function Navbar() {
   const pathname = usePathname();
+  const isHero = pathname === "/";
+
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
+    // On hero, navbar starts transparent and turns dark-glass after scroll.
+    // On inner pages, it is always light-glass.
     const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isHero = variant === "hero";
+  // Close mobile menu on route change (scheduled to avoid sync setState rule)
+  useEffect(() => {
+    const t = setTimeout(() => setMobileOpen(false), 0);
+    return () => clearTimeout(t);
+  }, [pathname]);
+
   const hasScrolled = scrolled;
 
-  /* On hero: transparent → dark glass when scrolled.
-     On light pages: always glass-light. */
   const navBg = isHero
     ? hasScrolled
       ? "bg-[rgba(8,16,36,0.85)] border-b border-[rgba(255,255,255,0.08)] backdrop-blur-xl"
@@ -41,9 +42,7 @@ export default function Navbar({ variant = "light" }: NavbarProps) {
     : "bg-[rgba(255,255,255,0.92)] border-b border-[#e8edf5] backdrop-blur-[16px]";
 
   const textColor = isHero
-    ? hasScrolled
-      ? "text-white/70 hover:text-white"
-      : "text-white/70 hover:text-white"
+    ? "text-white/70 hover:text-white"
     : "text-[#6b7a94] hover:text-[#0c2954]";
 
   const ghostStyle = isHero
@@ -115,7 +114,7 @@ export default function Navbar({ variant = "light" }: NavbarProps) {
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden mr-auto text-white/80"
+          className={`md:hidden mr-auto ${isHero ? "text-white/80" : "text-navy"}`}
           onClick={()=>setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >

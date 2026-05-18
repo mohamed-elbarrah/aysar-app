@@ -16,7 +16,7 @@
 
 ## Design System (extracted from references)
 
-- **Language**: Arabic (`lang="ar"`, `dir="rtl"`). All UI text is Arabic.
+- **Language**: Arabic (`lang="ar"`, `dir="rtl"`). All UI text is Arabic. and chat with ai agent english..
 - **Font**: `Noto Kufi Arabic` (Google Fonts). Weights: 300, 400, 500, 600, 700.
 - **Palette**:
   - Navy: `#0c2954`
@@ -36,14 +36,14 @@
 
 ## Page Inventory (to build in Next.js)
 
-| Page | Route | Source |
-|---|---|---|
-| Home (Landing) | `/` | `refrences/home.html` |
-| Pricing / Plans | `/plans` | `refrences/plans.html` |
-| Contact | `/contact` | `refrences/contact.html` |
-| Privacy Policy | `/privacy-policy` | `refrences/privacy-policy.html` |
-| Terms of Use | `/terms-of-use` | `refrences/terms-of-use.html` |
-| Return Policy | `/return-policy` | `refrences/return-policy.html` |
+| Page            | Route             | Source                          |
+| --------------- | ----------------- | ------------------------------- |
+| Home (Landing)  | `/`               | `refrences/home.html`           |
+| Pricing / Plans | `/plans`          | `refrences/plans.html`          |
+| Contact         | `/contact`        | `refrences/contact.html`        |
+| Privacy Policy  | `/privacy-policy` | `refrences/privacy-policy.html` |
+| Terms of Use    | `/terms-of-use`   | `refrences/terms-of-use.html`   |
+| Return Policy   | `/return-policy`  | `refrences/return-policy.html`  |
 
 ## Shared External Links (preserve exactly)
 
@@ -69,6 +69,7 @@
 All visual UI primitives must exist as **reusable React components** in `app/components/ui/` — never hardcode buttons, inputs, badges, cards, or alerts inline in pages. This ensures single-source-of-truth for the design system.
 
 ### File structure
+
 ```
 app/components/
   ui/               # atomic building blocks (no business logic)
@@ -91,6 +92,7 @@ app/sections/       # page-specific section assemblies
 ```
 
 ### Component rules
+
 - Every UI atom must accept `className` prop for Tailwind overrides.
 - Buttons must support both `href` (render `<a>`) and `onClick` (render `<button>`).
 - Inputs must be fully controlled with `value` + `onChange`.
@@ -130,6 +132,7 @@ pnpm lint
 For static visual mockups (dashboard previews, feature illustrations) that demonstrate the platform UI:
 
 ### File Structure
+
 ```
 app/components/
   DashboardMockup.tsx      # Hero dashboard (9 KPI cards + sidebar + rating)
@@ -214,7 +217,7 @@ const statCards = [
 export function DashboardMockup() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  
+
   return (
     <motion.div ref={ref} className="w-full lg:max-w-[1200px] lg:mx-auto">
       {/* Browser chrome with topbar */}
@@ -245,6 +248,7 @@ export function DashboardMockup() {
 ### Reference Implementation
 
 See `DashboardMockup.tsx` for complete working example with:
+
 - Topbar with logo and user avatar
 - 10-item sidebar with hover states
 - 9 KPI stat cards with color-coded icons
@@ -261,6 +265,7 @@ See `DashboardMockup.tsx` for complete working example with:
 For feature sections that alternate between text-content + mockup visuals:
 
 ### File Structure
+
 ```
 app/components/
   FeatureSection.tsx       # Reusable split layout component
@@ -282,17 +287,18 @@ app/components/
 
 ```tsx
 interface FeatureSectionProps {
-  eyebrow: string;              // "01 — Feature name"
-  title: string;                // Main title (before <br />)
-  titleAccent: string;           // Colored accent text
-  description: string;           // Paragraph text
-  features: {                   // Checklist items
-    iconColor: string;          // Hex color for check circle
-    text: string;                // "Bold text — description"
+  eyebrow: string; // "01 — Feature name"
+  title: string; // Main title (before <br />)
+  titleAccent: string; // Colored accent text
+  description: string; // Paragraph text
+  features: {
+    // Checklist items
+    iconColor: string; // Hex color for check circle
+    text: string; // "Bold text — description"
   }[];
-  mockup: ReactNode;            // The mockup component
+  mockup: ReactNode; // The mockup component
   layout: "text-left" | "text-right";
-  bgColor?: string;            // Section background
+  bgColor?: string; // Section background
 }
 ```
 
@@ -335,6 +341,7 @@ const itemVariants: Variants = {
 ### Mockup Guidelines
 
 Each mockup follows the DashboardMockup pattern:
+
 - **Gradient background** matching feature theme color
 - **Browser chrome** with navy header
 - **Table/card content** with scroll-triggered animations
@@ -344,6 +351,7 @@ Each mockup follows the DashboardMockup pattern:
 ### Reference Implementation
 
 See existing mockups:
+
 - `StagesMockup.tsx` - Progress bars + KPI cards
 - `MaintenanceMockup.tsx` - Data table with status badges
 - `BookingsMockup.tsx` - Booking management table
