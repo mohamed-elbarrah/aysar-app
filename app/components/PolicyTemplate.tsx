@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 import { PolicyData, SectionBlock, ListBlock, TableBlock, AlertBlock } from "@/lib/policy-data";
 import { Badge } from "@/app/components/ui/Badge";
 import { TocMobileAccordion } from "@/app/components/TocMobileAccordion";
@@ -60,41 +61,58 @@ function AlertBlockView({ block }: { block: AlertBlock }) {
   );
 }
 
-function TocSidebar({ data }: { data: PolicyData }) {
-  const tocRef = useRef<HTMLUListElement>(null);
+function TocSidebar({ data, isSticky }: { data: PolicyData; isSticky: boolean }) {
+  const [activeId, setActiveId] = useState(data.tocItems[0]?.id ?? "");
+  const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     const sections = document.querySelectorAll<HTMLElement>(".policy-section");
-    const links = tocRef.current?.querySelectorAll<HTMLAnchorElement>("a");
-
-    if (!links?.length || !sections.length) return;
+    if (!sections.length) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const id = entry.target.getAttribute("id");
-            links.forEach((link) => {
-              const href = link.getAttribute("href");
-              link.classList.toggle("active", href === `#${id}`);
-            });
+            if (id) setActiveId(id);
           }
         });
       },
-      { rootMargin: "-20% 0px -70% 0px" }
+      { rootMargin: "-82px 0px -60% 0px" }
     );
 
     sections.forEach((s) => observer.observe(s));
     return () => observer.disconnect();
-  }, []);
+  }, [data.tocItems]);
+
+  function handleClick(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  const docHeight = typeof document !== "undefined" ? document.documentElement.scrollHeight - window.innerHeight : 1;
+  const scrollTop = typeof window !== "undefined" ? window.scrollY : 0;
+  const progress = docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0;
 
   return (
-    <aside className="toc">
+    <aside className={cn("toc", isSticky && "toc-sticky")}>
+      {isSticky && (
+        <div className="toc-progress-bar">
+          <div className="toc-progress-fill" style={{ width: `${progress * 100}%` }} />
+        </div>
+      )}
       <div className="toc-title">المحتويات</div>
-      <ul className="toc-list" ref={tocRef}>
+      <ul className="toc-list" ref={listRef}>
         {data.tocItems.map((item) => (
           <li key={item.id}>
-            <a href={`#${item.id}`}>
+            <a
+              href={`#${item.id}`}
+              className={cn(activeId === item.id && "active")}
+              onClick={(e) => handleClick(e, item.id)}
+            >
               <span className="toc-num">{item.number}</span>
               {item.label}
             </a>
@@ -174,6 +192,24 @@ function PolicyFooterBar({ data }: { data: PolicyData }) {
 }
 
 export default function PolicyTemplate({ data }: { data: PolicyData }) {
+  const [isSticky, setIsSticky] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsSticky(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <section className="policy-hero noise-overlay">
@@ -212,10 +248,11 @@ export default function PolicyTemplate({ data }: { data: PolicyData }) {
 
       <div className="policy-content-root">
         <TocMobileAccordion data={data} />
+        <div ref={sentinelRef} className="toc-sentinel" />
 
         <div className="policy-content-wrap">
           <div className="hidden lg:block">
-            <TocSidebar data={data} />
+            <TocSidebar data={data} isSticky={isSticky} />
           </div>
           <ContentBody data={data} />
         </div>
