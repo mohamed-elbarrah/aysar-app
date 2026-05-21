@@ -54,10 +54,10 @@ export function FeatureSection({
       variants={containerVariants}
     >
       <div
-        className={`container-aysar sec-inner grid gap-8 lg:gap-16 items-center ${
+        className={`container-aysar sec-inner grid gap-8 lg:gap-20 items-center ${
           layout === "text-right"
-            ? "lg:grid-cols-[1fr_1.5fr]"
-            : "lg:grid-cols-[1.5fr_1fr]"
+            ? "lg:grid-cols-[1fr_1.2fr]"
+            : "lg:grid-cols-[1.2fr_1fr]"
         }`}
       >
         {/* Mobile/Tablet: Always text first, mockup second */}
@@ -144,7 +144,7 @@ function FeatureContent({
     <div>
       <motion.div
         variants={itemVariants}
-        className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-semibold mb-5"
+        className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-[5px] text-xs font-semibold mb-5"
         style={{ backgroundColor: badgeBgColor, color: accentColor }}
       >
         {eyebrow}
@@ -152,7 +152,7 @@ function FeatureContent({
 
       <motion.h2
         variants={itemVariants}
-        className="text-[clamp(26px,3.5vw,44px)] font-bold text-navy leading-[1.18] tracking-tight mb-4"
+        className="text-[clamp(26px,3.5vw,44px)] font-bold text-navy leading-[1.18] tracking-tight mb-[18px]"
       >
         {title}
         <br />
@@ -161,7 +161,7 @@ function FeatureContent({
 
       <motion.p
         variants={itemVariants}
-        className="text-base text-muted leading-[1.85] mb-8 max-w-[560px]"
+        className="text-[16px] text-muted leading-[1.85] mb-8 max-w-[600px]"
       >
         {description}
       </motion.p>

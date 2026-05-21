@@ -11,7 +11,7 @@ import CTASection from "@/app/sections/CTASection";
 
 function ContactHero() {
   return (
-    <section className="relative gradient-hero pt-[130px] pb-20 px-6 text-center overflow-hidden noise-overlay">
+    <section className="relative gradient-hero pt-[130px] pb-20 px-6 lg:px-10 text-center overflow-hidden noise-overlay">
       <div className="glow-orb glow-orb-indigo w-[600px] h-[400px] -top-[80px] left-1/2 -translate-x-1/2" />
       <Container className="relative z-[1] max-w-[640px] mx-auto">
         <div className="anim-fade-in-up">

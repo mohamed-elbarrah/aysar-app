@@ -141,7 +141,7 @@ export function ProjectOverview() {
             </motion.p>
 
             <motion.div
-              className="flex flex-col gap-3 mb-8"
+              className="flex flex-col gap-[13px] mb-8"
               variants={textVariants}
               initial="hidden"
               animate={isInView ? "visible" : "hidden"}
@@ -156,7 +156,7 @@ export function ProjectOverview() {
                   animate={isInView ? "visible" : "hidden"}
                   transition={{ delay: 0.35 + idx * 0.08 }}
                 >
-                  <div className="w-[22px] h-[22px] rounded-full bg-green-light flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-green-light flex items-center justify-center flex-shrink-0 mt-0.5">
                     <svg
                       width="11"
                       height="11"

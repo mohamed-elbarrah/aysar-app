@@ -74,7 +74,7 @@ export function PricingCard({ plan, billing }: PricingCardProps) {
         href={plan.ctaHref}
         target="_blank"
         rel="noopener noreferrer"
-        className={`block text-center font-bold text-[15px] py-3 px-7 rounded-[11px] no-underline mx-7 mb-6 transition-all duration-200 ${
+        className={`block text-center font-bold text-[15px] py-[13px] px-7 rounded-[11px] no-underline mx-7 mb-6 transition-all duration-200 ${
           plan.isFeatured
             ? "bg-gradient-to-br from-navy to-indigo text-white shadow-[0_4px_16px_rgba(45,46,131,0.3)] hover:opacity-92 hover:-translate-y-px"
             : "bg-[#f7f8fa] text-navy border-2 border-border hover:bg-[#e8edf5]"

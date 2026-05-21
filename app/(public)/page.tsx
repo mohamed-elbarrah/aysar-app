@@ -1,14 +1,14 @@
-import HeroSection from "./sections/HeroSection";
-import CTASection from "./sections/CTASection";
-import { FeatureSection } from "./components/FeatureSection";
-import { DashboardMockup } from "./components/DashboardMockup";
-import { StagesMockup } from "./components/StagesMockup";
-import { MaintenanceMockup } from "./components/MaintenanceMockup";
-import { BookingsMockup } from "./components/BookingsMockup";
-import { TemplatesMockup } from "./components/TemplatesMockup";
-import { FeaturesGrid } from "./sections/FeaturesGrid";
-import { ProjectOverview } from "./sections/ProjectOverview";
-import { AppSection } from "./sections/AppSection";
+import HeroSection from "../sections/HeroSection";
+import CTASection from "../sections/CTASection";
+import { FeatureSection } from "../components/FeatureSection";
+import { DashboardMockup } from "../components/DashboardMockup";
+import { StagesMockup } from "../components/StagesMockup";
+import { MaintenanceMockup } from "../components/MaintenanceMockup";
+import { BookingsMockup } from "../components/BookingsMockup";
+import { TemplatesMockup } from "../components/TemplatesMockup";
+import { FeaturesGrid } from "../sections/FeaturesGrid";
+import { ProjectOverview } from "../sections/ProjectOverview";
+import { AppSection } from "../sections/AppSection";
 
 export default function Home() {
   return (

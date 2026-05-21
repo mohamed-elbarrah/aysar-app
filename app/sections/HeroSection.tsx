@@ -24,13 +24,13 @@ export default function HeroSection({
   children,
 }: HeroProps) {
   return (
-    <section className={`relative min-h-[100dvh] gradient-hero flex flex-col items-center pt-[100px] pb-0 px-6 overflow-hidden ${showNoise ? "noise-overlay" : ""}`}>
+    <section className={`relative min-h-[100dvh] gradient-hero flex flex-col items-center pt-[100px] pb-0 px-6 lg:px-10 overflow-hidden ${showNoise ? "noise-overlay" : ""}`}>
       {/* Glow orbs */}
       <div className="glow-orb glow-orb-indigo w-[700px] h-[500px] -top-[100px] -right-[100px]" />
       <div className="glow-orb glow-orb-navy w-[500px] h-[400px] bottom-[200px] -left-20" />
       <div className="glow-orb glow-orb-mint w-[300px] h-[300px] top-[200px] left-1/2 -translate-x-1/2" />
 
-      <Container className="relative z-[1] pt-0 pb-8">
+      <Container className="relative z-[1] pt-0 pb-8 lg:pb-[52px]">
         <div className="text-center max-w-[760px] mx-auto">
           {badge && (
             <div className="badge anim-fade-in-up">
@@ -51,7 +51,7 @@ export default function HeroSection({
             )}
           </h1>
 
-          <p className="text-[clamp(16px,2vw,20px)] text-white/50 leading-[1.7] max-w-[580px] mx-auto mb-10 anim-fade-in-up anim-delay-2">
+          <p className="text-[clamp(16px,2vw,20px)] text-white/50 leading-[1.75] max-w-[580px] mx-auto mb-10 anim-fade-in-up anim-delay-2">
             {subtitle}
           </p>
 

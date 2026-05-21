@@ -22,7 +22,7 @@ export function Accordion({ title, subtitle, items, className }: AccordionProps)
           <h2 className="text-[clamp(24px,3.5vw,38px)] font-bold text-text leading-tight mb-3">
             {title}
           </h2>
-          <p className="text-base text-muted">{subtitle}</p>
+          <p className="text-[16px] text-muted">{subtitle}</p>
         </div>
 
         {items.map((item, index) => {

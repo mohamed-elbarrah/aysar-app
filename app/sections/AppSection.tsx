@@ -62,10 +62,10 @@ export function AppSection() {
         }}
       />
 
-      <div className="section-aysar relative z-10" ref={ref}>
+      <div className="section-aysar !pb-0 relative z-10" ref={ref}>
         <div className="container-aysar grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
           {/* Text */}
-          <div className="order-2 lg:order-1 pb-0 lg:pb-16">
+          <div className="order-2 lg:order-1 pb-0 lg:pb-20">
             <motion.div
               className="eyebrow"
               initial={{ opacity: 0, y: 16 }}
@@ -76,7 +76,7 @@ export function AppSection() {
             </motion.div>
 
             <motion.h2
-              className="text-[clamp(28px,4vw,48px)] font-bold text-navy leading-[1.15] tracking-tight mb-5"
+              className="text-[clamp(28px,4vw,48px)] font-bold text-navy leading-[1.15] tracking-tight mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5, delay: 0.1 }}
@@ -87,7 +87,7 @@ export function AppSection() {
             </motion.h2>
 
             <motion.p
-              className="text-base text-muted leading-[1.8] max-w-[480px] mb-8"
+              className="text-[16px] text-muted leading-[1.8] max-w-[500px] mb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -106,7 +106,7 @@ export function AppSection() {
                 href="https://apps.apple.com/sa/app/%D8%A3%D9%8A%D8%B3-%D8%B1/id6746420561?l=ar&platform=iphone"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 bg-navy hover:opacity-[0.88] hover:-translate-y-px active:translate-y-0 transition-all duration-150 rounded-xl px-5 py-2.5"
+                className="inline-flex items-center gap-2.5 bg-navy hover:opacity-[0.88] hover:-translate-y-px active:translate-y-0 transition-all duration-150 rounded-xl px-5 py-[11px]"
               >
                 {/* Apple Logo */}
                 <svg className="w-5 h-5 text-white flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
@@ -126,7 +126,7 @@ export function AppSection() {
                 href="https://play.google.com/store/apps/details?id=com.aysar.application"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 bg-navy hover:opacity-[0.88] hover:-translate-y-px active:translate-y-0 transition-all duration-150 rounded-xl px-5 py-2.5"
+                className="inline-flex items-center gap-2.5 bg-navy hover:opacity-[0.88] hover:-translate-y-px active:translate-y-0 transition-all duration-150 rounded-xl px-5 py-[11px]"
               >
                 {/* Google Play Logo */}
                 <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none">
@@ -157,7 +157,7 @@ export function AppSection() {
             >
               {/* Phone chassis — modern frame */}
               <div
-                className="relative w-[220px] sm:w-[240px] lg:w-[260px] rounded-[36px] p-2.5 pb-4 shadow-2xl"
+                className="relative w-[220px] sm:w-[240px] lg:w-[260px] rounded-[36px] p-[14px] px-3 pb-5 shadow-2xl"
                 style={{
                   background:
                     "linear-gradient(145deg, #162340 0%, #1e3050 40%, #0f1c30 100%)",
@@ -186,7 +186,7 @@ export function AppSection() {
                 </div>
 
                 {/* Screen */}
-                <div className="relative rounded-[28px] overflow-hidden bg-white"
+                <div className="relative rounded-[18px] overflow-hidden bg-white"
                   style={{
                     boxShadow:
                       "inset 0 0 8px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.15)",

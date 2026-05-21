@@ -42,7 +42,7 @@ export function ChannelsGrid({ title, subtitle, channels }: ChannelsGridProps) {
           <h2 className="text-[clamp(24px,3.5vw,36px)] font-bold text-text mb-2">
             {title}
           </h2>
-          <p className="text-base text-muted">{subtitle}</p>
+          <p className="text-[16px] text-muted">{subtitle}</p>
         </div>
 
         <div className="channels-grid-3">

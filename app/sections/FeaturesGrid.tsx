@@ -106,7 +106,7 @@ export function FeaturesGrid() {
       <div className="section-aysar" ref={ref}>
         <div className="container-aysar text-center">
           <motion.p
-            className="text-sm font-semibold text-muted mb-4"
+            className="text-sm font-semibold text-muted mb-[14px]"
             initial={{ opacity: 0, y: 10 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
             transition={{ duration: 0.5 }}
@@ -125,7 +125,7 @@ export function FeaturesGrid() {
           </motion.h2>
 
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-3"
             variants={containerVariants}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
@@ -141,7 +141,7 @@ export function FeaturesGrid() {
                     boxShadow: "0 12px 32px rgba(12,41,84,0.08)",
                     transition: { duration: 0.25 },
                   }}
-                  className="bg-white border border-border rounded-[14px] p-5 lg:p-6 text-center flex flex-col items-center"
+                  className="bg-white border border-border rounded-[14px] p-5 lg:px-[18px] lg:py-[22px] text-center flex flex-col items-center"
                 >
                   <div
                     className="w-12 h-12 rounded-[13px] flex items-center justify-center mb-3.5"
@@ -153,10 +153,10 @@ export function FeaturesGrid() {
                       style={{ color: feat.iconColor }}
                     />
                   </div>
-                  <h3 className="text-sm font-bold text-text mb-1.5">
+                  <h3 className="text-[14px] font-bold text-text mb-1.5">
                     {feat.title}
                   </h3>
-                  <p className="text-xs text-muted leading-relaxed">
+                  <p className="text-[12px] text-muted leading-relaxed">
                     {feat.description}
                   </p>
                 </motion.div>

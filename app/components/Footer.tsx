@@ -34,19 +34,20 @@ export default function Footer() {
   return (
     <footer className="bg-[#0c2954] pt-14 pb-0">
       <div className="container-aysar">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 pb-10 border-b border-white/[0.07]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.6fr_repeat(3,1fr)] gap-12 pb-10 border-b border-white/[0.08]">
           {/* Brand */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="inline-block mb-3">
+          <div>
+            <Link href="/" className="inline-block mb-4">
               <Image
                 src="/logo.png"
                 alt="أيسَر"
                 width={100}
-                height={36}
-                className="h-9 w-auto object-contain brightness-[5]"
+                height={34}
+                className="h-[34px] w-auto object-contain brightness-[5]"
+                priority
               />
             </Link>
-            <p className="text-sm text-white/40 leading-relaxed max-w-[260px] mb-4">
+            <p className="text-[14px] text-white/45 leading-relaxed max-w-[260px] mb-5">
               أيسَر برنامج لإدارة العقارات وتتبع مراحل الإنشاء من أول طوبة لآخر لمسة.
             </p>
             <div className="flex items-center gap-2">
@@ -57,7 +58,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="w-9 h-9 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center transition-colors hover:bg-white/[0.12]"
+                  className="w-[34px] h-[34px] rounded-lg bg-white/[0.07] border border-white/[0.1] flex items-center justify-center transition-colors hover:bg-white/[0.14]"
                 >
                   <s.icon className="w-4 h-4 text-white" />
                 </a>
@@ -67,15 +68,15 @@ export default function Footer() {
 
           {/* Quick links */}
           <div>
-            <h4 className="text-[11px] font-bold text-white/30 tracking-wide uppercase mb-3.5">
+            <h4 className="text-[11px] font-bold text-white/35 tracking-wide uppercase mb-4">
               روابط سريعة
             </h4>
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col gap-2.5">
               {quickLinks.map((l) => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
-                    className="text-[13px] text-white/55 hover:text-white transition-colors"
+                    className="text-[14px] text-white/55 hover:text-white transition-colors"
                   >
                     {l.label}
                   </Link>
@@ -86,10 +87,10 @@ export default function Footer() {
 
           {/* Help */}
           <div>
-            <h4 className="text-[11px] font-bold text-white/30 tracking-wide uppercase mb-3.5">
+            <h4 className="text-[11px] font-bold text-white/35 tracking-wide uppercase mb-4">
               المساعدة
             </h4>
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col gap-2.5">
               {helpLinks.map((l) => (
                 <li key={l.href}>
                   {l.external ? (
@@ -97,14 +98,14 @@ export default function Footer() {
                       href={l.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[13px] text-white/55 hover:text-white transition-colors"
+                      className="text-[14px] text-white/55 hover:text-white transition-colors"
                     >
                       {l.label}
                     </a>
                   ) : (
                     <Link
                       href={l.href}
-                      className="text-[13px] text-white/55 hover:text-white transition-colors"
+                      className="text-[14px] text-white/55 hover:text-white transition-colors"
                     >
                       {l.label}
                     </Link>
@@ -116,17 +117,17 @@ export default function Footer() {
 
           {/* App */}
           <div>
-            <h4 className="text-[11px] font-bold text-white/30 tracking-wide uppercase mb-3.5">
+            <h4 className="text-[11px] font-bold text-white/35 tracking-wide uppercase mb-4">
               التطبيق
             </h4>
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col gap-2.5">
               {appLinks.map((l) => (
                 <li key={l.href}>
                   <a
                     href={l.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[13px] text-white/55 hover:text-white transition-colors"
+                    className="text-[14px] text-white/55 hover:text-white transition-colors"
                   >
                     {l.label}
                   </a>
@@ -137,15 +138,15 @@ export default function Footer() {
         </div>
 
         {/* Bottom line */}
-        <div className="py-5 flex items-center justify-between flex-wrap gap-3">
-          <span className="text-xs text-white/28">
+        <div className="py-5 flex items-center justify-between flex-wrap gap-4">
+          <span className="text-[12px] text-white/28">
             © 2026 مؤسسة أيسر المتطورة لتقنية المعلومات · رقم السجل التجاري: 4030620045
           </span>
           <div className="flex items-center gap-4">
-            <Link href="/privacy-policy" className="text-xs text-white/35 hover:text-white/70 transition-colors">
+            <Link href="/privacy-policy" className="text-[12px] text-white/40 hover:text-white/70 transition-colors">
               الخصوصية
             </Link>
-            <Link href="/terms-of-use" className="text-xs text-white/35 hover:text-white/70 transition-colors">
+            <Link href="/terms-of-use" className="text-[12px] text-white/40 hover:text-white/70 transition-colors">
               الشروط
             </Link>
           </div>

@@ -321,7 +321,7 @@ export function DashboardMockup() {
               {statCards.map((card, idx) => (
                 <motion.div
                   key={idx}
-                  className="flex items-center gap-2 sm:gap-2.5 lg:gap-3.5 px-2 sm:px-3 lg:px-5 py-2 sm:py-3 lg:py-4 bg-white rounded-lg sm:rounded-xl border border-[#eef0f4] cursor-pointer"
+                  className="flex items-center gap-2 sm:gap-2.5 lg:gap-3.5 px-2 sm:px-3 lg:px-5 py-2 sm:py-3 lg:py-[18px] bg-white rounded-lg sm:rounded-xl lg:rounded-[14px] border border-[#eef0f4] cursor-pointer"
                   style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.04)" }}
                   variants={itemVariants}
                   initial="rest"
@@ -356,7 +356,7 @@ export function DashboardMockup() {
 
             {/* Rating Card */}
             <motion.div
-              className="bg-white rounded-lg sm:rounded-xl border border-[#eef0f4] p-3 sm:p-4 lg:p-5"
+              className="bg-white rounded-lg sm:rounded-xl lg:rounded-[14px] border border-[#eef0f4] p-3 sm:p-4 lg:p-5 lg:px-6"
               style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.04)" }}
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}

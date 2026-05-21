@@ -78,7 +78,7 @@ export default function Navbar() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`relative px-4 py-1.5 rounded-lg text-sm font-normal transition-all duration-150 ${textColor} ${
+                  className={`relative px-3.5 py-1.5 rounded-lg text-sm font-normal transition-all duration-150 ${textColor} ${
                     active ? "font-semibold" : ""
                   }`}
                 >
