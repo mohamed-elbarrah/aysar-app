@@ -13,52 +13,31 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const isHero = pathname === "/";
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    // On hero, navbar starts transparent and turns dark-glass after scroll.
-    // On inner pages, it is always light-glass.
     const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close mobile menu on route change (scheduled to avoid sync setState rule)
   useEffect(() => {
     const t = setTimeout(() => setMobileOpen(false), 0);
     return () => clearTimeout(t);
   }, [pathname]);
 
-  const hasScrolled = scrolled;
-
-  const navBg = isHero
-    ? hasScrolled
-      ? "bg-[rgba(8,16,36,0.85)] border-b border-[rgba(255,255,255,0.08)] backdrop-blur-xl"
-      : "bg-transparent border-b border-transparent"
-    : "bg-[rgba(255,255,255,0.92)] border-b border-[#e8edf5] backdrop-blur-[16px]";
-
-  const textColor = isHero
-    ? "text-white/70 hover:text-white"
-    : "text-[#6b7a94] hover:text-[#0c2954]";
-
-  const ghostStyle = isHero
-    ? "text-white/70 border border-white/18 hover:bg-white/10 hover:text-white"
-    : "text-[#0c2954] border border-[#e8edf5] hover:bg-[#f7f8fa]";
-
-  const solidStyle = isHero
-    ? "bg-white text-[#0c2954] hover:opacity-90"
-    : "bg-[#0c2954] text-white hover:opacity-88";
+  const navBg = scrolled
+    ? "bg-[rgba(8,16,36,0.85)] border-b border-[rgba(255,255,255,0.08)] backdrop-blur-xl"
+    : "bg-transparent border-b border-transparent";
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-[200] h-[62px] flex items-center transition-all duration-300 ${navBg}`}
     >
       <div className="container-aysar flex items-center gap-6 w-full">
-        {/* Logo */}
         <Link href="/" className="flex-shrink-0">
           <Image
             src="/logo.png"
@@ -70,7 +49,6 @@ export default function Navbar() {
           />
         </Link>
 
-        {/* Desktop links */}
         <ul className="hidden md:flex items-center gap-1 mr-auto">
           {navLinks.map((link) => {
             const active = pathname === link.href;
@@ -78,7 +56,7 @@ export default function Navbar() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`relative px-3.5 py-1.5 rounded-lg text-sm font-normal transition-all duration-150 ${textColor} ${
+                  className={`relative px-3.5 py-1.5 rounded-lg text-sm font-normal transition-all duration-150 text-white/70 hover:text-white ${
                     active ? "font-semibold" : ""
                   }`}
                 >
@@ -92,13 +70,12 @@ export default function Navbar() {
           })}
         </ul>
 
-        {/* Desktop buttons */}
         <div className="hidden md:flex items-center gap-2">
           <a
             href="https://platform.aysar.sa/"
             target="_blank"
             rel="noopener noreferrer"
-            className={`btn-ghost-nav ${ghostStyle}`}
+            className="btn-ghost-nav text-white/70 border border-white/18 hover:bg-white/10 hover:text-white"
           >
             تسجيل دخول
           </a>
@@ -106,16 +83,15 @@ export default function Navbar() {
             href="https://platform.aysar.sa/ar/company/dashboard/register"
             target="_blank"
             rel="noopener noreferrer"
-            className={`btn-solid-nav ${solidStyle}`}
+            className="btn-solid-nav bg-white text-[#0c2954] hover:opacity-90"
           >
             ابدأ مجاناً
           </a>
         </div>
 
-        {/* Mobile hamburger */}
         <button
-          className={`md:hidden mr-auto ${isHero ? "text-white/80" : "text-navy"}`}
-          onClick={()=>setMobileOpen(!mobileOpen)}
+          className="md:hidden mr-auto text-white/80"
+          onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
