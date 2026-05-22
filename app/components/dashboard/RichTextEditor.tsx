@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
 interface RichTextEditorProps {
   value: string;
@@ -12,10 +12,26 @@ interface RichTextEditorProps {
 export function RichTextEditor({ value, onChange, className, placeholder }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const [focused, setFocused] = useState(false);
+  const lastValueRef = useRef(value);
+  const didMount = useRef(false);
+
+  if (!didMount.current && editorRef.current) {
+    editorRef.current.innerHTML = value;
+    didMount.current = true;
+  }
+
+  useEffect(() => {
+    if (editorRef.current && value !== editorRef.current.innerHTML && value !== lastValueRef.current) {
+      editorRef.current.innerHTML = value;
+      lastValueRef.current = value;
+    }
+  }, [value]);
 
   const handleInput = useCallback(() => {
     if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
+      const html = editorRef.current.innerHTML;
+      lastValueRef.current = html;
+      onChange(html);
     }
   }, [onChange]);
 
@@ -45,7 +61,6 @@ export function RichTextEditor({ value, onChange, className, placeholder }: Rich
     <div
       className={`border border-[#e8edf5] rounded-xl overflow-hidden bg-white ${focused ? "ring-2 ring-[#0c2954]/10 border-[#0c2954]/20" : ""} transition-all ${className || ""}`}
     >
-      {/* Toolbar */}
       <div className="flex items-center gap-0.5 px-3 py-2 bg-[#f8f9fb] border-b border-[#e8edf5] flex-wrap">
         {buttons.map((btn, i) => {
           if ("divider" in btn) {
@@ -65,7 +80,6 @@ export function RichTextEditor({ value, onChange, className, placeholder }: Rich
         })}
       </div>
 
-      {/* Editable area */}
       <div
         ref={editorRef}
         contentEditable
@@ -74,8 +88,8 @@ export function RichTextEditor({ value, onChange, className, placeholder }: Rich
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         className="min-h-[200px] max-h-[500px] overflow-y-auto p-4 text-sm leading-relaxed outline-none"
-        style={{ direction: "rtl" }}
-        dangerouslySetInnerHTML={{ __html: value }}
+        style={{ direction: "rtl", textAlign: "start" }}
+        data-placeholder={placeholder || ""}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BillingPeriod, PLANS, COMPARE_ROWS, FAQ_ITEMS } from "@/lib/plans-data";
+import { BillingPeriod } from "@/lib/plans-data";
 import { PlansHeroSection } from "@/app/components/PlansHeroSection";
 import { PricingToggle } from "@/app/components/PricingToggle";
 import { PricingCard } from "@/app/components/PricingCard";
@@ -9,23 +9,25 @@ import { CompareTable } from "@/app/components/CompareTable";
 import { Accordion } from "@/app/components/ui/Accordion";
 import { Section } from "@/app/components/Section";
 import CTASection from "@/app/sections/CTASection";
+import type { PlansPageResponse } from "@/app/lib/plans-page-data";
 
-export default function PlansPageContent() {
+export default function PlansPageContent({ data }: { data: PlansPageResponse }) {
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
+  const { hero, plans, compareRows, faqItems } = data;
 
   return (
     <>
       <PlansHeroSection
-        badge="الأسعار والباقات"
-        title="اختر الباقة"
-        titleAccent="المناسبة لك"
-        subtitle="باقات مرنة تساعدك على إدارة مشاريعك العقارية بكفاءة عالية — ابدأ مجاناً وطوّر متى تريد."
+        badge={hero.badge}
+        title={hero.title}
+        titleAccent={hero.titleAccent}
+        subtitle={hero.subtitle}
         toggle={<PricingToggle billing={billing} onChange={setBilling} />}
       />
 
       <Section className="bg-[#f7f8fa] !pt-16 !pb-24">
         <div className="plans-grid max-w-[1140px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
-          {PLANS.map((plan, index) => (
+          {plans.map((plan) => (
             <PricingCard key={plan.id} plan={plan} billing={billing} />
           ))}
         </div>
@@ -34,13 +36,13 @@ export default function PlansPageContent() {
       <CompareTable
         title="قارن بين الباقات"
         subtitle="تفاصيل دقيقة لكل ما ستحصل عليه"
-        rows={COMPARE_ROWS}
+        rows={compareRows}
       />
 
       <Accordion
         title="أسئلة شائعة"
         subtitle="كل ما تريد معرفته عن باقات أيسَر"
-        items={FAQ_ITEMS}
+        items={faqItems}
       />
 
       <CTASection

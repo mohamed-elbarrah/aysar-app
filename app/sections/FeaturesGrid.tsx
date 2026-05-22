@@ -13,72 +13,53 @@ import {
   MessageCircle,
 } from "lucide-react";
 
+const ICON_MAP: Record<string, React.ElementType> = {
+  Bell, Globe, Users, Smartphone, ImageIcon, Cloud, LayoutGrid, MessageCircle,
+};
+
 interface GridFeature {
   icon: React.ElementType;
+  iconName: string;
   title: string;
   description: string;
   iconBg: string;
   iconColor: string;
 }
 
-const features: GridFeature[] = [
-  {
-    icon: Bell,
-    title: "إشعارات لحظية",
-    description: "عند كل تحديث للمراحل",
-    iconBg: "#e9f9f0",
-    iconColor: "#1a9a5a",
-  },
-  {
-    icon: Globe,
-    title: "صفحات هبوط",
-    description: "برابط خاص لكل مشروع",
-    iconBg: "#eef2ff",
-    iconColor: "#4f46e5",
-  },
-  {
-    icon: Users,
-    title: "نظام CRM",
-    description: "إدارة العملاء والمبيعات",
-    iconBg: "#f0f4ff",
-    iconColor: "#2d2e83",
-  },
-  {
-    icon: Smartphone,
-    title: "تطبيق مخصص",
-    description: "iOS و Android للعملاء",
-    iconBg: "#fff7ed",
-    iconColor: "#f97316",
-  },
-  {
-    icon: ImageIcon,
-    title: "صور وفيديو",
-    description: "توثيق المراحل من الموقع",
-    iconBg: "#fdf2f8",
-    iconColor: "#ec4899",
-  },
-  {
-    icon: Cloud,
-    title: "سحابي 100%",
-    description: "بدون تثبيت أو خوادم",
-    iconBg: "#e7fafd",
-    iconColor: "#06b6d4",
-  },
-  {
-    icon: LayoutGrid,
-    title: "مشاريع متعددة",
-    description: "فيلات، شقق، تجاري",
-    iconBg: "#f3eefe",
-    iconColor: "#8b5cf6",
-  },
-  {
-    icon: MessageCircle,
-    title: "دعم فني 7/24",
-    description: "واتساب أو بريد إلكتروني",
-    iconBg: "#fff8e8",
-    iconColor: "#f59e0b",
-  },
+const DEFAULT_FEATURES: GridFeature[] = [
+  { icon: Bell, iconName: "Bell", title: "إشعارات لحظية", description: "عند كل تحديث للمراحل", iconBg: "#e9f9f0", iconColor: "#1a9a5a" },
+  { icon: Globe, iconName: "Globe", title: "صفحات هبوط", description: "برابط خاص لكل مشروع", iconBg: "#eef2ff", iconColor: "#4f46e5" },
+  { icon: Users, iconName: "Users", title: "نظام CRM", description: "إدارة العملاء والمبيعات", iconBg: "#f0f4ff", iconColor: "#2d2e83" },
+  { icon: Smartphone, iconName: "Smartphone", title: "تطبيق مخصص", description: "iOS و Android للعملاء", iconBg: "#fff7ed", iconColor: "#f97316" },
+  { icon: ImageIcon, iconName: "ImageIcon", title: "صور وفيديو", description: "توثيق المراحل من الموقع", iconBg: "#fdf2f8", iconColor: "#ec4899" },
+  { icon: Cloud, iconName: "Cloud", title: "سحابي 100%", description: "بدون تثبيت أو خوادم", iconBg: "#e7fafd", iconColor: "#06b6d4" },
+  { icon: LayoutGrid, iconName: "LayoutGrid", title: "مشاريع متعددة", description: "فيلات، شقق، تجاري", iconBg: "#f3eefe", iconColor: "#8b5cf6" },
+  { icon: MessageCircle, iconName: "MessageCircle", title: "دعم فني 7/24", description: "واتساب أو بريد إلكتروني", iconBg: "#fff8e8", iconColor: "#f59e0b" },
 ];
+
+interface BentoFeatureData {
+  iconName: string;
+  title: string;
+  description: string;
+  iconBg: string;
+  iconColor: string;
+}
+
+interface FeaturesGridProps {
+  features?: BentoFeatureData[];
+}
+
+function resolveFeatures(input?: BentoFeatureData[]): GridFeature[] {
+  if (!input || input.length === 0) return DEFAULT_FEATURES;
+  return input.map((f) => ({
+    icon: ICON_MAP[f.iconName] || LayoutGrid,
+    iconName: f.iconName,
+    title: f.title,
+    description: f.description,
+    iconBg: f.iconBg,
+    iconColor: f.iconColor,
+  }));
+}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -97,9 +78,10 @@ const itemVariants = {
   },
 };
 
-export function FeaturesGrid() {
+export function FeaturesGrid({ features: featureData }: FeaturesGridProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const features = resolveFeatures(featureData);
 
   return (
     <section className="bg-bg-alt">

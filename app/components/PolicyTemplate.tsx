@@ -1,74 +1,28 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { PolicyData, SectionBlock, ListBlock, TableBlock, AlertBlock } from "@/lib/policy-data";
+import { PolicyData } from "@/lib/policy-data";
 import { Badge } from "@/app/components/ui/Badge";
 import { TocMobileAccordion } from "@/app/components/TocMobileAccordion";
 
-function SectionBlockView({ block }: { block: SectionBlock }) {
-  return (
-    <>
-      {block.paragraphs.map((p, i) => (
-        <p key={i} dangerouslySetInnerHTML={{ __html: p }} />
-      ))}
-    </>
-  );
+interface TOCItem {
+  id: string;
+  number: string;
+  label: string;
 }
 
-function ListBlockView({ block }: { block: ListBlock }) {
-  return (
-    <ul className="policy-list">
-      {block.items.map((item, i) => (
-        <li key={i} dangerouslySetInnerHTML={{ __html: item }} />
-      ))}
-    </ul>
-  );
-}
-
-function TableBlockView({ block }: { block: TableBlock }) {
-  return (
-    <table className="policy-table">
-      <thead>
-        <tr>
-          {block.headers.map((h, i) => (
-            <th key={i}>{h}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {block.rows.map((row, i) => (
-          <tr key={i}>
-            <td><strong>{row[0]}</strong></td>
-            <td>{row[1]}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
-
-function AlertBlockView({ block }: { block: AlertBlock }) {
-  const emojiMap = { blue: "ℹ️", green: "✅", amber: "⚠️" };
-  return (
-    <div className={`alert-card ${block.variant}`}>
-      <div className="alert-icon">{emojiMap[block.variant]}</div>
-      <div className="alert-body">
-        <strong>{block.label}</strong>
-        <p>{block.text}</p>
-      </div>
-    </div>
-  );
-}
-
-function TocSidebar({ data, isSticky }: { data: PolicyData; isSticky: boolean }) {
-  const [activeId, setActiveId] = useState(data.tocItems[0]?.id ?? "");
+function TocSidebar({ tocItems, isSticky, sidebarCard }: {
+  tocItems: TOCItem[];
+  isSticky: boolean;
+  sidebarCard?: PolicyData["sidebarCard"];
+}) {
+  const [activeId, setActiveId] = useState(tocItems[0]?.id ?? "");
   const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     const sections = document.querySelectorAll<HTMLElement>(".policy-section");
     if (!sections.length) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -80,17 +34,14 @@ function TocSidebar({ data, isSticky }: { data: PolicyData; isSticky: boolean })
       },
       { rootMargin: "-82px 0px -60% 0px" }
     );
-
     sections.forEach((s) => observer.observe(s));
     return () => observer.disconnect();
-  }, [data.tocItems]);
+  }, [tocItems]);
 
   function handleClick(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
     e.preventDefault();
     const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   const docHeight = typeof document !== "undefined" ? document.documentElement.scrollHeight - window.innerHeight : 1;
@@ -106,7 +57,7 @@ function TocSidebar({ data, isSticky }: { data: PolicyData; isSticky: boolean })
       )}
       <div className="toc-title">المحتويات</div>
       <ul className="toc-list" ref={listRef}>
-        {data.tocItems.map((item) => (
+        {tocItems.map((item) => (
           <li key={item.id}>
             <a
               href={`#${item.id}`}
@@ -119,12 +70,12 @@ function TocSidebar({ data, isSticky }: { data: PolicyData; isSticky: boolean })
           </li>
         ))}
       </ul>
-      {data.sidebarCard && (
+      {sidebarCard && (
         <div className="toc-card">
-          <div className="toc-card-title">{data.sidebarCard.title}</div>
-          <div className="toc-card-desc">{data.sidebarCard.desc}</div>
-          <a href={data.sidebarCard.href} className="toc-card-btn">
-            {data.sidebarCard.linkLabel}
+          <div className="toc-card-title">{sidebarCard.title}</div>
+          <div className="toc-card-desc">{sidebarCard.desc}</div>
+          <a href={sidebarCard.href} className="toc-card-btn">
+            {sidebarCard.linkLabel}
           </a>
         </div>
       )}
@@ -132,31 +83,19 @@ function TocSidebar({ data, isSticky }: { data: PolicyData; isSticky: boolean })
   );
 }
 
-function ContentBody({ data }: { data: PolicyData }) {
+function ContentBody({ parts }: { parts: PolicyData["parts"] }) {
   return (
     <main className="policy-body">
-      {data.sections.map((section, si) => (
-        <div key={section.id}>
-          <section className="policy-section" id={section.id}>
-            <div className="sec-eyebrow">{section.eyebrow}</div>
-            <h2>{section.title}</h2>
-            {section.content.map((block, bi) => {
-              if (block.type === "section") {
-                return <SectionBlockView key={bi} block={block} />;
-              }
-              if (block.type === "list") {
-                return <ListBlockView key={bi} block={block} />;
-              }
-              if (block.type === "table") {
-                return <TableBlockView key={bi} block={block} />;
-              }
-              if (block.type === "alert") {
-                return <AlertBlockView key={bi} block={block} />;
-              }
-              return null;
-            })}
+      {parts.map((part, i) => (
+        <div key={part.id}>
+          <section className="policy-section" id={part.id}>
+            <div className="sec-eyebrow">
+              {String(i + 1).padStart(2, "0")} — {part.headline}
+            </div>
+            <h2>{part.headline}</h2>
+            <div dangerouslySetInnerHTML={{ __html: part.content }} />
           </section>
-          {si < data.sections.length - 1 && <div className="section-divider" />}
+          {i < parts.length - 1 && <div className="section-divider" />}
         </div>
       ))}
     </main>
@@ -169,21 +108,12 @@ function PolicyFooterBar({ data }: { data: PolicyData }) {
       <div className="policy-footer-inner">
         <div className="policy-footer-text">
           {data.footerText.split("\n").map((line, i) => (
-            <span key={i}>
-              {line}
-              {i === 0 && <br />}
-            </span>
+            <span key={i}>{line}{i === 0 && <br />}</span>
           ))}
         </div>
         <div className="policy-footer-actions">
           {data.footerActions.map((action, i) => (
-            <a
-              key={i}
-              href={action.href}
-              className={`tfooter-btn ${action.variant}`}
-            >
-              {action.label}
-            </a>
+            <a key={i} href={action.href} className={`tfooter-btn ${action.variant}`}>{action.label}</a>
           ))}
         </div>
       </div>
@@ -198,17 +128,18 @@ export default function PolicyTemplate({ data }: { data: PolicyData }) {
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsSticky(!entry.isIntersecting);
-      },
-      { threshold: 0 }
-    );
-
+    const observer = new IntersectionObserver(([entry]) => { setIsSticky(!entry.isIntersecting); }, { threshold: 0 });
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, []);
+
+  const tocItems: TOCItem[] = useMemo(() =>
+    data.parts.map((p, i) => ({
+      id: p.id,
+      number: String(i + 1).padStart(2, "0"),
+      label: p.headline,
+    })), [data.parts]
+  );
 
   return (
     <>
@@ -232,15 +163,9 @@ export default function PolicyTemplate({ data }: { data: PolicyData }) {
           </p>
           {data.version && data.effectiveDate && data.entity && (
             <div className="page-meta anim-fade-in-up anim-delay-3">
-              <div className="meta-item">
-                📄 <strong>الإصدار:</strong> {data.version}
-              </div>
-              <div className="meta-item">
-                📅 <strong>تاريخ السريان:</strong> {data.effectiveDate}
-              </div>
-              <div className="meta-item">
-                🏢 <strong>الجهة:</strong> {data.entity}
-              </div>
+              <div className="meta-item">📄 <strong>الإصدار:</strong> {data.version}</div>
+              <div className="meta-item">📅 <strong>تاريخ السريان:</strong> {data.effectiveDate}</div>
+              <div className="meta-item">🏢 <strong>الجهة:</strong> {data.entity}</div>
             </div>
           )}
         </div>
@@ -252,9 +177,9 @@ export default function PolicyTemplate({ data }: { data: PolicyData }) {
 
         <div className="policy-content-wrap">
           <div className="hidden lg:block">
-            <TocSidebar data={data} isSticky={isSticky} />
+            <TocSidebar tocItems={tocItems} isSticky={isSticky} sidebarCard={data.sidebarCard} />
           </div>
-          <ContentBody data={data} />
+          <ContentBody parts={data.parts} />
         </div>
       </div>
 

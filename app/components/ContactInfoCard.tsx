@@ -1,6 +1,8 @@
 "use client";
 
-import { CONTACT_INFO } from "@/lib/contact-data";
+import type { ContactInfo, Channel, InquiryOption } from "@/lib/contact-data";
+import { ContactForm } from "@/app/components/ContactForm";
+import { ChannelsGrid } from "@/app/components/ChannelsGrid";
 
 function PhoneIcon() {
   return (
@@ -37,37 +39,44 @@ function HoursIcon() {
   );
 }
 
-const infoItems = [
-  {
-    icon: <PhoneIcon />,
-    iconBg: "#eef5ff",
-    label: "الهاتف",
-    value: CONTACT_INFO.phone,
-    href: `tel:${CONTACT_INFO.phone}`,
-  },
-  {
-    icon: <EmailIcon />,
-    iconBg: "#f0f4ff",
-    label: "البريد الإلكتروني",
-    value: CONTACT_INFO.email,
-    href: `mailto:${CONTACT_INFO.email}`,
-  },
-  {
-    icon: <LocationIcon />,
-    iconBg: "#feeeee",
-    label: "الموقع",
-    value: CONTACT_INFO.location,
-  },
-  {
-    icon: <HoursIcon />,
-    iconBg: "#fff7ed",
-    label: "ساعات العمل",
-    value: CONTACT_INFO.hoursDays,
-    sub: CONTACT_INFO.hoursTime,
-  },
-];
+export interface ContactInfoCardProps {
+  contactInfo: ContactInfo;
+}
 
-export function ContactInfoCard() {
+function InfoItems({ contactInfo }: { contactInfo: ContactInfo }) {
+  return [
+    {
+      icon: <PhoneIcon />,
+      iconBg: "#eef5ff",
+      label: "الهاتف",
+      value: contactInfo.phone,
+      href: `tel:${contactInfo.phone}`,
+    },
+    {
+      icon: <EmailIcon />,
+      iconBg: "#f0f4ff",
+      label: "البريد الإلكتروني",
+      value: contactInfo.email,
+      href: `mailto:${contactInfo.email}`,
+    },
+    {
+      icon: <LocationIcon />,
+      iconBg: "#feeeee",
+      label: "الموقع",
+      value: contactInfo.location,
+    },
+    {
+      icon: <HoursIcon />,
+      iconBg: "#fff7ed",
+      label: "ساعات العمل",
+      value: contactInfo.hoursDays,
+      sub: contactInfo.hoursTime,
+    },
+  ];
+}
+
+export function ContactInfoCard({ contactInfo }: ContactInfoCardProps) {
+  const items = InfoItems({ contactInfo });
   return (
     <div className="contact-info-card anim-fade-in-up">
       <div className="text-[20px] font-bold text-navy mb-2">معلومات التواصل</div>
@@ -76,7 +85,7 @@ export function ContactInfoCard() {
       </div>
 
       <div className="info-items">
-        {infoItems.map((item, i) => (
+        {items.map((item, i) => (
           <div key={i} className="info-item">
             <div className="info-icon-box" style={{ background: item.iconBg }}>
               {item.icon}
@@ -105,7 +114,7 @@ export function ContactInfoCard() {
           <img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/686f58163d6350e998381015_X.svg" alt="X" />
         </a>
         <a href="https://www.instagram.com/aysar_ksa/" className="soc-btn-contact" target="_blank" rel="noopener noreferrer">
-          <img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/686f581646ec4c97bf1eecb4_Insta.svg" alt="Instagram" />
+          <img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/686f5816464ec4c97bf1eecb4_Insta.svg" alt="Instagram" />
         </a>
         <a href="https://www.tiktok.com/@aysar_sa" className="soc-btn-contact tiktok" target="_blank" rel="noopener noreferrer">
           <img src="https://cdn.prod.website-files.com/686ecfb1fbbb502328ba5eed/68e0d5460bf150d8b7f651f6_tiktok-white-icon.webp" alt="TikTok" className="!filter-none" />

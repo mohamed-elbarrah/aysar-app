@@ -17,6 +17,16 @@ interface ProjectCardData {
   remaining: string;
 }
 
+interface ProjectOverviewProps {
+  eyebrow?: string;
+  title?: string;
+  titleAccent?: string;
+  description?: string;
+  checkItems?: Array<{ bold: string; detail: string }>;
+  linkLabel?: string;
+  linkHref?: string;
+}
+
 const projects: ProjectCardData[] = [
   {
     initial: "و",
@@ -56,13 +66,6 @@ const projects: ProjectCardData[] = [
   },
 ];
 
-const checkItems = [
-  { bold: "إدارة مشاريع متعددة", detail: " — فيلات، شقق، تجاري من لوحة واحدة" },
-  { bold: "تتبع نسبة الإنجاز", detail: " لكل مشروع ولكل مرحلة بدقة" },
-  { bold: "توثيق بالصور والفيديو", detail: " — يراها العميل فور رفعها" },
-  { bold: "سحابي 100%", detail: " — من أي جهاز وأي مكان بدون تثبيت" },
-];
-
 function AnimatedProgress({ targetPercentage, color, delay = 0 }: { targetPercentage: number; color: string; delay?: number }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
@@ -93,7 +96,20 @@ function AnimatedProgress({ targetPercentage, color, delay = 0 }: { targetPercen
   );
 }
 
-export function ProjectOverview() {
+export function ProjectOverview({
+  eyebrow = "لوحة التحكم",
+  title = "كل مشاريعك",
+  titleAccent = "في نظرة واحدة",
+  description = "لوحة تحكم احترافية تعطيك صورة كاملة عن جميع مشاريعك، وحداتك، وعملاءك — محدّثة لحظياً.",
+  checkItems = [
+    { bold: "إدارة مشاريع متعددة", detail: " — فيلات، شقق، تجاري من لوحة واحدة" },
+    { bold: "تتبع نسبة الإنجاز", detail: " لكل مشروع ولكل مرحلة بدقة" },
+    { bold: "توثيق بالصور والفيديو", detail: " — يراها العميل فور رفعها" },
+    { bold: "سحابي 100%", detail: " — من أي جهاز وأي مكان بدون تثبيت" },
+  ],
+  linkLabel = "ادخل لوحة التحكم",
+  linkHref = "https://platform.aysar.sa/",
+}: ProjectOverviewProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -106,7 +122,6 @@ export function ProjectOverview() {
     <section className="bg-white">
       <div className="section-aysar" ref={ref}>
         <div className="container-aysar grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Text */}
           <div className="order-1">
             <motion.div
               className="eyebrow"
@@ -114,7 +129,7 @@ export function ProjectOverview() {
               initial="hidden"
               animate={isInView ? "visible" : "hidden"}
             >
-              لوحة التحكم
+              {eyebrow}
             </motion.div>
 
             <motion.h2
@@ -124,9 +139,9 @@ export function ProjectOverview() {
               animate={isInView ? "visible" : "hidden"}
               transition={{ delay: 0.1 }}
             >
-              كل مشاريعك
+              {title}
               <br />
-              <span className="text-indigo">في نظرة واحدة</span>
+              <span className="text-indigo">{titleAccent}</span>
             </motion.h2>
 
             <motion.p
@@ -136,8 +151,7 @@ export function ProjectOverview() {
               animate={isInView ? "visible" : "hidden"}
               transition={{ delay: 0.2 }}
             >
-              لوحة تحكم احترافية تعطيك صورة كاملة عن جميع مشاريعك، وحداتك،
-              وعملاءك — محدّثة لحظياً.
+              {description}
             </motion.p>
 
             <motion.div
@@ -185,16 +199,15 @@ export function ProjectOverview() {
               transition={{ delay: 0.7 }}
             >
               <Link
-                href="https://platform.aysar.sa/"
+                href={linkHref}
                 target="_blank"
                 className="inline-flex items-center gap-1.5 text-sm font-bold text-navy border-b-2 border-navy pb-1 hover:text-indigo hover:border-indigo transition-colors duration-150"
               >
-                ادخل لوحة التحكم ←
+                {linkLabel} ←
               </Link>
             </motion.div>
           </div>
 
-          {/* Visual — Project Cards */}
           <div className="order-2">
             <motion.div
               className="bg-[#f4f6fb] border border-border rounded-[20px] p-5"
@@ -202,7 +215,6 @@ export function ProjectOverview() {
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
             >
-              {/* Mini header */}
               <div className="flex items-center justify-between mb-3.5">
                 <span className="text-[13px] font-bold text-text">
                   كل المشاريع
@@ -217,7 +229,6 @@ export function ProjectOverview() {
                 </div>
               </div>
 
-              {/* Cards */}
               <div className="flex flex-col gap-2.5">
                 {projects.map((project, idx) => (
                   <motion.div
@@ -236,7 +247,6 @@ export function ProjectOverview() {
                       transition: { duration: 0.25 },
                     }}
                   >
-                    {/* Initial circle */}
                     <div
                       className="w-[38px] h-[38px] rounded-[10px] flex-shrink-0 flex items-center justify-center text-[15px] font-bold text-white"
                       style={{ backgroundColor: project.initialBg }}
@@ -244,7 +254,6 @@ export function ProjectOverview() {
                       {project.initial}
                     </div>
 
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[13px] font-bold text-text truncate">

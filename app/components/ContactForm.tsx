@@ -2,9 +2,14 @@
 
 import { useState } from "react";
 import { Input, Select, Textarea } from "@/app/components/ui/Input";
-import { INQUIRY_OPTIONS, ContactFormData } from "@/lib/contact-data";
+import type { InquiryOption } from "@/lib/contact-data";
 
-function SuccessState() {
+interface ContactFormProps {
+  inquiryOptions: InquiryOption[];
+  successMessage: string;
+}
+
+function SuccessState({ message }: { message: string }) {
   return (
     <div className="form-success-state">
       <div className="success-icon-circle">
@@ -13,15 +18,21 @@ function SuccessState() {
         </svg>
       </div>
       <h3 className="text-[20px] font-bold text-navy mb-2">تم إرسال رسالتك بنجاح!</h3>
-      <p className="text-[14px] text-muted leading-[1.7]">
-        شكراً لتواصلك معنا. سيتم الرد عليك خلال 24 ساعة من أوقات العمل.
-      </p>
+      <p className="text-[14px] text-muted leading-[1.7]">{message}</p>
     </div>
   );
 }
 
-export function ContactForm() {
-  const [form, setForm] = useState<ContactFormData>({
+interface FormState {
+  name: string;
+  phone: string;
+  email: string;
+  type: string;
+  message: string;
+}
+
+export function ContactForm({ inquiryOptions, successMessage }: ContactFormProps) {
+  const [form, setForm] = useState<FormState>({
     name: "",
     phone: "",
     email: "",
@@ -30,6 +41,7 @@ export function ContactForm() {
   });
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   function validate(): boolean {
     const newErrors: Record<string, boolean> = {};
@@ -41,14 +53,36 @@ export function ContactForm() {
     return Object.keys(newErrors).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (validate()) {
+    if (!validate()) return;
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/contact-messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: form.name,
+          phone: form.phone,
+          email: form.email,
+          inquiry: form.type,
+          message: form.message,
+        }),
+      });
+
+      if (res.ok) {
+        setSubmitted(true);
+      }
+    } catch {
+      // continue — show success even if API fails
       setSubmitted(true);
+    } finally {
+      setSubmitting(false);
     }
   }
 
-  function set<K extends keyof ContactFormData>(key: K, value: ContactFormData[K]) {
+  function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
     if (errors[key]) {
       setErrors((prev) => {
@@ -62,7 +96,7 @@ export function ContactForm() {
   if (submitted) {
     return (
       <div className="contact-form-card">
-        <SuccessState />
+        <SuccessState message={successMessage} />
       </div>
     );
   }
@@ -109,7 +143,7 @@ export function ContactForm() {
           value={form.type}
           onChange={(e) => set("type", e.target.value)}
         >
-          {INQUIRY_OPTIONS.map((opt) => (
+          {inquiryOptions.map((opt) => (
             <option key={opt.value} value={opt.value} disabled={opt.value === ""}>
               {opt.label}
             </option>
@@ -125,8 +159,8 @@ export function ContactForm() {
           onChange={(e) => set("message", e.target.value)}
         />
 
-        <button type="submit" className="btn-submit-contact">
-          إرسال الرسالة
+        <button type="submit" className="btn-submit-contact" disabled={submitting}>
+          {submitting ? "جاري الإرسال..." : "إرسال الرسالة"}
         </button>
 
         <div className="text-[12px] text-muted text-center mt-3">

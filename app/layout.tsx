@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Kufi_Arabic } from "next/font/google";
 import "./globals.css";
+import { getSiteSettings } from "@/app/lib/settings-data";
 
 const notoKufi = Noto_Kufi_Arabic({
   variable: "--font-noto-kufi",
@@ -9,11 +10,15 @@ const notoKufi = Noto_Kufi_Arabic({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "أيسَر — منصة إدارة التطوير العقاري",
-  description:
-    "أيسَر تمنحك لوحة تحكم احترافية لإدارة مشاريعك وعملاءك — من تتبع مراحل الإنشاء وإشعارات فورية، حتى صفحات هبوط واستقبال حجوزات ونظام CRM متكامل.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return {
+    title: settings.siteTitle,
+    description: settings.siteDescription,
+    keywords: settings.seoKeywords,
+    icons: settings.faviconUrl ? { icon: settings.faviconUrl } : undefined,
+  };
+}
 
 export default function RootLayout({
   children,

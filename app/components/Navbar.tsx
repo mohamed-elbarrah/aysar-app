@@ -5,15 +5,13 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
-const navLinks = [
-  { href: "/", label: "الرئيسية" },
-  { href: "/plans", label: "الأسعار" },
-  { href: "/contact", label: "اتصل بنا" },
-];
+interface NavLinkItem {
+  label: string;
+  href: string;
+}
 
-export default function Navbar() {
+export default function Navbar({ navLinks }: { navLinks: NavLinkItem[] }) {
   const pathname = usePathname();
-
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -108,14 +106,13 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile drawer */}
       {mobileOpen && (
         <div className="md:hidden absolute top-[62px] left-0 right-0 bg-white border border-[#e8edf5] shadow-lg flex flex-col p-4 gap-2">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              onClick={()=>setMobileOpen(false)}
+              onClick={() => setMobileOpen(false)}
               className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                 pathname === link.href
                   ? "bg-[rgba(45,46,131,0.06)] text-indigo font-semibold"

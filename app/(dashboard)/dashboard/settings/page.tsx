@@ -1,152 +1,181 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Input, Textarea } from "@/app/components/ui/Input";
 import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
 import { DynamicList } from "@/app/components/dashboard/DynamicList";
-import { SITE_SETTINGS, NAV_LINKS, SOCIAL_LINKS } from "@/app/lib/dashboard/placeholders";
-import { ScrollText, ChevronUp } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
-const sections = [
-  { id: "metadata", label: "معلومات الموقع" },
-  { id: "navbar", label: "شريط التنقل" },
-  { id: "footer", label: "تذييل الموقع" },
-  { id: "socials", label: "وسائل التواصل" },
-  { id: "apps", label: "روابط التطبيق" },
-];
+interface NavLinkItem { label: string; href: string }
+interface FooterLinkItem { label: string; href: string; external?: boolean }
+interface SocialInfo { xUrl: string; instagramUrl: string; tiktokUrl: string; whatsappNumber: string }
+interface AppLinkInfo { appStoreUrl: string; googlePlayUrl: string }
+interface SettingsData {
+  siteTitle: string; siteDescription: string; faviconUrl: string; seoKeywords: string;
+  navLinks: NavLinkItem[];
+  socialLinks: SocialInfo;
+  appLinks: AppLinkInfo;
+  footerCopyright: string; footerTagline: string;
+  footerQuickLinks: FooterLinkItem[]; footerHelpLinks: FooterLinkItem[];
+}
+
+const DEFAULTS: SettingsData = {
+  siteTitle: "أيسَر — منصة إدارة التطوير العقاري",
+  siteDescription: "أيسَر تمنحك لوحة تحكم احترافية لإدارة مشاريعك وعملاءك — من تتبع مراحل الإنشاء وإشعارات فورية، حتى صفحات هبوط واستقبال حجوزات ونظام CRM متكامل.",
+  faviconUrl: "/favicon.ico",
+  seoKeywords: "تطوير عقاري, إدارة مشاريع, CRM عقاري, تطبيق عقارات, منصة سحابية",
+  navLinks: [{ label: "الرئيسية", href: "/" }, { label: "الأسعار", href: "/plans" }, { label: "اتصل بنا", href: "/contact" }],
+  socialLinks: { xUrl: "https://x.com/aysar_ksa", instagramUrl: "https://instagram.com/aysar_ksa", tiktokUrl: "https://tiktok.com/@aysar_sa", whatsappNumber: "966125101107" },
+  appLinks: { appStoreUrl: "https://apps.apple.com/sa/app/أيس-ر/id6746420561?l=ar&platform=iphone", googlePlayUrl: "https://play.google.com/store/apps/details?id=com.aysar.application" },
+  footerCopyright: "© 2026 مؤسسة أيسر المتطورة لتقنية المعلومات · رقم السجل التجاري: 4030620045",
+  footerTagline: "أيسَر برنامج لإدارة العقارات وتتبع مراحل الإنشاء من أول طوبة لآخر لمسة.",
+  footerQuickLinks: [{ label: "الرئيسية", href: "/" }, { label: "الأسعار", href: "/plans" }, { label: "اتصل بنا", href: "/contact" }],
+  footerHelpLinks: [
+    { label: "تسجيل دخول", href: "https://platform.aysar.sa/ar/company/dashboard/login" },
+    { label: "مركز المساعدة", href: "https://support.aysar.sa/" },
+    { label: "التحديثات", href: "https://support.aysar.sa/page/update" },
+    { label: "سياسة الخصوصية", href: "/privacy-policy" },
+    { label: "شروط الاستخدام", href: "/terms-of-use" },
+    { label: "سياسة الاسترجاع", href: "/return-policy" },
+  ],
+};
+
+async function saveSettings(data: Record<string, unknown>): Promise<boolean> {
+  try {
+    const res = await fetch("/api/settings", {
+      method: "PATCH", headers: { "Content-Type": "application/json" }, credentials: "include",
+      body: JSON.stringify(data),
+    });
+    return res.ok;
+  } catch { return false; }
+}
 
 export default function SettingsPage() {
-  const [lastSaved, setLastSaved] = useState<string>();
-  const [activeSection, setActiveSection] = useState("metadata");
-  const pageRef = useRef<HTMLDivElement>(null);
+  const [data, setData] = useState<SettingsData>(DEFAULTS);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (!pageRef.current) return;
-      const els = sections.map((s) => document.getElementById(s.id));
-      const scrollY = pageRef.current.scrollTop + 100;
-      for (let i = els.length - 1; i >= 0; i--) {
-        const el = els[i];
-        if (el && el.offsetTop <= scrollY) {
-          setActiveSection(sections[i].id);
-          break;
-        }
-      }
-    };
-    const el = pageRef.current;
-    el?.addEventListener("scroll", handleScroll);
-    return () => el?.removeEventListener("scroll", handleScroll);
+    async function load() {
+      try {
+        const res = await fetch("/api/settings");
+        const json = await res.json();
+        if (json.success && json.data) setData(json.data);
+      } catch { /* keep defaults */ }
+      finally { setLoading(false); }
+    }
+    load();
   }, []);
 
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el && pageRef.current) {
-      pageRef.current.scrollTo({ top: el.offsetTop - 16, behavior: "smooth" });
-    }
-  };
+  const handleSave = useCallback(async (key: string, val: unknown) => {
+    setSaving(key); const ok = await saveSettings({ [key]: val }); setSaving(null);
+    if (ok) { setFeedback("تم الحفظ بنجاح"); setTimeout(() => setFeedback(""), 3000); }
+  }, []);
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-[60vh]"><div className="text-center"><Loader2 className="w-8 h-8 animate-spin text-[#2d2e83] mx-auto mb-3" /><p className="text-sm text-[#6b7a94]">جارٍ تحميل الإعدادات...</p></div></div>
+  );
 
   return (
-    <div className="flex gap-6 h-[calc(100vh-120px)]">
-      <div ref={pageRef} className="flex-1 overflow-y-auto pr-2 -mr-2">
-        <div className="mb-6">
-          <h1 className="text-xl font-bold text-[#0c2954] mb-1">الإعدادات العامة</h1>
-          <p className="text-sm text-[#6b7a94]">تعديل إعدادات الموقع والتنقل والروابط</p>
-        </div>
-        <div className="space-y-6 pb-24">
-          <MetadataSection onSave={(t) => setLastSaved(t)} />
-          <NavbarSection onSave={(t) => setLastSaved(t)} />
-          <FooterSection onSave={(t) => setLastSaved(t)} />
-          <SocialsSection onSave={(t) => setLastSaved(t)} />
-          <AppsSection onSave={(t) => setLastSaved(t)} />
-        </div>
+    <div className="space-y-6 pb-24">
+      <div className="mb-6 flex items-center justify-between">
+        <div><h1 className="text-xl font-bold text-[#0c2954] mb-1">الإعدادات العامة</h1><p className="text-sm text-[#6b7a94]">تعديل إعدادات الموقع، التنقل، الفوتر، ووسائل التواصل</p></div>
+        {feedback && <span className="text-xs text-[#1a9a5a] bg-[#e9f9f0] px-3 py-1.5 rounded-lg font-medium">{feedback}</span>}
       </div>
-      <div className="hidden xl:block w-[200px] shrink-0">
-        <div className="sticky top-0">
-          <div className="bg-white rounded-xl border border-[#e8edf5] p-4">
-            <p className="text-xs font-bold text-[#0c2954] mb-3 flex items-center gap-1.5"><ScrollText className="w-3.5 h-3.5" /> الأقسام</p>
-            <nav className="space-y-1">
-              {sections.map((s) => (
-                <button key={s.id} onClick={() => scrollTo(s.id)} className={`w-full text-right text-xs py-1.5 px-2 rounded-md transition-colors ${activeSection === s.id ? "bg-[#0c2954]/5 text-[#0c2954] font-medium" : "text-[#6b7a94] hover:text-[#0c2954] hover:bg-[#f5f6f9]"}`}>{s.label}</button>
-              ))}
-            </nav>
-            <button onClick={() => pageRef.current?.scrollTo({ top: 0, behavior: "smooth" })} className="mt-3 w-full flex items-center justify-center gap-1 text-[10px] text-[#6b7a94] hover:text-[#0c2954] py-1.5 rounded-md hover:bg-[#f5f6f9] transition-colors"><ChevronUp className="w-3 h-3" /> العودة للأعلى</button>
+
+      <MetadataSection data={data} saving={saving === "metadata"} onSave={(d) => handleSave("metadata_bulk", d)} />
+      <NavbarSection data={data.navLinks} saving={saving === "navLinks"} onSave={(d) => handleSave("navLinks", d)} />
+
+      {/* Footer section - expanded */}
+      <ContentCard title="تذييل الموقع" subtitle="نص الحقوق، الشعار، وروابط الفوتر">
+        <div className="space-y-5">
+          <Textarea label="نص حقوق النشر" value={data.footerCopyright} onChange={(e) => setData({ ...data, footerCopyright: e.target.value })} rows={2} />
+          <Textarea label="نص التعريف أسفل الشعار" value={data.footerTagline} onChange={(e) => setData({ ...data, footerTagline: e.target.value })} rows={2} />
+          <div>
+            <p className="text-xs font-semibold text-[#3a4a60] mb-2">روابط سريعة</p>
+            <DynamicList items={data.footerQuickLinks.map(l => `${l.label} | ${l.href}`)} onChange={(items) => { setData({ ...data, footerQuickLinks: items.map(i => { const [label, href] = i.split(" | "); return { label: label || "", href: href || "" }; }) }); }} placeholder="الاسم | الرابط" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-[#3a4a60] mb-2">روابط المساعدة</p>
+            <DynamicList items={data.footerHelpLinks.map(l => `${l.label} | ${l.href}`)} onChange={(items) => { setData({ ...data, footerHelpLinks: items.map(i => { const [label, href] = i.split(" | "); return { label: label || "", href: href || "" }; }) }); }} placeholder="الاسم | الرابط" />
           </div>
         </div>
-      </div>
+        <div className="mt-5 flex justify-end">
+          <DashboardButton disabled={saving === "footer"} onClick={() => handleSave("footer_bulk", { footerCopyright: data.footerCopyright, footerTagline: data.footerTagline, footerQuickLinks: data.footerQuickLinks, footerHelpLinks: data.footerHelpLinks })}>
+            {saving === "footer" ? "جاري الحفظ..." : "حفظ الفوتر"}
+          </DashboardButton>
+        </div>
+      </ContentCard>
+
+      <SocialsSection data={data.socialLinks} saving={saving === "socialLinks"} onSave={(d) => handleSave("socialLinks", d)} />
+      <AppsSection data={data.appLinks} saving={saving === "appLinks"} onSave={(d) => handleSave("appLinks", d)} />
     </div>
   );
 }
 
-function MetadataSection({ onSave }: { onSave: (t: string) => void }) {
-  const [data, setData] = useState(SITE_SETTINGS);
+function MetadataSection({ data, saving, onSave }: { data: SettingsData; saving: boolean; onSave: (d: Record<string, string|null>) => void }) {
+  const [local, setLocal] = useState({ siteTitle: data.siteTitle, siteDescription: data.siteDescription, faviconUrl: data.faviconUrl, seoKeywords: data.seoKeywords });
+  useEffect(() => { setLocal({ siteTitle: data.siteTitle, siteDescription: data.siteDescription, faviconUrl: data.faviconUrl, seoKeywords: data.seoKeywords }); }, [data]);
   return (
-    <section id="metadata">
-      <ContentCard title="معلومات الموقع" subtitle="عنوان ووصف الموقع والSEO">
-        <div className="form-grid-2">
-          <Input label="عنوان الموقع" value={data.siteTitle} onChange={(e) => setData({ ...data, siteTitle: e.target.value })} />
-          <Input label="Favicon" value={data.faviconUrl} onChange={(e) => setData({ ...data, faviconUrl: e.target.value })} />
-          <Textarea label="وصف الموقع" value={data.siteDescription} onChange={(e) => setData({ ...data, siteDescription: e.target.value })} rows={3} />
-          <Textarea label="كلمات مفتاحية (SEO)" value={data.seoKeywords} onChange={(e) => setData({ ...data, seoKeywords: e.target.value })} rows={2} />
-        </div>
-        <div className="mt-5 flex justify-end"><DashboardButton onClick={() => onSave(new Date().toLocaleTimeString("ar-SA"))}>حفظ التغييرات</DashboardButton></div>
-      </ContentCard>
-    </section>
+    <ContentCard title="معلومات الموقع" subtitle="عنوان ووصف الموقع والSEO">
+      <div className="form-grid-2">
+        <Input label="عنوان الموقع" value={local.siteTitle} onChange={(e) => setLocal({ ...local, siteTitle: e.target.value })} />
+        <Input label="Favicon URL" value={local.faviconUrl} onChange={(e) => setLocal({ ...local, faviconUrl: e.target.value })} />
+        <Textarea label="وصف الموقع" value={local.siteDescription} onChange={(e) => setLocal({ ...local, siteDescription: e.target.value })} rows={3} />
+        <Textarea label="كلمات مفتاحية (SEO)" value={local.seoKeywords} onChange={(e) => setLocal({ ...local, seoKeywords: e.target.value })} rows={2} />
+      </div>
+      <div className="mt-5 flex justify-end">
+        <DashboardButton disabled={saving} onClick={() => onSave(local)}>{saving ? "جاري الحفظ..." : "حفظ التغييرات"}</DashboardButton>
+      </div>
+    </ContentCard>
   );
 }
 
-function NavbarSection({ onSave }: { onSave: (t: string) => void }) {
-  const [links, setLinks] = useState(NAV_LINKS);
+function NavbarSection({ data, saving, onSave }: { data: NavLinkItem[]; saving: boolean; onSave: (d: NavLinkItem[]) => void }) {
+  const [links, setLinks] = useState(data);
+  useEffect(() => { setLinks(data); }, [data]);
   return (
-    <section id="navbar">
-      <ContentCard title="شريط التنقل" subtitle="روابط شريط التنقل العلوي">
-        <DynamicList items={links.map((l) => `${l.label} | ${l.href}`)} onChange={(items) => { setLinks(items.map((item) => { const [label, href] = item.split(" | "); return { label: label || "", href: href || "" }; })); }} placeholder="الاسم | الرابط" />
-        <div className="mt-5 flex justify-end"><DashboardButton onClick={() => onSave(new Date().toLocaleTimeString("ar-SA"))}>حفظ التغييرات</DashboardButton></div>
-      </ContentCard>
-    </section>
+    <ContentCard title="شريط التنقل" subtitle="روابط شريط التنقل العلوي">
+      <DynamicList items={links.map(l => `${l.label} | ${l.href}`)} onChange={(items) => { setLinks(items.map(i => { const [label, href] = i.split(" | "); return { label: label || "", href: href || "" }; })); }} placeholder="الاسم | الرابط" />
+      <div className="mt-5 flex justify-end">
+        <DashboardButton disabled={saving} onClick={() => onSave(links)}>{saving ? "جاري الحفظ..." : "حفظ التغييرات"}</DashboardButton>
+      </div>
+    </ContentCard>
   );
 }
 
-function FooterSection({ onSave }: { onSave: (t: string) => void }) {
-  const [copyright, setCopyright] = useState("© 2026 مؤسسة أيسر المتطورة لتقنية المعلومات · رقم السجل التجاري: 4030620045");
+function SocialsSection({ data, saving, onSave }: { data: SocialInfo; saving: boolean; onSave: (d: SocialInfo) => void }) {
+  const [local, setLocal] = useState(data);
+  useEffect(() => { setLocal(data); }, [data]);
   return (
-    <section id="footer">
-      <ContentCard title="تذييل الموقع" subtitle="نص حقوق النشر">
-        <Textarea label="نص حقوق النشر" value={copyright} onChange={(e) => setCopyright(e.target.value)} rows={2} />
-        <div className="mt-5 flex justify-end"><DashboardButton onClick={() => onSave(new Date().toLocaleTimeString("ar-SA"))}>حفظ التغييرات</DashboardButton></div>
-      </ContentCard>
-    </section>
+    <ContentCard title="وسائل التواصل الاجتماعي" subtitle="روابط حسابات التواصل الاجتماعي">
+      <div className="form-grid-2">
+        <Input label="X (Twitter)" value={local.xUrl} onChange={(e) => setLocal({ ...local, xUrl: e.target.value })} />
+        <Input label="Instagram" value={local.instagramUrl} onChange={(e) => setLocal({ ...local, instagramUrl: e.target.value })} />
+        <Input label="TikTok" value={local.tiktokUrl} onChange={(e) => setLocal({ ...local, tiktokUrl: e.target.value })} />
+        <Input label="رقم WhatsApp" value={local.whatsappNumber} onChange={(e) => setLocal({ ...local, whatsappNumber: e.target.value })} />
+      </div>
+      <div className="mt-5 flex justify-end">
+        <DashboardButton disabled={saving} onClick={() => onSave(local)}>{saving ? "جاري الحفظ..." : "حفظ التغييرات"}</DashboardButton>
+      </div>
+    </ContentCard>
   );
 }
 
-function SocialsSection({ onSave }: { onSave: (t: string) => void }) {
-  const [data, setData] = useState(SOCIAL_LINKS);
+function AppsSection({ data, saving, onSave }: { data: AppLinkInfo; saving: boolean; onSave: (d: AppLinkInfo) => void }) {
+  const [local, setLocal] = useState(data);
+  useEffect(() => { setLocal(data); }, [data]);
   return (
-    <section id="socials">
-      <ContentCard title="وسائل التواصل الاجتماعي" subtitle="روابط حسابات التواصل الاجتماعي">
-        <div className="form-grid-2">
-          <Input label="X (Twitter)" value={data.xUrl} onChange={(e) => setData({ ...data, xUrl: e.target.value })} />
-          <Input label="Instagram" value={data.instagramUrl} onChange={(e) => setData({ ...data, instagramUrl: e.target.value })} />
-          <Input label="TikTok" value={data.tiktokUrl} onChange={(e) => setData({ ...data, tiktokUrl: e.target.value })} />
-          <Input label="رقم WhatsApp" value={data.whatsappNumber} onChange={(e) => setData({ ...data, whatsappNumber: e.target.value })} />
-        </div>
-        <div className="mt-5 flex justify-end"><DashboardButton onClick={() => onSave(new Date().toLocaleTimeString("ar-SA"))}>حفظ التغييرات</DashboardButton></div>
-      </ContentCard>
-    </section>
-  );
-}
-
-function AppsSection({ onSave }: { onSave: (t: string) => void }) {
-  const [data, setData] = useState({ appStoreUrl: "https://apps.apple.com/sa/app/أيس-ر/id6746420561?l=ar\u0026platform=iphone", googlePlayUrl: "https://play.google.com/store/apps/details?id=com.aysar.application" });
-  return (
-    <section id="apps">
-      <ContentCard title="روابط التطبيق" subtitle="روابط تحميل التطبيق من المتاجر">
-        <div className="form-grid-2">
-          <Input label="App Store" value={data.appStoreUrl} onChange={(e) => setData({ ...data, appStoreUrl: e.target.value })} />
-          <Input label="Google Play" value={data.googlePlayUrl} onChange={(e) => setData({ ...data, googlePlayUrl: e.target.value })} />
-        </div>
-        <div className="mt-5 flex justify-end"><DashboardButton onClick={() => onSave(new Date().toLocaleTimeString("ar-SA"))}>حفظ التغييرات</DashboardButton></div>
-      </ContentCard>
-    </section>
+    <ContentCard title="روابط التطبيق" subtitle="روابط تحميل التطبيق من المتاجر">
+      <div className="form-grid-2">
+        <Input label="App Store" value={local.appStoreUrl} onChange={(e) => setLocal({ ...local, appStoreUrl: e.target.value })} />
+        <Input label="Google Play" value={local.googlePlayUrl} onChange={(e) => setLocal({ ...local, googlePlayUrl: e.target.value })} />
+      </div>
+      <div className="mt-5 flex justify-end">
+        <DashboardButton disabled={saving} onClick={() => onSave(local)}>{saving ? "جاري الحفظ..." : "حفظ التغييرات"}</DashboardButton>
+      </div>
+    </ContentCard>
   );
 }
