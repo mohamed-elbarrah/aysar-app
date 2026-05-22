@@ -78,7 +78,12 @@ const navItems: NavItem[] = [
       { href: "/dashboard/policies#return", label: "سياسة الإرجاع" },
     ],
   },
-  { href: "/dashboard/messages", label: "رسائل التواصل", icon: MessageCircle, badge: 3 },
+  {
+    href: "/dashboard/messages",
+    label: "رسائل التواصل",
+    icon: MessageCircle,
+    badge: 3,
+  },
   {
     href: "/dashboard/settings",
     label: "الإعدادات العامة",
@@ -118,7 +123,7 @@ function NavItemComponent({
           "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 cursor-pointer select-none",
           isActive
             ? "bg-white/10 text-white font-medium"
-            : "text-white/60 hover:bg-white/5 hover:text-white"
+            : "text-white/60 hover:bg-white/5 hover:text-white",
         )}
       >
         <Link
@@ -133,7 +138,9 @@ function NavItemComponent({
           <span className="flex-1">{item.label}</span>
         </Link>
         {item.badge && (
-          <Badge className="bg-[#ef4444] text-white text-[10px] h-5 min-w-[20px] px-1.5">{item.badge}</Badge>
+          <Badge className="bg-[#ef4444] text-white text-[10px] h-5 min-w-[20px] px-1.5">
+            {item.badge}
+          </Badge>
         )}
         {hasSubItems && (
           <button
@@ -147,7 +154,7 @@ function NavItemComponent({
             <ChevronDown
               className={cn(
                 "w-3.5 h-3.5 text-white/50 transition-transform duration-200",
-                isExpanded && "rotate-180"
+                isExpanded && "rotate-180",
               )}
             />
           </button>
@@ -168,7 +175,7 @@ function NavItemComponent({
                   "block py-1.5 px-2 rounded text-xs transition-colors duration-150",
                   isSubActive
                     ? "text-[#5ddfb8] font-medium"
-                    : "text-white/40 hover:text-white/70 hover:bg-white/5"
+                    : "text-white/40 hover:text-white/70 hover:bg-white/5",
                 )}
               >
                 <span className="inline-flex items-center gap-1.5">
@@ -190,38 +197,36 @@ export function DashboardSidebar() {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(() => {
     // Auto-expand the current page's section
     const s = new Set<string>();
-    const active = navItems.find((item) => pathname.startsWith(item.href) && item.href !== "/dashboard");
+    const active = navItems.find(
+      (item) => pathname.startsWith(item.href) && item.href !== "/dashboard",
+    );
     if (active?.subItems) s.add(active.href);
     return s;
   });
 
-  const toggleExpand = useCallback(
-    (href: string) => {
-      setExpandedItems((prev) => {
-        const next = new Set(prev);
-        if (next.has(href)) next.delete(href);
-        else next.add(href);
-        return next;
-      });
-    },
-    []
-  );
+  const toggleExpand = useCallback((href: string) => {
+    setExpandedItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(href)) next.delete(href);
+      else next.add(href);
+      return next;
+    });
+  }, []);
 
   const NavContent = (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col w-full justify-center h-full">
       {/* Logo */}
-      <div className="px-5 py-5">
+      <div className="w-full px-5 py-5">
         <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="/Aysarlogo.png"
-            alt="أيسَر"
-            width={36}
-            height={36}
-            className="rounded-lg"
-          />
-          <div>
-            <span className="text-white font-bold text-lg block leading-none">أيسَر</span>
-            <span className="text-white/40 text-[10px]">لوحة التحكم</span>
+          <div className="w-full flex justify-center">
+            <Image
+              src="/logo.png"
+              alt="أيسَر"
+              width={100}
+              height={100}
+              className="rounded-lg"
+            />
+            
           </div>
         </Link>
       </div>
@@ -270,7 +275,9 @@ export function DashboardSidebar() {
             <span className="text-[#5ddfb8] text-xs font-bold">م</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-medium truncate">مدير النظام</p>
+            <p className="text-white text-sm font-medium truncate">
+              مدير النظام
+            </p>
             <p className="text-white/40 text-[10px]">مدير النظام</p>
           </div>
           <button
@@ -313,7 +320,10 @@ export function DashboardSidebar() {
               </DashboardButton>
             }
           />
-          <SheetContent side="right" className="w-[260px] bg-[#0c2954] p-0 border-none">
+          <SheetContent
+            side="right"
+            className="w-[260px] bg-[#0c2954] p-0 border-none"
+          >
             {NavContent}
           </SheetContent>
         </Sheet>

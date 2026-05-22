@@ -33,7 +33,7 @@ export default function HeroSection({
       <Container className="relative z-[1] pt-0 pb-8 lg:pb-[52px]">
         <div className="text-center max-w-[760px] mx-auto">
           {badge && (
-            <div className="badge anim-fade-in-up">
+            <div className="badge mb-8 anim-fade-in-up">
               <span className="badge-dot anim-pulse" />
               {badge}
             </div>

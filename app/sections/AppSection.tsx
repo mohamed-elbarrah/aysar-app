@@ -3,11 +3,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import Image from "next/image";
-import {
-  Bell,
-  LayoutGrid,
-  Wrench,
-} from "lucide-react";
+import { Bell, LayoutGrid, Wrench } from "lucide-react";
 
 interface AppSectionProps {
   eyebrow?: string;
@@ -120,12 +116,17 @@ export function AppSection({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 bg-navy hover:opacity-[0.88] hover:-translate-y-px active:translate-y-0 transition-all duration-150 rounded-xl px-5 py-[11px]"
               >
-                <svg className="w-5 h-5 text-white flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.65 8.65c-.05-1.95 1.6-2.89 1.67-2.93-.91-1.33-2.33-1.51-2.83-1.53-1.2-.12-2.35.71-2.96.71-.62 0-1.57-.69-2.59-.67-1.33.02-2.57.78-3.25 1.97-1.39 2.41-.36 5.98 1 7.93.66.96 1.45 2.04 2.5 2.01 1-.04 1.38-.65 2.59-.65 1.21 0 1.56.65 2.58.63 1.07-.02 1.74-.97 2.41-1.93.76-1.1 1.07-2.18 1.09-2.23-.02-.01-2.11-.81-2.13-3.22-.02-2.01 1.64-2.97 1.72-3.02-.95-1.38-2.42-1.53-2.93-1.56-.11-.01-1.06-.12-1.46-.12zM14.87 5.1c.57-.69.95-1.65.85-2.6-.82.03-1.81.55-2.4 1.23-.52.6-.98 1.56-.86 2.49.91.07 1.84-.46 2.41-1.12z"/>
-                </svg>
+                <Image
+                  src="/apple-svgrepo-com.svg"
+                  alt="App Store"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5 flex-shrink-0"
+                  unoptimized
+                />
                 <div>
                   <div className="text-[10px] text-white/55 leading-none">
-                    Download on the
+                    تحميل عبر
                   </div>
                   <div className="text-[13px] font-bold text-white leading-tight">
                     App Store
@@ -139,15 +140,17 @@ export function AppSection({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 bg-navy hover:opacity-[0.88] hover:-translate-y-px active:translate-y-0 transition-all duration-150 rounded-xl px-5 py-[11px]"
               >
-                <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none">
-                  <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.922V2.736a1 1 0 01.61-.922z" fill="#4285F4"/>
-                  <path d="M14.899 12.849l2.302 2.302-10.937 6.333 8.635-8.635z" fill="#34A853"/>
-                  <path d="M14.899 11.151l2.302-2.302 2.807 1.626a1 1 0 010 1.73l-2.807 1.626-2.302-2.29z" fill="#FBBC05"/>
-                  <path d="M11.646 8.348l8.663 8.662-10.973-6.35 2.31-2.312z" fill="#EA4335"/>
-                </svg>
+                <Image
+                  src="/google-play.svg"
+                  alt="Google Play"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5 flex-shrink-0"
+                  unoptimized
+                />
                 <div>
                   <div className="text-[10px] text-white/55 leading-none">
-                    Get it on
+                    تحميل من
                   </div>
                   <div className="text-[13px] font-bold text-white leading-tight">
                     Google Play
@@ -183,7 +186,8 @@ export function AppSection({
                         "inset 0 1px 3px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.06)",
                     }}
                   >
-                    <div className="absolute left-[14px] top-1/2 -translate-y-1/2 w-[7px] h-[7px] rounded-full"
+                    <div
+                      className="absolute left-[14px] top-1/2 -translate-y-1/2 w-[7px] h-[7px] rounded-full"
                       style={{
                         background:
                           "radial-gradient(circle at 30% 30%, #2a4080, #0c1a2e)",
@@ -192,7 +196,8 @@ export function AppSection({
                   </div>
                 </div>
 
-                <div className="relative rounded-[18px] overflow-hidden bg-white"
+                <div
+                  className="relative rounded-[18px] overflow-hidden bg-white"
                   style={{
                     boxShadow:
                       "inset 0 0 8px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.15)",
@@ -213,22 +218,24 @@ export function AppSection({
 
               {floatingCards.map((card, idx) => {
                 const Icon = card.icon;
-                const delayClass = idx === 0
-                  ? "anim-float-delay-0"
-                  : idx === 1
-                    ? "anim-float-delay-1"
-                    : "anim-float-delay-2";
+                const delayClass =
+                  idx === 0
+                    ? "anim-float-delay-0"
+                    : idx === 1
+                      ? "anim-float-delay-1"
+                      : "anim-float-delay-2";
                 return (
                   <div
                     key={idx}
                     className={`absolute ${card.position} z-20 anim-float-smooth ${delayClass} ${
-                      idx === 0 ? "hidden sm:block" :
-                      idx === 1 ? "hidden lg:block" :
-                      "hidden md:block"
+                      idx === 0
+                        ? "hidden sm:block"
+                        : idx === 1
+                          ? "hidden lg:block"
+                          : "hidden md:block"
                     }`}
                   >
-                    <div className="bg-white rounded-[14px] px-4 py-3 shadow-[0_8px_32px_rgba(12,41,84,0.12)] min-w-[180px]"
-                    >
+                    <div className="bg-white rounded-[14px] px-4 py-3 shadow-[0_8px_32px_rgba(12,41,84,0.12)] min-w-[180px]">
                       {idx === 1 ? (
                         <>
                           <div className="flex items-center gap-3 mb-2">
