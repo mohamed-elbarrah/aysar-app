@@ -17,8 +17,6 @@ import {
   ChevronLeft,
   ChevronDown,
   Menu,
-  X,
-  ChevronRight,
   type LucideIcon,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -86,11 +84,11 @@ const navItems: NavItem[] = [
     label: "الإعدادات العامة",
     icon: Settings,
     subItems: [
-      { href: "/dashboard/settings#metadata", label: "معلومات الموقع" },
-      { href: "/dashboard/settings#navbar", label: "شريط التنقل" },
-      { href: "/dashboard/settings#footer", label: "تذييل الموقع" },
-      { href: "/dashboard/settings#socials", label: "وسائل التواصل" },
-      { href: "/dashboard/settings#apps", label: "روابط التطبيق" },
+      { href: "/dashboard/settings/metadata", label: "معلومات الموقع" },
+      { href: "/dashboard/settings/navbar", label: "شريط التنقل" },
+      { href: "/dashboard/settings/footer", label: "تذييل الموقع" },
+      { href: "/dashboard/settings/social", label: "وسائل التواصل" },
+      { href: "/dashboard/settings/apps", label: "روابط التطبيق" },
     ],
   },
 ];
@@ -101,12 +99,14 @@ function NavItemComponent({
   isExpanded,
   onToggle,
   onNavigate,
+  currentPathname,
 }: {
   item: NavItem;
   isActive: boolean;
   isExpanded: boolean;
   onToggle: () => void;
   onNavigate: () => void;
+  currentPathname: string;
 }) {
   const Icon = item.icon;
   const hasSubItems = !!item.subItems?.length;
@@ -158,7 +158,7 @@ function NavItemComponent({
       {hasSubItems && isExpanded && (
         <div className="mr-6 mt-0.5 mb-1 space-y-0.5 border-r border-white/10 pr-2">
           {item.subItems!.map((sub) => {
-            const isSubActive = false; // Could check hash
+            const isSubActive = currentPathname === sub.href;
             return (
               <Link
                 key={sub.href}
@@ -244,6 +244,7 @@ export function DashboardSidebar() {
               isExpanded={isExpanded}
               onToggle={() => toggleExpand(item.href)}
               onNavigate={() => setMobileOpen(false)}
+              currentPathname={pathname}
             />
           );
         })}

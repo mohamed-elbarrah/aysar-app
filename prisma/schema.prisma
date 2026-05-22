@@ -74,10 +74,7 @@ model SiteSettings {
   navLinks         Json     @default("[]") @map("nav_links")
   socialLinks      Json     @default("{}") @map("social_links")
   appLinks         Json     @default("{}") @map("app_links")
-  footerCopyright  String   @default("") @map("footer_copyright")
-  footerTagline    String   @default("") @map("footer_tagline")
-  footerQuickLinks Json     @default("[]") @map("footer_quick_links")
-  footerHelpLinks  Json     @default("[]") @map("footer_help_links")
+  footerColumns    Json     @default("[]") @map("footer_columns")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
   @@map("site_settings")

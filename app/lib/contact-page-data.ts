@@ -41,11 +41,11 @@ export async function getContactPageData(): Promise<ContactPageResponse> {
   return {
     id: page.id,
     hero: page.hero as ContactPageResponse["hero"],
-    contactInfo: page.contactInfo as ContactPageResponse["contactInfo"],
-    channels: page.channels as ContactPageResponse["channels"],
-    inquiryOptions: page.inquiryOptions as ContactPageResponse["inquiryOptions"],
+    contactInfo: page.contactInfo as unknown as ContactPageResponse["contactInfo"],
+    channels: page.channels as unknown as ContactPageResponse["channels"],
+    inquiryOptions: page.inquiryOptions as unknown as ContactPageResponse["inquiryOptions"],
     successMessage: page.successMessage,
-    formFields: page.formFields as ContactPageResponse["formFields"],
+    formFields: page.formFields as unknown as ContactPageResponse["formFields"],
     updatedAt: page.updatedAt.toISOString(),
   };
 }

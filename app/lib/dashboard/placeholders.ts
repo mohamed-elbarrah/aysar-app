@@ -157,3 +157,55 @@ export const SOCIAL_LINKS = {
   tiktokUrl: "https://tiktok.com/@aysar_sa",
   whatsappNumber: "966125101107",
 };
+
+export const APP_LINKS_DEFAULTS = {
+  appStoreUrl: "https://apps.apple.com/sa/app/أيس-ر/id6746420561?l=ar&platform=iphone",
+  googlePlayUrl: "https://play.google.com/store/apps/details?id=com.aysar.application",
+};
+
+interface FooterLinkItem { label: string; href: string; external?: boolean }
+interface FooterColumn {
+  type: "brand" | "links";
+  title: string;
+  links?: FooterLinkItem[];
+  tagline?: string;
+  copyright?: string;
+}
+
+export const DEFAULT_FOOTER_COLUMNS: FooterColumn[] = [
+  {
+    type: "brand",
+    title: "أيسَر",
+    tagline: "أيسَر برنامج لإدارة العقارات وتتبع مراحل الإنشاء من أول طوبة لآخر لمسة.",
+    copyright: "© 2026 مؤسسة أيسر المتطورة لتقنية المعلومات · رقم السجل التجاري: 4030620045",
+  },
+  {
+    type: "links",
+    title: "روابط سريعة",
+    links: [
+      { label: "الرئيسية", href: "/" },
+      { label: "الأسعار", href: "/plans" },
+      { label: "اتصل بنا", href: "/contact" },
+    ],
+  },
+  {
+    type: "links",
+    title: "المساعدة",
+    links: [
+      { label: "تسجيل دخول", href: "https://platform.aysar.sa/ar/company/dashboard/login", external: true },
+      { label: "مركز المساعدة", href: "https://support.aysar.sa/", external: true },
+      { label: "التحديثات", href: "https://support.aysar.sa/page/update", external: true },
+      { label: "سياسة الخصوصية", href: "/privacy-policy" },
+      { label: "شروط الاستخدام", href: "/terms-of-use" },
+      { label: "سياسة الاسترجاع", href: "/return-policy" },
+    ],
+  },
+  {
+    type: "links",
+    title: "التطبيق",
+    links: [
+      { label: "App Store", href: "https://apps.apple.com/sa/app/أيس-ر/id6746420561?l=ar&platform=iphone", external: true },
+      { label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.aysar.application", external: true },
+    ],
+  },
+];

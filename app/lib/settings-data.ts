@@ -1,15 +1,17 @@
 import { prisma } from "@/app/lib/db";
-import { SITE_SETTINGS, NAV_LINKS, SOCIAL_LINKS } from "@/app/lib/dashboard/placeholders";
-
-const APP_LINKS_DEFAULTS = {
-  appStoreUrl: "https://apps.apple.com/sa/app/أيس-ر/id6746420561?l=ar&platform=iphone",
-  googlePlayUrl: "https://play.google.com/store/apps/details?id=com.aysar.application",
-};
+import { SITE_SETTINGS, NAV_LINKS, SOCIAL_LINKS, APP_LINKS_DEFAULTS, DEFAULT_FOOTER_COLUMNS } from "@/app/lib/dashboard/placeholders";
 
 export interface NavLink { label: string; href: string }
 export interface SocialInfo { xUrl: string; instagramUrl: string; tiktokUrl: string; whatsappNumber: string }
 export interface AppLinkInfo { appStoreUrl: string; googlePlayUrl: string }
 export interface FooterLinkItem { label: string; href: string; external?: boolean }
+export interface FooterColumn {
+  type: "brand" | "links";
+  title: string;
+  links?: FooterLinkItem[];
+  tagline?: string;
+  copyright?: string;
+}
 
 export interface SiteSettingsResponse {
   id: string;
@@ -20,29 +22,16 @@ export interface SiteSettingsResponse {
   navLinks: NavLink[];
   socialLinks: SocialInfo;
   appLinks: AppLinkInfo;
-  footerCopyright: string;
-  footerTagline: string;
-  footerQuickLinks: FooterLinkItem[];
-  footerHelpLinks: FooterLinkItem[];
+  footerColumns: FooterColumn[];
   updatedAt: string;
 }
 
-const FOOTER_COPYRIGHT = "© 2026 مؤسسة أيسر المتطورة لتقنية المعلومات · رقم السجل التجاري: 4030620045";
-const FOOTER_TAGLINE = "أيسَر برنامج لإدارة العقارات وتتبع مراحل الإنشاء من أول طوبة لآخر لمسة.";
-const FOOTER_QUICK: FooterLinkItem[] = [
-  { label: "الرئيسية", href: "/" }, { label: "الأسعار", href: "/plans" }, { label: "اتصل بنا", href: "/contact" },
-];
-const FOOTER_HELP: FooterLinkItem[] = [
-  { label: "تسجيل دخول", href: "https://platform.aysar.sa/ar/company/dashboard/login", external: true },
-  { label: "مركز المساعدة", href: "https://support.aysar.sa/", external: true },
-  { label: "التحديثات", href: "https://support.aysar.sa/page/update", external: true },
-  { label: "سياسة الخصوصية", href: "/privacy-policy" },
-  { label: "شروط الاستخدام", href: "/terms-of-use" },
-  { label: "سياسة الاسترجاع", href: "/return-policy" },
-];
+function safeJsonArray<T>(value: unknown, fallback: T[]): T[] {
+  return Array.isArray(value) ? (value as T[]) : [...fallback];
+}
 
 export async function getSiteSettings(): Promise<SiteSettingsResponse> {
-  let row = await prisma.siteSettings.findUnique({ where: { id: "SETTINGS" } });
+  const row = await prisma.siteSettings.findUnique({ where: { id: "SETTINGS" } });
 
   if (!row) {
     return {
@@ -54,10 +43,7 @@ export async function getSiteSettings(): Promise<SiteSettingsResponse> {
       navLinks: [...NAV_LINKS],
       socialLinks: { ...SOCIAL_LINKS },
       appLinks: { ...APP_LINKS_DEFAULTS },
-      footerCopyright: FOOTER_COPYRIGHT,
-      footerTagline: FOOTER_TAGLINE,
-      footerQuickLinks: FOOTER_QUICK,
-      footerHelpLinks: FOOTER_HELP,
+      footerColumns: [...DEFAULT_FOOTER_COLUMNS],
       updatedAt: new Date().toISOString(),
     };
   }
@@ -68,13 +54,14 @@ export async function getSiteSettings(): Promise<SiteSettingsResponse> {
     siteDescription: row.siteDescription,
     faviconUrl: row.faviconUrl,
     seoKeywords: row.seoKeywords,
-    navLinks: row.navLinks as NavLink[],
-    socialLinks: row.socialLinks as SocialInfo,
-    appLinks: row.appLinks as AppLinkInfo,
-    footerCopyright: row.footerCopyright,
-    footerTagline: row.footerTagline,
-    footerQuickLinks: row.footerQuickLinks as FooterLinkItem[],
-    footerHelpLinks: row.footerHelpLinks as FooterLinkItem[],
+    navLinks: safeJsonArray<NavLink>(row.navLinks, NAV_LINKS),
+    socialLinks: (row.socialLinks && typeof row.socialLinks === "object" && !Array.isArray(row.socialLinks)
+      ? row.socialLinks
+      : SOCIAL_LINKS) as unknown as SocialInfo,
+    appLinks: (row.appLinks && typeof row.appLinks === "object" && !Array.isArray(row.appLinks)
+      ? row.appLinks
+      : APP_LINKS_DEFAULTS) as unknown as AppLinkInfo,
+    footerColumns: safeJsonArray<FooterColumn>(row.footerColumns, DEFAULT_FOOTER_COLUMNS),
     updatedAt: row.updatedAt.toISOString(),
   };
 }

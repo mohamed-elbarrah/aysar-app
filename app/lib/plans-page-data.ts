@@ -40,9 +40,9 @@ export async function getPlansPageData(): Promise<PlansPageResponse> {
   return {
     id: page.id,
     hero: page.hero as PlansPageResponse["hero"],
-    plans: page.plans as PlansPageResponse["plans"],
-    compareRows: page.compareRows as PlansPageResponse["compareRows"],
-    faqItems: page.faqItems as PlansPageResponse["faqItems"],
+    plans: page.plans as unknown as PlansPageResponse["plans"],
+    compareRows: page.compareRows as unknown as PlansPageResponse["compareRows"],
+    faqItems: page.faqItems as unknown as PlansPageResponse["faqItems"],
     updatedAt: page.updatedAt.toISOString(),
   };
 }

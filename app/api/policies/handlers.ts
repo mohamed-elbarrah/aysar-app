@@ -81,19 +81,19 @@ export async function updatePolicyHandler(
   }
 
   const existing = await prisma.policies.findUnique({ where: { id: "POLICIES" } });
-  const currentPolicy = ((existing?.[dbKey] as unknown as PolicyData) || FALLBACKS[dbKey]) as Record<string, unknown>;
+  const currentPolicy = ((existing?.[dbKey] as unknown as PolicyData) || FALLBACKS[dbKey]) as unknown as Record<string, unknown>;
 
-  const merged = deepMerge(currentPolicy, parsed.data as Record<string, unknown>);
+  const merged = deepMerge(currentPolicy, parsed.data as unknown as Record<string, unknown>);
 
   await prisma.policies.upsert({
     where: { id: "POLICIES" },
     create: {
       id: "POLICIES",
-      privacy: dbKey === "privacy" ? merged : FALLBACKS.privacy,
-      terms: dbKey === "terms" ? merged : FALLBACKS.terms,
-      returns: dbKey === "returns" ? merged : FALLBACKS.returns,
+      privacy: dbKey === "privacy" ? merged as any : (FALLBACKS.privacy as any),
+      terms: dbKey === "terms" ? merged as any : (FALLBACKS.terms as any),
+      returns: dbKey === "returns" ? merged as any : (FALLBACKS.returns as any),
     },
-    update: { [dbKey]: merged },
+    update: { [dbKey]: merged as any },
   });
 
   res.json({ success: true, data: merged });

@@ -8,7 +8,7 @@ import { ContentCard } from "@/app/components/dashboard/ContentCard";
 import { DynamicList } from "@/app/components/dashboard/DynamicList";
 import { CONTACT_HERO, CONTACT_INFO, CHANNELS } from "@/app/lib/dashboard/placeholders";
 import { INQUIRY_OPTIONS } from "@/lib/contact-data";
-import type { Channel } from "@/lib/contact-data";
+import type { Channel, InquiryType } from "@/lib/contact-data";
 import { ScrollText, ChevronUp, Loader2 } from "lucide-react";
 
 const sections = [
@@ -227,7 +227,7 @@ function FormSection({ data, saving, onSave }: { data: ContactSectionData; savin
           <Textarea label="رسالة النجاح" value={successMessage} onChange={(e) => setSuccessMessage(e.target.value)} rows={2} />
           <div>
             <p className="text-xs font-semibold text-[#3a4a60] mb-2">أنواع الاستفسارات</p>
-            <DynamicList items={inquiryTypes.map((o) => o.label)} onChange={(items) => { setInquiryTypes(items.map((label, i) => ({ value: `type_${i}`, label }))); }} />
+            <DynamicList items={inquiryTypes.map((o) => o.label)} onChange={(items) => { setInquiryTypes(items.map((label) => ({ value: "" as "" | InquiryType, label }))); }} />
           </div>
         </div>
         <div className="mt-5 flex justify-end">

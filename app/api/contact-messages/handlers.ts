@@ -9,7 +9,7 @@ export async function submitContactMessageHandler(
 ): Promise<void> {
   const parsed = contactMessageSubmitSchema.safeParse(req.body);
   if (!parsed.success) {
-    const firstError = parsed.error.errors[0];
+    const firstError = parsed.error.issues[0];
     res.status(422).json({ success: false, error: firstError?.message || "بيانات غير صالحة" });
     return;
   }

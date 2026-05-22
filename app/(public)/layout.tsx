@@ -14,12 +14,8 @@ export default async function PublicLayout({
       <Navbar navLinks={settings.navLinks} />
       <main className="flex-1 flex flex-col">{children}</main>
       <Footer
-        tagline={settings.footerTagline}
-        copyright={settings.footerCopyright}
-        quickLinks={settings.footerQuickLinks}
-        helpLinks={settings.footerHelpLinks}
+        columns={settings.footerColumns}
         socialLinks={settings.socialLinks}
-        appLinks={settings.appLinks}
       />
     </>
   );

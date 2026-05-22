@@ -2,30 +2,7 @@ import type { Response } from "express";
 import { prisma } from "@/app/lib/db";
 import { settingsUpdateSchema } from "@/app/lib/shared-types";
 import type { AuthenticatedRequest, ApiResponse } from "@/app/lib/shared-types";
-import { SITE_SETTINGS, NAV_LINKS, SOCIAL_LINKS } from "@/app/lib/dashboard/placeholders";
-
-const APP_LINKS_DEFAULTS = {
-  appStoreUrl: "https://apps.apple.com/sa/app/أيس-ر/id6746420561?l=ar&platform=iphone",
-  googlePlayUrl: "https://play.google.com/store/apps/details?id=com.aysar.application",
-};
-
-const FOOTER_DEFAULTS = {
-  footerCopyright: "© 2026 مؤسسة أيسر المتطورة لتقنية المعلومات · رقم السجل التجاري: 4030620045",
-  footerTagline: "أيسَر برنامج لإدارة العقارات وتتبع مراحل الإنشاء من أول طوبة لآخر لمسة.",
-  footerQuickLinks: [
-    { label: "الرئيسية", href: "/" },
-    { label: "الأسعار", href: "/plans" },
-    { label: "اتصل بنا", href: "/contact" },
-  ],
-  footerHelpLinks: [
-    { label: "تسجيل دخول", href: "https://platform.aysar.sa/ar/company/dashboard/login", external: true },
-    { label: "مركز المساعدة", href: "https://support.aysar.sa/", external: true },
-    { label: "التحديثات", href: "https://support.aysar.sa/page/update", external: true },
-    { label: "سياسة الخصوصية", href: "/privacy-policy" },
-    { label: "شروط الاستخدام", href: "/terms-of-use" },
-    { label: "سياسة الاسترجاع", href: "/return-policy" },
-  ],
-};
+import { SITE_SETTINGS, NAV_LINKS, SOCIAL_LINKS, APP_LINKS_DEFAULTS, DEFAULT_FOOTER_COLUMNS } from "@/app/lib/dashboard/placeholders";
 
 const DEFAULTS = {
   siteTitle: SITE_SETTINGS.siteTitle,
@@ -35,7 +12,7 @@ const DEFAULTS = {
   navLinks: NAV_LINKS,
   socialLinks: SOCIAL_LINKS,
   appLinks: APP_LINKS_DEFAULTS,
-  ...FOOTER_DEFAULTS,
+  footerColumns: DEFAULT_FOOTER_COLUMNS,
 };
 
 function deepMerge<T extends Record<string, unknown>>(existing: T, incoming: Partial<T>): T {
@@ -64,7 +41,7 @@ export async function getSettingsHandler(
   _req: AuthenticatedRequest,
   res: Response<ApiResponse>
 ): Promise<void> {
-  let row = await prisma.siteSettings.findUnique({ where: { id: "SETTINGS" } });
+  const row = await prisma.siteSettings.findUnique({ where: { id: "SETTINGS" } });
 
   if (!row) {
     res.json({ success: true, data: { ...DEFAULTS, id: "SETTINGS", updatedAt: new Date().toISOString() } });
