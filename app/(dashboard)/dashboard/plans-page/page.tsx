@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
 import { PLANS, FAQ_ITEMS, COMPARE_ROWS } from "@/app/lib/dashboard/placeholders";
-import type { Plan, FAQItem, CompareRowData } from "@/lib/plans-data";
-import { ScrollText, ChevronUp, Loader2 } from "lucide-react";
+import type { Plan, FAQItem, CompareTableData, CompareColumn, CompareRow } from "@/lib/plans-data";
+import { ScrollText, ChevronUp, Loader2, Plus, Trash2, GripVertical } from "lucide-react";
 
 const sections = [
   { id: "banner", label: "البانر" },
@@ -20,7 +20,7 @@ const sections = [
 interface PlansPageData {
   hero: { badge: string; title: string; titleAccent: string; subtitle: string };
   plans: Plan[];
-  compareRows: CompareRowData[];
+  compareRows: CompareTableData;
   faqItems: FAQItem[];
 }
 
@@ -60,10 +60,15 @@ export default function PlansPageEditor() {
         const res = await fetch("/api/plans-page");
         const json = await res.json();
         if (json.success && json.data) {
+          const raw = json.data.compareRows;
+          const compareRows =
+            raw && typeof raw === "object" && !Array.isArray(raw) && "columns" in raw
+              ? raw
+              : DEFAULTS.compareRows;
           setData({
             hero: json.data.hero || DEFAULTS.hero,
             plans: json.data.plans || DEFAULTS.plans,
-            compareRows: json.data.compareRows || DEFAULTS.compareRows,
+            compareRows,
             faqItems: json.data.faqItems || DEFAULTS.faqItems,
           });
         }
@@ -95,6 +100,7 @@ export default function PlansPageEditor() {
   }, []);
 
   const scrollTo = (id: string) => {
+    setActiveSection(id);
     const el = document.getElementById(id);
     if (el && pageRef.current) {
       pageRef.current.scrollTo({ top: el.offsetTop - 16, behavior: "smooth" });
@@ -204,13 +210,63 @@ function PlansSection({ data: initial, saving, onSave }: { data: Plan[]; saving:
                 </div>
                 <div className="mt-2">
                   <p className="text-xs font-semibold text-[#3a4a60] mb-2">المميزات</p>
-                  <div className="space-y-1.5">{plan.features.map((feat, fidx) => (
-                    <div key={fidx} className="flex items-center gap-2">
-                      <Checkbox checked={feat.enabled} onCheckedChange={(v) => { const n = [...plans]; n[idx].features[fidx] = { ...n[idx].features[fidx], enabled: !!v }; setPlans(n); }} />
-                      <input className="form-control-contact flex-1" value={feat.text} onChange={(e) => { const n = [...plans]; n[idx].features[fidx] = { ...n[idx].features[fidx], text: e.target.value }; setPlans(n); }} />
-                      <label className="flex items-center gap-1 text-xs"><Checkbox checked={feat.soon || false} onCheckedChange={(v) => { const n = [...plans]; n[idx].features[fidx] = { ...n[idx].features[fidx], soon: !!v }; setPlans(n); }} /> قريباً</label>
-                    </div>
-                  ))}</div>
+                  <div className="space-y-1.5">
+                    {plan.features.map((feat, fidx) => (
+                      <div key={fidx} className="flex items-center gap-2 group">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const n = [...plans];
+                            n[idx].features = n[idx].features.filter((_, i) => i !== fidx);
+                            setPlans(n);
+                          }}
+                          className="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 transition-colors shrink-0"
+                          title="حذف الميزة"
+                        >
+                          <Trash2 className="w-3 h-3 text-red-400 hover:text-red-600" />
+                        </button>
+                        <Checkbox
+                          checked={feat.enabled}
+                          onCheckedChange={(v) => {
+                            const n = [...plans];
+                            n[idx].features[fidx] = { ...n[idx].features[fidx], enabled: !!v };
+                            setPlans(n);
+                          }}
+                        />
+                        <input
+                          className="form-control-contact flex-1"
+                          value={feat.text}
+                          onChange={(e) => {
+                            const n = [...plans];
+                            n[idx].features[fidx] = { ...n[idx].features[fidx], text: e.target.value };
+                            setPlans(n);
+                          }}
+                        />
+                        <label className="flex items-center gap-1 text-xs shrink-0">
+                          <Checkbox
+                            checked={feat.soon || false}
+                            onCheckedChange={(v) => {
+                              const n = [...plans];
+                              n[idx].features[fidx] = { ...n[idx].features[fidx], soon: !!v };
+                              setPlans(n);
+                            }}
+                          /> قريباً
+                        </label>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const n = [...plans];
+                        n[idx].features = [...n[idx].features, { text: "ميزة جديدة", enabled: true }];
+                        setPlans(n);
+                      }}
+                      className="w-full py-1.5 rounded-md border border-dashed border-[#e8edf5] text-xs text-[#6b7a94] hover:border-[#0c2954]/30 hover:text-[#0c2954] hover:bg-[#f5f6f9] transition-colors flex items-center justify-center gap-1"
+                    >
+                      <Plus className="w-3 h-3" />
+                      إضافة ميزة
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -226,28 +282,179 @@ function PlansSection({ data: initial, saving, onSave }: { data: Plan[]; saving:
   );
 }
 
-function CompareSection({ data: initial, saving, onSave }: { data: CompareRowData[]; saving: boolean; onSave: (d: CompareRowData[]) => void }) {
-  const [rows, setRows] = useState<CompareRowData[]>(initial);
+function CompareSection({ data: initial, saving, onSave }: { data: CompareTableData; saving: boolean; onSave: (d: CompareTableData) => void }) {
+  const [compare, setCompare] = useState<CompareTableData>(initial);
+
+  const addColumn = () => {
+    const newId = `col_${compare.columns.length}`;
+    const n = { ...compare };
+    n.columns = [...n.columns, { id: newId, label: "باقة جديدة" }];
+    n.rows = n.rows.map((row) => {
+      if (row.type === "feature") {
+        return { ...row, values: { ...row.values, [newId]: null } };
+      }
+      return row;
+    });
+    setCompare(n);
+  };
+
+  const deleteColumn = (colId: string) => {
+    const n = { ...compare };
+    n.columns = n.columns.filter((c) => c.id !== colId);
+    n.rows = n.rows.map((row) => {
+      if (row.type === "feature") {
+        const { [colId]: _, ...rest } = row.values;
+        return { ...row, values: rest };
+      }
+      return row;
+    });
+    setCompare(n);
+  };
+
+  const addFeatureAt = (afterIdx: number) => {
+    const n = { ...compare };
+    const blankValues: Record<string, string | null> = {};
+    for (const col of n.columns) blankValues[col.id] = null;
+    const newRow: CompareRow = { type: "feature" as const, label: "ميزة جديدة", values: blankValues };
+    n.rows = [...n.rows.slice(0, afterIdx + 1), newRow, ...n.rows.slice(afterIdx + 1)];
+    setCompare(n);
+  };
+
+  const addSection = () => {
+    setCompare({ ...compare, rows: [...compare.rows, { type: "section" as const, label: "قسم جديد" }] });
+  };
+
   return (
     <section id="compare">
-      <ContentCard title="جدول المقارنة" subtitle="مقارنة المميزات بين الباقات الثلاث">
-        <div className="space-y-2">
-          {rows.map((row, idx) => {
-            if ("section" in row) {
-              return <div key={idx} className="py-2 px-3 bg-[#f8f9fb] rounded-lg"><input className="form-control-contact font-bold bg-transparent border-0 text-sm" value={row.section} onChange={(e) => { const n = [...rows]; (n[idx] as { section: string }).section = e.target.value; setRows(n); }} /></div>;
-            }
-            return (
-              <div key={idx} className="grid grid-cols-4 gap-2 items-center">
-                <input className="form-control-contact" value={row.label} onChange={(e) => { const n = [...rows]; (n[idx] as { label: string }).label = e.target.value; setRows(n); }} placeholder="الميزة" />
-                <input className="form-control-contact" value={row.free ?? ""} onChange={(e) => { const n = [...rows]; (n[idx] as { free: string | null }).free = e.target.value || null; setRows(n); }} placeholder="المجانية" />
-                <input className="form-control-contact" value={row.advanced ?? ""} onChange={(e) => { const n = [...rows]; (n[idx] as { advanced: string | null }).advanced = e.target.value || null; setRows(n); }} placeholder="المتقدمة" />
-                <input className="form-control-contact" value={row.featured ?? ""} onChange={(e) => { const n = [...rows]; (n[idx] as { featured: string | null }).featured = e.target.value || null; setRows(n); }} placeholder="المميزة" />
+      <ContentCard title="جدول المقارنة" subtitle={`${compare.columns.length} باقة — ${compare.rows.length} صف`}>
+        <div className="space-y-1">
+          <div className="grid gap-2 items-center" style={{ gridTemplateColumns: `1fr repeat(${compare.columns.length}, 1fr) auto` }}>
+            <input
+              className="form-control-contact text-xs font-bold"
+              value={compare.featureLabel}
+              onChange={(e) => setCompare({ ...compare, featureLabel: e.target.value })}
+              placeholder="الميزة"
+            />
+            {compare.columns.map((col) => (
+              <div key={col.id} className="flex items-center gap-1">
+                <input
+                  className="form-control-contact text-xs font-bold text-center"
+                  value={col.label}
+                  onChange={(e) => {
+                    const n = { ...compare };
+                    n.columns = n.columns.map((c) => (c.id === col.id ? { ...c, label: e.target.value } : c));
+                    setCompare(n);
+                  }}
+                  placeholder="اسم الباقة"
+                />
+                <button
+                  type="button"
+                  onClick={() => deleteColumn(col.id)}
+                  className="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 shrink-0"
+                  title="حذف الباقة"
+                >
+                  <Trash2 className="w-3 h-3 text-red-400 hover:text-red-600" />
+                </button>
               </div>
-            );
-          })}
+            ))}
+            <button
+              type="button"
+              onClick={addColumn}
+              className="flex items-center justify-center gap-1 text-xs text-[#6b7a94] hover:text-[#0c2954] py-1 rounded border border-dashed border-[#e8edf5] hover:border-[#0c2954]/30 transition-colors"
+            >
+              <Plus className="w-3 h-3" /> إضافة باقة
+            </button>
+          </div>
+
+          <hr className="border-[#e8edf5]" />
+
+          <div className="space-y-1">
+            {compare.rows.map((row, ridx) => (
+              <div key={ridx}>
+                {row.type === "section" ? (
+                  <div className="flex items-center gap-2 py-1.5 px-3 bg-[#f8f9fb] rounded-lg">
+                    <input
+                      className="form-control-contact font-bold bg-transparent border-0 text-sm flex-1"
+                      value={row.label}
+                      onChange={(e) => {
+                        const n = { ...compare };
+                        n.rows = n.rows.map((r, i) => (i === ridx ? { ...r, label: e.target.value } : r));
+                        setCompare(n);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setCompare({ ...compare, rows: compare.rows.filter((_, i) => i !== ridx) })}
+                      className="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 shrink-0"
+                      title="حذف القسم"
+                    >
+                      <Trash2 className="w-3 h-3 text-red-400 hover:text-red-600" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => addFeatureAt(ridx)}
+                      className="flex items-center justify-center gap-1 text-xs text-[#6b7a94] hover:text-[#0c2954] py-1 px-2 rounded border border-dashed border-[#e8edf5] hover:border-[#0c2954]/30 transition-colors shrink-0"
+                    >
+                      <Plus className="w-3 h-3" /> إضافة ميزة
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2" style={{ direction: "ltr" }}>
+                    <div className="flex-1" style={{ direction: "rtl", display: "grid", gap: "0.5rem", gridTemplateColumns: `1fr repeat(${compare.columns.length}, 1fr)` }}>
+                      <input
+                        className="form-control-contact text-sm"
+                        value={row.label}
+                        onChange={(e) => {
+                          const n = { ...compare };
+                          n.rows = n.rows.map((r, i) =>
+                            i === ridx && r.type === "feature" ? { ...r, label: e.target.value } : r
+                          );
+                          setCompare(n);
+                        }}
+                        placeholder="الميزة"
+                      />
+                      {compare.columns.map((col) => (
+                        <input
+                          key={col.id}
+                          className="form-control-contact text-xs text-center"
+                          value={row.values[col.id] ?? ""}
+                          onChange={(e) => {
+                            const n = { ...compare };
+                            n.rows = n.rows.map((r, i) =>
+                              i === ridx && r.type === "feature"
+                                ? { ...r, values: { ...r.values, [col.id]: e.target.value || null } }
+                                : r
+                            );
+                            setCompare(n);
+                          }}
+                          placeholder="—"
+                        />
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setCompare({ ...compare, rows: compare.rows.filter((_, i) => i !== ridx) })}
+                      className="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 shrink-0"
+                      title="حذف الميزة"
+                    >
+                      <Trash2 className="w-3 h-3 text-red-400 hover:text-red-600" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={addSection}
+            className="mt-2 w-full py-2 rounded-lg border-2 border-dashed border-[#e8edf5] text-xs text-[#6b7a94] hover:border-[#0c2954]/30 hover:text-[#0c2954] hover:bg-[#f5f6f9] transition-colors flex items-center justify-center gap-1"
+          >
+            <Plus className="w-3.5 h-3.5" /> إضافة قسم
+          </button>
         </div>
         <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave(rows)}>
+          <DashboardButton disabled={saving} onClick={() => onSave(compare)}>
             {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
           </DashboardButton>
         </div>
@@ -258,21 +465,98 @@ function CompareSection({ data: initial, saving, onSave }: { data: CompareRowDat
 
 function FAQSection({ data: initial, saving, onSave }: { data: FAQItem[]; saving: boolean; onSave: (d: FAQItem[]) => void }) {
   const [items, setItems] = useState<FAQItem[]>(initial);
+  const dragIdx = useRef<number | null>(null);
+
+  const handleDragStart = (idx: number) => {
+    dragIdx.current = idx;
+  };
+
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    if (dragIdx.current === null || dragIdx.current === idx) return;
+    const n = [...items];
+    const [moved] = n.splice(dragIdx.current, 1);
+    n.splice(idx, 0, moved);
+    dragIdx.current = idx;
+    setItems(n);
+  };
+
+  const handleDragEnd = () => {
+    dragIdx.current = null;
+  };
+
+  const handleAdd = () => {
+    setItems([...items, { question: "سؤال جديد", answer: "الإجابة هنا" }]);
+  };
+
+  const handleDelete = (idx: number) => {
+    setItems(items.filter((_, i) => i !== idx));
+  };
+
   return (
     <section id="faq">
-      <ContentCard title="الأسئلة الشائعة" subtitle="6 أسئلة وأجوبة شائعة">
+      <ContentCard title="الأسئلة الشائعة" subtitle={`${items.length} سؤال وجواب`}>
         <div className="space-y-4">
           {items.map((item, idx) => (
-            <div key={idx} className="rounded-lg border border-[#e8edf5] p-4 bg-[#fafbfc]">
+            <div
+              key={idx}
+              draggable
+              onDragStart={() => handleDragStart(idx)}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDragEnd={handleDragEnd}
+              className="rounded-lg border border-[#e8edf5] p-4 bg-[#fafbfc]"
+            >
               <div className="flex items-center gap-2 mb-3">
+                <button
+                  type="button"
+                  className="cursor-grab active:cursor-grabbing touch-none"
+                  title="سحب لإعادة الترتيب"
+                >
+                  <GripVertical className="w-3.5 h-3.5 text-[#6b7a94]" />
+                </button>
                 <Badge variant="outline" className="text-[10px]">#{idx + 1}</Badge>
                 <span className="text-sm font-bold text-[#0c2954]">سؤال {idx + 1}</span>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(idx)}
+                  className="mr-auto w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 transition-colors"
+                  title="حذف السؤال"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-red-400 hover:text-red-600" />
+                </button>
               </div>
-              <Input label="السؤال" value={item.question} onChange={(e) => { const n = [...items]; n[idx] = { ...n[idx], question: e.target.value }; setItems(n); }} />
-              <Textarea label="الإجابة" value={item.answer} onChange={(e) => { const n = [...items]; n[idx] = { ...n[idx], answer: e.target.value }; setItems(n); }} rows={4} />
+              <Input
+                label="السؤال"
+                value={item.question}
+                onChange={(e) => {
+                  const n = [...items];
+                  n[idx] = { ...n[idx], question: e.target.value };
+                  setItems(n);
+                }}
+              />
+              <Textarea
+                label="الإجابة"
+                value={item.answer}
+                onChange={(e) => {
+                  const n = [...items];
+                  n[idx] = { ...n[idx], answer: e.target.value };
+                  setItems(n);
+                }}
+                rows={4}
+              />
             </div>
           ))}
         </div>
+
+        <button
+          type="button"
+          onClick={handleAdd}
+          className="mt-4 w-full py-3 rounded-xl border-2 border-dashed border-[#e8edf5] text-sm text-[#6b7a94] hover:border-[#0c2954]/30 hover:text-[#0c2954] hover:bg-[#f5f6f9] transition-colors flex items-center justify-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          إضافة سؤال جديد
+        </button>
+
         <div className="mt-5 flex justify-end">
           <DashboardButton disabled={saving} onClick={() => onSave(items)}>
             {saving ? "جاري الحفظ..." : "حفظ التغييرات"}

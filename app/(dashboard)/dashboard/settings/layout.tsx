@@ -9,6 +9,9 @@ const TABS = [
   { href: "/dashboard/settings/footer", label: "تذييل الموقع" },
   { href: "/dashboard/settings/social", label: "وسائل التواصل" },
   { href: "/dashboard/settings/apps", label: "روابط التطبيق" },
+  { href: "/dashboard/settings/contact", label: "معلومات الاتصال" },
+  { href: "/dashboard/settings/platform", label: "روابط المنصة" },
+  { href: "/dashboard/settings/hours", label: "ساعات العمل" },
 ];
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {

@@ -20,6 +20,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 interface GridFeature {
   icon: React.ElementType;
   iconName: string;
+  iconUrl?: string | null;
   title: string;
   description: string;
   iconBg: string;
@@ -27,18 +28,19 @@ interface GridFeature {
 }
 
 const DEFAULT_FEATURES: GridFeature[] = [
-  { icon: Bell, iconName: "Bell", title: "إشعارات لحظية", description: "عند كل تحديث للمراحل", iconBg: "#e9f9f0", iconColor: "#1a9a5a" },
-  { icon: Globe, iconName: "Globe", title: "صفحات هبوط", description: "برابط خاص لكل مشروع", iconBg: "#eef2ff", iconColor: "#4f46e5" },
-  { icon: Users, iconName: "Users", title: "نظام CRM", description: "إدارة العملاء والمبيعات", iconBg: "#f0f4ff", iconColor: "#2d2e83" },
-  { icon: Smartphone, iconName: "Smartphone", title: "تطبيق مخصص", description: "iOS و Android للعملاء", iconBg: "#fff7ed", iconColor: "#f97316" },
-  { icon: ImageIcon, iconName: "ImageIcon", title: "صور وفيديو", description: "توثيق المراحل من الموقع", iconBg: "#fdf2f8", iconColor: "#ec4899" },
-  { icon: Cloud, iconName: "Cloud", title: "سحابي 100%", description: "بدون تثبيت أو خوادم", iconBg: "#e7fafd", iconColor: "#06b6d4" },
-  { icon: LayoutGrid, iconName: "LayoutGrid", title: "مشاريع متعددة", description: "فيلات، شقق، تجاري", iconBg: "#f3eefe", iconColor: "#8b5cf6" },
-  { icon: MessageCircle, iconName: "MessageCircle", title: "دعم فني 7/24", description: "واتساب أو بريد إلكتروني", iconBg: "#fff8e8", iconColor: "#f59e0b" },
+  { icon: Bell, iconName: "Bell", iconUrl: null, title: "إشعارات لحظية", description: "عند كل تحديث للمراحل", iconBg: "#e9f9f0", iconColor: "#1a9a5a" },
+  { icon: Globe, iconName: "Globe", iconUrl: null, title: "صفحات هبوط", description: "برابط خاص لكل مشروع", iconBg: "#eef2ff", iconColor: "#4f46e5" },
+  { icon: Users, iconName: "Users", iconUrl: null, title: "نظام CRM", description: "إدارة العملاء والمبيعات", iconBg: "#f0f4ff", iconColor: "#2d2e83" },
+  { icon: Smartphone, iconName: "Smartphone", iconUrl: null, title: "تطبيق مخصص", description: "iOS و Android للعملاء", iconBg: "#fff7ed", iconColor: "#f97316" },
+  { icon: ImageIcon, iconName: "ImageIcon", iconUrl: null, title: "صور وفيديو", description: "توثيق المراحل من الموقع", iconBg: "#fdf2f8", iconColor: "#ec4899" },
+  { icon: Cloud, iconName: "Cloud", iconUrl: null, title: "سحابي 100%", description: "بدون تثبيت أو خوادم", iconBg: "#e7fafd", iconColor: "#06b6d4" },
+  { icon: LayoutGrid, iconName: "LayoutGrid", iconUrl: null, title: "مشاريع متعددة", description: "فيلات، شقق، تجاري", iconBg: "#f3eefe", iconColor: "#8b5cf6" },
+  { icon: MessageCircle, iconName: "MessageCircle", iconUrl: null, title: "دعم فني 7/24", description: "واتساب أو بريد إلكتروني", iconBg: "#fff8e8", iconColor: "#f59e0b" },
 ];
 
 interface BentoFeatureData {
   iconName: string;
+  iconUrl?: string | null;
   title: string;
   description: string;
   iconBg: string;
@@ -54,6 +56,7 @@ function resolveFeatures(input?: BentoFeatureData[]): GridFeature[] {
   return input.map((f) => ({
     icon: ICON_MAP[f.iconName] || LayoutGrid,
     iconName: f.iconName,
+    iconUrl: f.iconUrl,
     title: f.title,
     description: f.description,
     iconBg: f.iconBg,
@@ -129,11 +132,19 @@ export function FeaturesGrid({ features: featureData }: FeaturesGridProps) {
                     className="w-12 h-12 rounded-[13px] flex items-center justify-center mb-3.5"
                     style={{ backgroundColor: feat.iconBg }}
                   >
-                    <Icon
-                      className="w-5 h-5"
-                      strokeWidth={1.8}
-                      style={{ color: feat.iconColor }}
-                    />
+                    {feat.iconUrl ? (
+                      <img
+                        src={feat.iconUrl}
+                        alt=""
+                        className="w-5 h-5 object-contain"
+                      />
+                    ) : (
+                      <Icon
+                        className="w-5 h-5"
+                        strokeWidth={1.8}
+                        style={{ color: feat.iconColor }}
+                      />
+                    )}
                   </div>
                   <h3 className="text-[14px] font-bold text-text mb-1.5">
                     {feat.title}

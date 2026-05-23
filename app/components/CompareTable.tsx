@@ -1,14 +1,14 @@
-import { CompareRowData, CompareSection, CompareRowItem } from "@/lib/plans-data";
+import { CompareTableData, CompareRow, CompareSectionRow, CompareFeatureRow } from "@/lib/plans-data";
 import { Section } from "@/app/components/Section";
 
 interface CompareTableProps {
   title: string;
   subtitle: string;
-  rows: CompareRowData[];
+  data: CompareTableData;
 }
 
-function isSection(row: CompareRowData): row is CompareSection {
-  return "section" in row;
+function isSectionRow(row: CompareRow): row is CompareSectionRow {
+  return row.type === "section";
 }
 
 function Cell({ value, isFeatured }: { value: string | null; isFeatured?: boolean }) {
@@ -28,18 +28,20 @@ function Cell({ value, isFeatured }: { value: string | null; isFeatured?: boolea
   return <td className={`val-cell ${isFeatured ? "featured-col" : ""}`}>{value}</td>;
 }
 
-function RowItem({ row }: { row: CompareRowItem }) {
+function RowItem({ row, columns }: { row: CompareFeatureRow; columns: CompareTableData["columns"] }) {
   return (
     <tr>
       <td>{row.label}</td>
-      <Cell value={row.free} />
-      <Cell value={row.advanced} />
-      <Cell value={row.featured} isFeatured />
+      {columns.map((col, cidx) => (
+        <Cell key={col.id} value={row.values[col.id] ?? null} isFeatured={cidx === columns.length - 1} />
+      ))}
     </tr>
   );
 }
 
-export function CompareTable({ title, subtitle, rows }: CompareTableProps) {
+export function CompareTable({ title, subtitle, data }: CompareTableProps) {
+  const { featureLabel, columns, rows } = data;
+
   return (
     <Section className="bg-white">
       <div className="max-w-[1000px] mx-auto">
@@ -51,20 +53,22 @@ export function CompareTable({ title, subtitle, rows }: CompareTableProps) {
         <table className="compare-table">
           <thead>
             <tr>
-              <th className="feat-col">الميزة</th>
-              <th className="plan-col">المجانية</th>
-              <th className="plan-col">المتقدمة</th>
-              <th className="plan-col plan-featured">المميزة</th>
+              <th className="feat-col">{featureLabel}</th>
+              {columns.map((col, cidx) => (
+                <th key={col.id} className={`plan-col ${cidx === columns.length - 1 ? "plan-featured" : ""}`}>
+                  {col.label}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {rows.map((row, i) =>
-              isSection(row) ? (
+              isSectionRow(row) ? (
                 <tr key={i} className="section-row">
-                  <td colSpan={4}>{row.section}</td>
+                  <td colSpan={columns.length + 1}>{row.label}</td>
                 </tr>
               ) : (
-                <RowItem key={i} row={row} />
+                <RowItem key={i} row={row} columns={columns} />
               )
             )}
           </tbody>

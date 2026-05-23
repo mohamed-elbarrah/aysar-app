@@ -50,6 +50,7 @@ model ContactPage {
   inquiryOptions Json     @default("[]") @map("inquiry_options")
   successMessage String   @default("") @map("success_message")
   formFields     Json     @default("{}") @map("form_fields")
+  formConfig     Json     @default("{}") @map("form_config")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
   @@map("contact_page")
@@ -72,9 +73,12 @@ model SiteSettings {
   faviconUrl       String?  @map("favicon_url")
   seoKeywords      String   @default("") @map("seo_keywords")
   navLinks         Json     @default("[]") @map("nav_links")
-  socialLinks      Json     @default("{}") @map("social_links")
+  socialLinks      Json     @default("[]") @map("social_links")
   appLinks         Json     @default("{}") @map("app_links")
   footerColumns    Json     @default("[]") @map("footer_columns")
+  contactInfo      Json     @default("{}") @map("contact_info")
+  platformLinks    Json     @default("{}") @map("platform_links")
+  workHours        Json     @default("{}") @map("work_hours")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
   @@map("site_settings")

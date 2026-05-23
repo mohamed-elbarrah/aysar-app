@@ -3,11 +3,24 @@
 import { useState } from "react";
 import { Input, Select, Textarea } from "@/app/components/ui/Input";
 import type { InquiryOption } from "@/lib/contact-data";
+import type { FormFieldConfig } from "@/app/lib/form-fields-data";
+import { ThirdPartyForm } from "@/app/components/ThirdPartyForm";
 
 interface ContactFormProps {
   inquiryOptions: InquiryOption[];
   successMessage: string;
+  formFields: FormFieldConfig[];
+  thirdPartyFormScript?: string;
+  formReplaced?: boolean;
 }
+
+const API_KEY_MAP: Record<string, string> = {
+  name: "fullName",
+  phone: "phone",
+  email: "email",
+  type: "inquiry",
+  message: "message",
+};
 
 function SuccessState({ message }: { message: string }) {
   return (
@@ -23,32 +36,23 @@ function SuccessState({ message }: { message: string }) {
   );
 }
 
-interface FormState {
-  name: string;
-  phone: string;
-  email: string;
-  type: string;
-  message: string;
-}
+export function ContactForm({ inquiryOptions, successMessage, formFields, thirdPartyFormScript, formReplaced }: ContactFormProps) {
+  const enabledFields = formFields.filter((f) => f.enabled);
 
-export function ContactForm({ inquiryOptions, successMessage }: ContactFormProps) {
-  const [form, setForm] = useState<FormState>({
-    name: "",
-    phone: "",
-    email: "",
-    type: "",
-    message: "",
-  });
+  const initialForm = Object.fromEntries(enabledFields.map((f) => [f.key, ""]));
+
+  const [form, setForm] = useState<Record<string, string>>(initialForm);
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   function validate(): boolean {
     const newErrors: Record<string, boolean> = {};
-    if (!form.name.trim()) newErrors.name = true;
-    if (!form.phone.trim()) newErrors.phone = true;
-    if (!form.type) newErrors.type = true;
-    if (!form.message.trim()) newErrors.message = true;
+    for (const field of enabledFields) {
+      if (field.required && !form[field.key]?.trim()) {
+        newErrors[field.key] = true;
+      }
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -59,30 +63,40 @@ export function ContactForm({ inquiryOptions, successMessage }: ContactFormProps
 
     setSubmitting(true);
     try {
+      const payload: Record<string, string> = {};
+      const extraParts: string[] = [];
+
+      for (const field of enabledFields) {
+        const val = form[field.key]?.trim() ?? "";
+        const apiField = API_KEY_MAP[field.key];
+        if (apiField) {
+          payload[apiField] = val;
+        } else if (val) {
+          extraParts.push(`${field.label}: ${val}`);
+        }
+      }
+
+      if (extraParts.length > 0) {
+        payload.message = (payload.message ? payload.message + "\n\n" : "") + extraParts.join("\n");
+      }
+
       const res = await fetch("/api/contact-messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: form.name,
-          phone: form.phone,
-          email: form.email,
-          inquiry: form.type,
-          message: form.message,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         setSubmitted(true);
       }
     } catch {
-      // continue — show success even if API fails
       setSubmitted(true);
     } finally {
       setSubmitting(false);
     }
   }
 
-  function set<K extends keyof FormState>(key: K, value: FormState[K]) {
+  function setValue(key: string, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
     if (errors[key]) {
       setErrors((prev) => {
@@ -91,6 +105,80 @@ export function ContactForm({ inquiryOptions, successMessage }: ContactFormProps
         return next;
       });
     }
+  }
+
+  function renderField(field: FormFieldConfig) {
+    if (field.type === "select") {
+      return (
+        <Select
+          key={field.key}
+          label={field.label}
+          required={field.required}
+          value={form[field.key] ?? ""}
+          onChange={(e) => setValue(field.key, e.target.value)}
+        >
+          {inquiryOptions.map((opt) => (
+            <option key={opt.value} value={opt.value} disabled={opt.value === ""}>
+              {opt.label}
+            </option>
+          ))}
+        </Select>
+      );
+    }
+
+    if (field.type === "textarea") {
+      return (
+        <Textarea
+          key={field.key}
+          label={field.label}
+          placeholder={field.placeholder || undefined}
+          required={field.required}
+          value={form[field.key] ?? ""}
+          error={errors[field.key]}
+          onChange={(e) => setValue(field.key, e.target.value)}
+          rows={4}
+        />
+      );
+    }
+
+    return (
+      <Input
+        key={field.key}
+        label={field.label}
+        placeholder={field.placeholder || undefined}
+        required={field.required}
+        type={field.type === "tel" ? "tel" : field.type === "email" ? "email" : "text"}
+        value={form[field.key] ?? ""}
+        error={errors[field.key]}
+        onChange={(e) => setValue(field.key, e.target.value)}
+      />
+    );
+  }
+
+  function isTextLike(f: FormFieldConfig) {
+    return f.type === "text" || f.type === "tel" || f.type === "email";
+  }
+
+  function renderFields() {
+    const rows: React.ReactNode[] = [];
+    let i = 0;
+    while (i < enabledFields.length) {
+      const cur = enabledFields[i];
+      const next = enabledFields[i + 1];
+      if (next && isTextLike(cur) && isTextLike(next)) {
+        rows.push(
+          <div key={`pair-${i}`} className="form-grid-2">
+            {renderField(cur)}
+            {renderField(next)}
+          </div>
+        );
+        i += 2;
+      } else {
+        rows.push(<div key={cur.key} className="form-grid-single">{renderField(cur)}</div>);
+        i += 1;
+      }
+    }
+    return rows;
   }
 
   if (submitted) {
@@ -108,68 +196,24 @@ export function ContactForm({ inquiryOptions, successMessage }: ContactFormProps
         سيتم التواصل معك خلال 24 ساعة من فريقنا المتخصص.
       </div>
 
-      <form onSubmit={handleSubmit} noValidate>
-        <div className="form-grid-2">
-          <Input
-            label="الاسم الكامل"
-            placeholder="محمد العمري"
-            required
-            value={form.name}
-            error={errors.name}
-            onChange={(e) => set("name", e.target.value)}
-          />
-          <Input
-            label="رقم الجوال"
-            placeholder="05XXXXXXXX"
-            required
-            type="tel"
-            value={form.phone}
-            error={errors.phone}
-            onChange={(e) => set("phone", e.target.value)}
-          />
-        </div>
+      {formReplaced && thirdPartyFormScript ? (
+        <ThirdPartyForm scriptHtml={thirdPartyFormScript} />
+      ) : (
+        <form onSubmit={handleSubmit} noValidate>
+          {renderFields()}
 
-        <Input
-          label="البريد الإلكتروني"
-          placeholder="example@email.com"
-          type="email"
-          value={form.email}
-          onChange={(e) => set("email", e.target.value)}
-        />
+          <button type="submit" className="btn-submit-contact" disabled={submitting}>
+            {submitting ? "جاري الإرسال..." : "إرسال الرسالة"}
+          </button>
 
-        <Select
-          label="نوع الاستفسار"
-          required
-          value={form.type}
-          onChange={(e) => set("type", e.target.value)}
-        >
-          {inquiryOptions.map((opt) => (
-            <option key={opt.value} value={opt.value} disabled={opt.value === ""}>
-              {opt.label}
-            </option>
-          ))}
-        </Select>
-
-        <Textarea
-          label="رسالتك"
-          placeholder="اكتب رسالتك هنا..."
-          required
-          value={form.message}
-          error={errors.message}
-          onChange={(e) => set("message", e.target.value)}
-        />
-
-        <button type="submit" className="btn-submit-contact" disabled={submitting}>
-          {submitting ? "جاري الإرسال..." : "إرسال الرسالة"}
-        </button>
-
-        <div className="text-[12px] text-muted text-center mt-3">
-          بإرسال الرسالة، أنت توافق على{" "}
-          <a href="https://www.aysar.sa/privacy-policy" className="text-indigo no-underline">
-            سياسة الخصوصية
-          </a>
-        </div>
-      </form>
+          <div className="text-[12px] text-muted text-center mt-3">
+            بإرسال الرسالة، أنت توافق على{" "}
+            <a href="https://www.aysar.sa/privacy-policy" className="text-indigo no-underline">
+              سياسة الخصوصية
+            </a>
+          </div>
+        </form>
+      )}
     </div>
   );
 }

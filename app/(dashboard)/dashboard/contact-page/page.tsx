@@ -5,11 +5,14 @@ import { Input, Textarea } from "@/app/components/ui/Input";
 import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
+import { CodeEditor } from "@/app/components/dashboard/CodeEditor";
 import { DynamicList } from "@/app/components/dashboard/DynamicList";
-import { CONTACT_HERO, CONTACT_INFO, CHANNELS } from "@/app/lib/dashboard/placeholders";
+import { CONTACT_HERO, CONTACT_PAGE_INFO, CHANNELS } from "@/app/lib/dashboard/placeholders";
 import { INQUIRY_OPTIONS } from "@/lib/contact-data";
+import { FORM_FIELDS_DEFAULTS, CONTACT_FORM_DEFAULTS } from "@/app/lib/form-fields-data";
 import type { Channel, InquiryType } from "@/lib/contact-data";
-import { ScrollText, ChevronUp, Loader2 } from "lucide-react";
+import type { FormFieldConfig } from "@/app/lib/form-fields-data";
+import { ScrollText, ChevronUp, Loader2, Plus, Trash2, GripVertical } from "lucide-react";
 
 const sections = [
   { id: "banner", label: "البانر" },
@@ -19,20 +22,24 @@ const sections = [
 
 interface ContactSectionData {
   hero: typeof CONTACT_HERO;
-  contactInfo: typeof CONTACT_INFO;
+  contactInfo: typeof CONTACT_PAGE_INFO;
   channels: typeof CHANNELS;
   inquiryOptions: typeof INQUIRY_OPTIONS;
   successMessage: string;
-  formFields: { name: boolean; phone: boolean; email: boolean; type: boolean; message: boolean };
+  formFields: FormFieldConfig[];
+  thirdPartyFormScript: string;
+  formReplaced: boolean;
 }
 
 const DEFAULTS: ContactSectionData = {
   hero: CONTACT_HERO,
-  contactInfo: CONTACT_INFO,
+  contactInfo: CONTACT_PAGE_INFO,
   channels: CHANNELS,
   inquiryOptions: INQUIRY_OPTIONS,
   successMessage: "تم إرسال رسالتك بنجاح! سنتواصل معك خلال 24 ساعة.",
-  formFields: { name: true, phone: true, email: true, type: true, message: true },
+  formFields: FORM_FIELDS_DEFAULTS,
+  thirdPartyFormScript: CONTACT_FORM_DEFAULTS.thirdPartyFormScript,
+  formReplaced: CONTACT_FORM_DEFAULTS.formReplaced,
 };
 
 async function saveSection(section: string, data: unknown): Promise<boolean> {
@@ -65,13 +72,16 @@ export default function ContactPageEditor() {
         const json = await res.json();
         if (json.success && json.data) {
           const d = json.data;
+          const fc = d.formConfig as Record<string, unknown> | undefined;
           setData({
             hero: d.hero || DEFAULTS.hero,
             contactInfo: d.contactInfo || DEFAULTS.contactInfo,
             channels: d.channels || DEFAULTS.channels,
             inquiryOptions: d.inquiryOptions || DEFAULTS.inquiryOptions,
             successMessage: d.successMessage || DEFAULTS.successMessage,
-            formFields: d.formFields || DEFAULTS.formFields,
+            formFields: Array.isArray(d.formFields) ? d.formFields : DEFAULTS.formFields,
+            thirdPartyFormScript: (fc?.thirdPartyFormScript as string) ?? DEFAULTS.thirdPartyFormScript,
+            formReplaced: (fc?.formReplaced as boolean) ?? DEFAULTS.formReplaced,
           });
         }
       } catch {
@@ -102,6 +112,7 @@ export default function ContactPageEditor() {
   }, []);
 
   const scrollTo = (id: string) => {
+    setActiveSection(id);
     const el = document.getElementById(id);
     if (el && pageRef.current) {
       pageRef.current.scrollTo({ top: el.offsetTop - 16, behavior: "smooth" });
@@ -159,22 +170,18 @@ export default function ContactPageEditor() {
     </div>
   );
 
-  async function handleFormSave(formData: { inquiryOptions: typeof INQUIRY_OPTIONS; successMessage: string; formFields: typeof DEFAULTS.formFields }) {
+  async function handleFormSave(formData: { inquiryOptions: typeof INQUIRY_OPTIONS; successMessage: string; formFields: FormFieldConfig[]; thirdPartyFormScript: string; formReplaced: boolean }) {
     setSaving("form");
-    const [a, b] = await Promise.all([
-      saveSection("inquiryOptions", formData.inquiryOptions),
-      saveSection("successMessage", formData.successMessage),
-      saveSection("formFields", formData.formFields),
-    ]);
     await saveSection("inquiryOptions", formData.inquiryOptions);
     await saveSection("successMessage", formData.successMessage);
     await saveSection("formFields", formData.formFields);
+    await saveSection("formConfig", { thirdPartyFormScript: formData.thirdPartyFormScript, formReplaced: formData.formReplaced });
     setSaving(null);
     setLastSaved(new Date().toLocaleTimeString("ar-SA"));
     setTimeout(() => setLastSaved(undefined), 5000);
   }
 
-  async function handleChannelsSave(chData: { channels: Channel[]; contactInfo: typeof CONTACT_INFO }) {
+  async function handleChannelsSave(chData: { channels: Channel[]; contactInfo: typeof CONTACT_PAGE_INFO }) {
     setSaving("channels");
     await saveSection("channels", chData.channels);
     await saveSection("contactInfo", chData.contactInfo);
@@ -205,33 +212,164 @@ function BannerSection({ data: initial, saving, onSave }: { data: typeof CONTACT
   );
 }
 
-function FormSection({ data, saving, onSave }: { data: ContactSectionData; saving: boolean; onSave: (d: { inquiryOptions: typeof INQUIRY_OPTIONS; successMessage: string; formFields: typeof DEFAULTS.formFields }) => void }) {
+function FormSection({ data, saving, onSave }: { data: ContactSectionData; saving: boolean; onSave: (d: { inquiryOptions: typeof INQUIRY_OPTIONS; successMessage: string; formFields: FormFieldConfig[]; thirdPartyFormScript: string; formReplaced: boolean }) => void }) {
   const [inquiryTypes, setInquiryTypes] = useState(data.inquiryOptions.filter((o) => o.value !== ""));
   const [successMessage, setSuccessMessage] = useState(data.successMessage);
-  const [fields, setFields] = useState(data.formFields);
+  const [fields, setFields] = useState<FormFieldConfig[]>(data.formFields);
+  const [scriptCode, setScriptCode] = useState(data.thirdPartyFormScript ?? "");
+  const [scriptReplaced, setScriptReplaced] = useState(data.formReplaced ?? false);
+  const dragIdx = useRef<number | null>(null);
+
+  const handleDragStart = (idx: number) => { dragIdx.current = idx; };
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    if (dragIdx.current === null || dragIdx.current === idx) return;
+    const n = [...fields];
+    const [moved] = n.splice(dragIdx.current, 1);
+    n.splice(idx, 0, moved);
+    dragIdx.current = idx;
+    setFields(n);
+  };
+  const handleDragEnd = () => { dragIdx.current = null; };
+
+  const updateField = (idx: number, patch: Partial<FormFieldConfig>) => {
+    const n = [...fields];
+    n[idx] = { ...n[idx], ...patch };
+    setFields(n);
+  };
+
+  const handleAdd = () => {
+    const idx = fields.length;
+    setFields([
+      ...fields,
+      {
+        key: `custom_${Date.now()}`,
+        label: `حقل مخصص ${idx + 1}`,
+        placeholder: "",
+        type: "text",
+        required: false,
+        enabled: true,
+      },
+    ]);
+  };
+
+  const handleDelete = (idx: number) => {
+    setFields(fields.filter((_, i) => i !== idx));
+  };
 
   return (
     <section id="form">
       <ContentCard title="نموذج التواصل" subtitle="إعدادات نموذج الاتصال">
         <div className="space-y-5">
+
           <div>
-            <p className="text-xs font-semibold text-[#3a4a60] mb-2">الحقول المفعلة</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {Object.entries(fields).map(([key, val]) => (
-                <label key={key} className="flex items-center gap-2 text-sm"><Checkbox checked={val} onCheckedChange={(v) => setFields({ ...fields, [key]: !!v })} />
-                  {key === "name" && "الاسم"}{key === "phone" && "الجوال"}{key === "email" && "البريد"}{key === "type" && "نوع الاستفسار"}{key === "message" && "الرسالة"}
-                </label>
+            <p className="text-xs font-semibold text-[#3a4a60] mb-3">الحقول المخصصة <span className="text-[#6b7a94] font-normal">({fields.length} حقول)</span></p>
+            <div className="space-y-3">
+              {fields.map((field, idx) => (
+                <div
+                  key={field.key}
+                  draggable
+                  onDragStart={() => handleDragStart(idx)}
+                  onDragOver={(e) => handleDragOver(e, idx)}
+                  onDragEnd={handleDragEnd}
+                  className="rounded-lg border border-[#e8edf5] p-4 bg-[#fafbfc]"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <button type="button" className="cursor-grab active:cursor-grabbing touch-none" title="سحب لإعادة الترتيب">
+                      <GripVertical className="w-3.5 h-3.5 text-[#6b7a94]" />
+                    </button>
+                    <span className="rounded bg-[#0c2954]/5 px-2 py-0.5 text-[10px] font-mono text-[#0c2954]">{field.key}</span>
+                    <span className="text-sm font-bold text-[#0c2954]">{field.label || `حقل ${idx + 1}`}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(idx)}
+                      className="mr-auto w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 transition-colors"
+                      title="حذف الحقل"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-red-400 hover:text-red-600" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <Input label="التسمية" value={field.label} onChange={(e) => updateField(idx, { label: e.target.value })} />
+                    <Input label="النص التوجيهي" value={field.placeholder} onChange={(e) => updateField(idx, { placeholder: e.target.value })} />
+                    <div className="flex items-end gap-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Checkbox
+                          id={`req-${field.key}`}
+                          checked={field.required}
+                          onCheckedChange={(v) => updateField(idx, { required: !!v })}
+                        />
+                        <label htmlFor={`req-${field.key}`} className="text-xs text-[#3a4a60] cursor-pointer">مطلوب</label>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Checkbox
+                          id={`enb-${field.key}`}
+                          checked={field.enabled}
+                          onCheckedChange={(v) => updateField(idx, { enabled: !!v })}
+                        />
+                        <label htmlFor={`enb-${field.key}`} className="text-xs text-[#3a4a60] cursor-pointer">مفعل</label>
+                      </div>
+                      <div className="flex-1">
+                        <select
+                          value={field.type}
+                          onChange={(e) => updateField(idx, { type: e.target.value as FormFieldConfig["type"] })}
+                          className="w-full h-9 px-2 rounded-lg border border-[#e8edf5] text-xs text-[#0c2954] bg-white"
+                        >
+                          <option value="text">نص</option>
+                          <option value="tel">هاتف</option>
+                          <option value="email">بريد</option>
+                          <option value="select">قائمة منسدلة</option>
+                          <option value="textarea">منطقة نص</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
+
+            <button
+              type="button"
+              onClick={handleAdd}
+              className="mt-3 w-full py-3 rounded-xl border-2 border-dashed border-[#e8edf5] text-sm text-[#6b7a94] hover:border-[#0c2954]/30 hover:text-[#0c2954] hover:bg-[#f5f6f9] transition-colors flex items-center justify-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              إضافة حقل جديد
+            </button>
           </div>
+
           <Textarea label="رسالة النجاح" value={successMessage} onChange={(e) => setSuccessMessage(e.target.value)} rows={2} />
+
           <div>
             <p className="text-xs font-semibold text-[#3a4a60] mb-2">أنواع الاستفسارات</p>
             <DynamicList items={inquiryTypes.map((o) => o.label)} onChange={(items) => { setInquiryTypes(items.map((label) => ({ value: "" as "" | InquiryType, label }))); }} />
           </div>
+
+          <div className="border-t border-[#e8edf5] pt-5">
+            <p className="text-xs font-semibold text-[#3a4a60] mb-1">نموذج طرف ثالث</p>
+            <p className="text-[11px] text-[#6b7a94] mb-3 leading-[1.6]">أضف كود النموذج من مزود خارجي (مثل زيتون). اتركه فارغًا لاستخدام النموذج الافتراضي.</p>
+            <div className="mb-2">
+              <p className="text-xs font-semibold text-[#3a4a60] mb-2">كود السكريبت</p>
+              <CodeEditor value={scriptCode} onChange={setScriptCode} />
+            </div>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <Checkbox
+                checked={scriptReplaced}
+                onCheckedChange={(v) => setScriptReplaced(!!v)}
+                disabled={!scriptCode.trim()}
+              />
+              <span className="text-xs text-[#3a4a60]">استبدال الحقول الافتراضية بهذا السكريبت</span>
+            </label>
+          </div>
         </div>
         <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave({ inquiryOptions: [{ value: "", label: "اختر نوع الاستفسار" }, ...inquiryTypes], successMessage, formFields: fields })}>
+          <DashboardButton disabled={saving} onClick={() => onSave({
+            inquiryOptions: [{ value: "", label: "اختر نوع الاستفسار" }, ...inquiryTypes],
+            successMessage,
+            formFields: fields,
+            thirdPartyFormScript: scriptCode,
+            formReplaced: scriptReplaced && !!scriptCode.trim(),
+          })}>
             {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
           </DashboardButton>
         </div>
@@ -240,7 +378,7 @@ function FormSection({ data, saving, onSave }: { data: ContactSectionData; savin
   );
 }
 
-function ChannelsSection({ data, saving, onSave }: { data: ContactSectionData; saving: boolean; onSave: (d: { channels: Channel[]; contactInfo: typeof CONTACT_INFO }) => void }) {
+function ChannelsSection({ data, saving, onSave }: { data: ContactSectionData; saving: boolean; onSave: (d: { channels: Channel[]; contactInfo: typeof CONTACT_PAGE_INFO }) => void }) {
   const [channels, setChannels] = useState<Channel[]>(data.channels);
   const [info, setInfo] = useState(data.contactInfo);
 

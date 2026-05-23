@@ -8,12 +8,17 @@ import { ContactForm } from "@/app/components/ContactForm";
 import { ChannelsGrid } from "@/app/components/ChannelsGrid";
 import CTASection from "@/app/sections/CTASection";
 import type { ContactPageResponse } from "@/app/lib/contact-page-data";
+import type { ContactInfo as SettingsContactInfo, SocialLink, WorkHours, PlatformLinks } from "@/app/lib/settings-data";
 
 interface Props {
   data: ContactPageResponse;
+  contactInfo: SettingsContactInfo;
+  socialLinks: SocialLink[];
+  workHours?: WorkHours;
+  platformLinks: PlatformLinks;
 }
 
-function ContactHero({ data }: Props) {
+function ContactHero({ data }: { data: ContactPageResponse }) {
   const { hero } = data;
   return (
     <section className="relative gradient-hero pt-[130px] pb-20 px-6 lg:px-10 text-center overflow-hidden noise-overlay">
@@ -34,26 +39,28 @@ function ContactHero({ data }: Props) {
   );
 }
 
-function ContactMain({ data }: Props) {
+function ContactMain({ data, contactInfo, socialLinks, workHours }: { data: ContactPageResponse; contactInfo: SettingsContactInfo; socialLinks: SocialLink[]; workHours?: WorkHours }) {
   return (
     <Section className="bg-[#f7f8fa]">
       <div className="contact-inner max-w-[1100px] mx-auto">
-        <ContactInfoCard contactInfo={data.contactInfo} />
-        <ContactForm inquiryOptions={data.inquiryOptions} successMessage={data.successMessage} />
+        <ContactInfoCard contactInfo={contactInfo} socialLinks={socialLinks} workHours={workHours} />
+        <ContactForm inquiryOptions={data.inquiryOptions} successMessage={data.successMessage} formFields={data.formFields} thirdPartyFormScript={data.thirdPartyFormScript} formReplaced={data.formReplaced} />
       </div>
     </Section>
   );
 }
 
-export default function ContactPageContent({ data }: Props) {
+export default function ContactPageContent({ data, contactInfo, socialLinks, workHours, platformLinks }: Props) {
   return (
     <>
       <ContactHero data={data} />
-      <ContactMain data={data} />
+      <ContactMain data={data} contactInfo={contactInfo} socialLinks={socialLinks} workHours={workHours} />
       <ChannelsGrid
         title="قنوات التواصل المباشر"
         subtitle="تواصل معنا عبر قناتك المفضلة — نحن دائماً هنا"
         channels={data.channels}
+        siteContactInfo={contactInfo}
+        sitePlatformLinks={platformLinks}
       />
       <CTASection
         variant="dark"
@@ -61,11 +68,11 @@ export default function ContactPageContent({ data }: Props) {
         subtitle="انضم لمطورين عقاريين يستخدمون أيسَر لتوفير الوقت ورفع مستوى تجربة عملائهم."
         primaryCta={{
           label: "ابدأ مجاناً الآن",
-          href: "https://platform.aysar.sa/ar/company/dashboard/register",
+          href: platformLinks.registerUrl,
         }}
         secondaryCta={{
           label: "تواصل على واتساب",
-          href: "http://wa.me/966125101107",
+          href: `https://wa.me/${contactInfo.whatsappNumber}`,
         }}
         note="لا بطاقة ائتمان · فريقنا يتواصل معك خلال 24 ساعة"
       />

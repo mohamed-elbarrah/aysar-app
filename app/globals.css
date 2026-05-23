@@ -81,6 +81,10 @@
     }
   }
 
+  .select-list {
+    background-color: white !important;
+  }
+
   .section-aysar {
     padding: var(--spacing-section) 40px;
   }
@@ -865,11 +869,13 @@
     justify-content: center;
     text-decoration: none;
     transition: all 0.15s;
+    color: var(--color-navy);
   }
 
   .soc-btn-contact:hover {
     background: var(--color-navy);
     border-color: var(--color-navy);
+    color: #fff;
   }
 
   .soc-btn-contact:hover img {
@@ -880,11 +886,6 @@
     width: 17px;
     height: 17px;
     object-fit: contain;
-  }
-
-  .soc-btn-contact.whatsapp {
-    background: #25d366;
-    border-color: transparent;
   }
 
   .soc-btn-contact.tiktok {
@@ -1138,29 +1139,24 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 64px 40px 80px;
-    display: grid;
-    grid-template-columns: 260px 1fr;
+    display: flex;
     gap: 48px;
-    align-items: start;
+    align-items: flex-start;
+  }
+
+  .policy-sidebar {
+    position: sticky;
+    top: 82px;
+    width: 260px;
+    flex-shrink: 0;
+    align-self: flex-start;
   }
 
   /* TOC sidebar */
   .toc {
-    transition: box-shadow 0.25s ease;
-  }
-
-  .toc.toc-sticky {
-    position: sticky;
-    top: 82px;
     box-shadow: 0 4px 20px rgba(12, 41, 84, 0.06);
     border-radius: 14px;
     padding: 0 0 4px;
-  }
-
-  .toc-sentinel {
-    height: 1px;
-    pointer-events: none;
-    opacity: 0;
   }
 
   .toc-progress-bar {
@@ -1287,6 +1283,7 @@
 
   /* Policy content body */
   .policy-body {
+    flex: 1;
     min-width: 0;
   }
 
@@ -1651,7 +1648,7 @@
     }
 
     .policy-content-wrap {
-      grid-template-columns: 1fr;
+      flex-direction: column;
       padding: 40px 24px 60px;
     }
 

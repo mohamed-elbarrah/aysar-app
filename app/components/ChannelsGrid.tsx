@@ -1,5 +1,6 @@
 import { Channel } from "@/lib/contact-data";
 import { Section } from "@/app/components/Section";
+import type { ContactInfo as SiteContactInfo, PlatformLinks } from "@/app/lib/settings-data";
 
 function ChannelIcon({ channel }: { channel: Channel }) {
   if (channel.id === "whatsapp") {
@@ -32,9 +33,11 @@ interface ChannelsGridProps {
   title: string;
   subtitle: string;
   channels: Channel[];
+  siteContactInfo?: SiteContactInfo;
+  sitePlatformLinks?: PlatformLinks;
 }
 
-export function ChannelsGrid({ title, subtitle, channels }: ChannelsGridProps) {
+export function ChannelsGrid({ title, subtitle, channels, siteContactInfo, sitePlatformLinks }: ChannelsGridProps) {
   return (
     <Section className="bg-white">
       <div className="max-w-[1100px] mx-auto">
@@ -46,27 +49,41 @@ export function ChannelsGrid({ title, subtitle, channels }: ChannelsGridProps) {
         </div>
 
         <div className="channels-grid-3">
-          {channels.map((channel) => (
-            <a
-              key={channel.id}
-              href={channel.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="channel-card"
-            >
-              <div className="channel-icon-box" style={{ background: channel.iconBg }}>
-                <ChannelIcon channel={channel} />
-              </div>
-              <div className="channel-name">{channel.name}</div>
-              <div className="channel-val">{channel.value}</div>
-              <span className="channel-action">
-                {channel.actionLabel}
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="mr-1">
-                  <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-            </a>
-          ))}
+          {channels.map((channel) => {
+            const channelHref = channel.id === "whatsapp" && siteContactInfo
+              ? `https://wa.me/${siteContactInfo.whatsappNumber}`
+              : channel.id === "help" && sitePlatformLinks
+                ? sitePlatformLinks.supportCenterUrl
+                : channel.href;
+
+            const channelValue = channel.id === "whatsapp" && siteContactInfo
+              ? `+${siteContactInfo.whatsappNumber}`
+              : channel.id === "help" && sitePlatformLinks?.supportCenterUrl
+                ? sitePlatformLinks.supportCenterUrl.replace("https://", "").replace(/\/$/, "")
+                : channel.value;
+
+            return (
+              <a
+                key={channel.id}
+                href={channelHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="channel-card"
+              >
+                <div className="channel-icon-box" style={{ background: channel.iconBg }}>
+                  <ChannelIcon channel={channel} />
+                </div>
+                <div className="channel-name">{channel.name}</div>
+                <div className="channel-val">{channelValue}</div>
+                <span className="channel-action">
+                  {channel.actionLabel}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="mr-1">
+                    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              </a>
+            );
+          })}
         </div>
       </div>
     </Section>

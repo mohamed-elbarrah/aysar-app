@@ -1,6 +1,7 @@
 import { prisma } from "@/app/lib/db";
 import { PLANS, COMPARE_ROWS, FAQ_ITEMS } from "@/lib/plans-data";
-import type { Plan, CompareRowData, FAQItem } from "@/lib/plans-data";
+import { isOldCompareFormat, migrateCompareRows } from "@/lib/plans-data";
+import type { Plan, CompareTableData, FAQItem } from "@/lib/plans-data";
 
 const PLANS_HERO_DEFAULTS = {
   badge: "الأسعار والباقات",
@@ -18,7 +19,7 @@ export interface PlansPageResponse {
     subtitle: string;
   };
   plans: Plan[];
-  compareRows: CompareRowData[];
+  compareRows: CompareTableData;
   faqItems: FAQItem[];
   updatedAt: string;
 }
@@ -31,17 +32,21 @@ export async function getPlansPageData(): Promise<PlansPageResponse> {
       id: "PLANS",
       hero: { ...PLANS_HERO_DEFAULTS },
       plans: [...PLANS],
-      compareRows: [...COMPARE_ROWS],
+      compareRows: { ...COMPARE_ROWS, rows: [...COMPARE_ROWS.rows], columns: [...COMPARE_ROWS.columns] },
       faqItems: [...FAQ_ITEMS],
       updatedAt: new Date().toISOString(),
     };
   }
 
+  const rawCompareRows = page.compareRows as unknown;
+
   return {
     id: page.id,
     hero: page.hero as PlansPageResponse["hero"],
     plans: page.plans as unknown as PlansPageResponse["plans"],
-    compareRows: page.compareRows as unknown as PlansPageResponse["compareRows"],
+    compareRows: isOldCompareFormat(rawCompareRows)
+      ? migrateCompareRows(rawCompareRows)
+      : (rawCompareRows as CompareTableData),
     faqItems: page.faqItems as unknown as PlansPageResponse["faqItems"],
     updatedAt: page.updatedAt.toISOString(),
   };

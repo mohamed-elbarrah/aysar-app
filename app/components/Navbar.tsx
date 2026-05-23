@@ -10,7 +10,13 @@ interface NavLinkItem {
   href: string;
 }
 
-export default function Navbar({ navLinks }: { navLinks: NavLinkItem[] }) {
+interface PlatformLinks {
+  loginUrl: string;
+  registerUrl: string;
+  supportCenterUrl: string;
+}
+
+export default function Navbar({ navLinks, platformLinks }: { navLinks: NavLinkItem[]; platformLinks: PlatformLinks }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -47,7 +53,7 @@ export default function Navbar({ navLinks }: { navLinks: NavLinkItem[] }) {
           />
         </Link>
 
-        <ul className="hidden md:flex items-center gap-1 mr-auto">
+        <ul className="max-md:hidden md:flex items-center gap-1 mr-auto">
           {navLinks.map((link) => {
             const active = pathname === link.href;
             return (
@@ -68,9 +74,9 @@ export default function Navbar({ navLinks }: { navLinks: NavLinkItem[] }) {
           })}
         </ul>
 
-        <div className="hidden md:flex items-center gap-2">
+        <div className="max-md:hidden md:flex items-center gap-2">
           <a
-            href="https://platform.aysar.sa/"
+            href={platformLinks.loginUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-ghost-nav text-white/70 border border-white/18 hover:bg-white/10 hover:text-white"
@@ -78,7 +84,7 @@ export default function Navbar({ navLinks }: { navLinks: NavLinkItem[] }) {
             تسجيل دخول
           </a>
           <a
-            href="https://platform.aysar.sa/ar/company/dashboard/register"
+            href={platformLinks.registerUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-solid-nav bg-white text-[#0c2954] hover:opacity-90"
@@ -123,7 +129,7 @@ export default function Navbar({ navLinks }: { navLinks: NavLinkItem[] }) {
             </Link>
           ))}
           <a
-            href="https://platform.aysar.sa/"
+            href={platformLinks.loginUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-ghost-nav text-[#0c2954] border border-[#e8edf5] hover:bg-[#f7f8fa] justify-center mt-2"
@@ -131,7 +137,7 @@ export default function Navbar({ navLinks }: { navLinks: NavLinkItem[] }) {
             تسجيل دخول
           </a>
           <a
-            href="https://platform.aysar.sa/ar/company/dashboard/register"
+            href={platformLinks.registerUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-solid-nav bg-[#0c2954] text-white hover:opacity-88 justify-center"

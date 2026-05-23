@@ -1,5 +1,6 @@
 import PlansPageContent from "./PlansPageContent";
 import { getPlansPageData } from "@/app/lib/plans-page-data";
+import { getSiteSettings } from "@/app/lib/settings-data";
 
 export const metadata = {
   title: "الباقات والأسعار — أيسَر",
@@ -8,6 +9,15 @@ export const metadata = {
 };
 
 export default async function PlansPage() {
-  const data = await getPlansPageData();
-  return <PlansPageContent data={data} />;
+  const [data, settings] = await Promise.all([
+    getPlansPageData(),
+    getSiteSettings(),
+  ]);
+  return (
+    <PlansPageContent
+      data={data}
+      platformLinks={settings.platformLinks}
+      contactInfo={settings.contactInfo}
+    />
+  );
 }

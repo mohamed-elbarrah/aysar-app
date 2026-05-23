@@ -35,6 +35,7 @@ export const contactPageUpdateSchema = z.object({
   hero: jsonValueSchema.optional(), contactInfo: jsonValueSchema.optional(),
   channels: jsonValueSchema.optional(), inquiryOptions: jsonValueSchema.optional(),
   successMessage: z.string().optional(), formFields: jsonValueSchema.optional(),
+  formConfig: jsonValueSchema.optional(),
 });
 
 export const contactMessageSubmitSchema = z.object({

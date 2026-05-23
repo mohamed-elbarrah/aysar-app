@@ -11,11 +11,14 @@ import {
   HOME_HERO,
   FEATURE_SECTIONS,
   BENTO_FEATURES,
+  BentoFeature,
   PROJECT_OVERVIEW,
   APP_SECTION,
   CTA_SECTION,
 } from "@/app/lib/dashboard/placeholders";
-import { ScrollText, ChevronUp, Loader2 } from "lucide-react";
+import { ScrollText, ChevronUp, Loader2, Plus, Trash2 } from "lucide-react";
+import { IconPicker } from "@/app/components/dashboard/IconPicker";
+import { IconPreview } from "@/app/components/dashboard/IconPreview";
 
 const sections = [
   { id: "banner", label: "البانر الرئيسي" },
@@ -111,6 +114,7 @@ export default function HomePageEditor() {
   }, []);
 
   const scrollTo = (id: string) => {
+    setActiveSection(id);
     const el = document.getElementById(id);
     if (el && pageRef.current) {
       pageRef.current.scrollTo({ top: el.offsetTop - 16, behavior: "smooth" });
@@ -249,22 +253,81 @@ function FeaturesSection({ data: initial, saving, onSave }: { data: typeof FEATU
   );
 }
 
+const NEW_CARD_TEMPLATE: BentoFeature = {
+  iconName: "HelpCircle",
+  iconUrl: null,
+  title: "بطاقة جديدة",
+  description: "وصف البطاقة",
+  iconBg: "#f5f6f9",
+  iconColor: "#0c2954",
+};
+
 function BentoSection({ data: initial, saving, onSave }: { data: typeof BENTO_FEATURES; saving: boolean; onSave: (d: typeof BENTO_FEATURES) => void }) {
   const [features, setFeatures] = useState(initial);
+
+  const existingUploads: string[] = [];
+  for (const f of features) {
+    if (f.iconUrl) existingUploads.push(f.iconUrl);
+  }
+
+  const handleIconChange = (idx: number, name: string, url?: string | null) => {
+    const n = [...features];
+    n[idx] = { ...n[idx], iconName: name, iconUrl: url ?? null };
+    setFeatures(n);
+  };
+
+  const handleAdd = () => {
+    setFeatures([...features, { ...NEW_CARD_TEMPLATE, iconUrl: null }]);
+  };
+
+  const handleDelete = (idx: number) => {
+    const n = features.filter((_, i) => i !== idx);
+    setFeatures(n);
+  };
+
   return (
     <section id="bento">
-      <ContentCard title="شبكة المميزات (Bento)" subtitle="8 بطاقات مميزة في الشبكة">
+      <ContentCard
+        title="شبكة المميزات (Bento)"
+        subtitle={`${features.length} بطاقة مميزة في الشبكة`}
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {features.map((feat, idx) => (
-            <div key={idx} className="rounded-lg border border-[#e8edf5] p-4 bg-[#fafbfc]">
+            <div key={idx} className="relative rounded-lg border border-[#e8edf5] p-4 bg-[#fafbfc] group">
+              <button
+                type="button"
+                onClick={() => handleDelete(idx)}
+                className="absolute top-2 left-2 w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-50 transition-colors"
+                title="حذف البطاقة"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-red-400 hover:text-red-600" />
+              </button>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: feat.iconColor }}>
-                  {feat.iconName[0]}
+                <div
+                  className="w-7 h-7 rounded-md flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: feat.iconColor }}
+                >
+                  <IconPreview
+                    iconName={feat.iconName}
+                    iconUrl={feat.iconUrl}
+                    iconColor="#ffffff"
+                    size={14}
+                  />
                 </div>
-                <span className="text-sm font-bold text-[#0c2954]">{feat.title}</span>
+                <span className="text-sm font-bold text-[#0c2954] truncate">{feat.title}</span>
               </div>
               <div className="form-grid-2">
-                <Input label="الأيقونة" value={feat.iconName} onChange={(e) => { const n = [...features]; n[idx] = { ...n[idx], iconName: e.target.value }; setFeatures(n); }} />
+                <div className="form-group-contact">
+                  <label>الأيقونة</label>
+                  <IconPicker
+                    iconName={feat.iconName}
+                    iconUrl={feat.iconUrl}
+                    iconColor={feat.iconColor}
+                    iconBg={feat.iconBg}
+                    onChange={(iconName, iconUrl) => handleIconChange(idx, iconName, iconUrl)}
+                    existingUploads={existingUploads}
+                  />
+                </div>
                 <Input label="العنوان" value={feat.title} onChange={(e) => { const n = [...features]; n[idx] = { ...n[idx], title: e.target.value }; setFeatures(n); }} />
                 <Input label="الوصف" value={feat.description} onChange={(e) => { const n = [...features]; n[idx] = { ...n[idx], description: e.target.value }; setFeatures(n); }} />
                 <div className="form-group-contact">
@@ -274,10 +337,27 @@ function BentoSection({ data: initial, saving, onSave }: { data: typeof BENTO_FE
                     <div className="w-6 h-6 rounded border border-[#e8edf5] shrink-0" style={{ backgroundColor: feat.iconBg }} />
                   </div>
                 </div>
+                <div className="form-group-contact">
+                  <label>لون الأيقونة</label>
+                  <div className="flex items-center gap-2">
+                    <input className="form-control-contact" value={feat.iconColor} onChange={(e) => { const n = [...features]; n[idx] = { ...n[idx], iconColor: e.target.value }; setFeatures(n); }} />
+                    <div className="w-6 h-6 rounded border border-[#e8edf5] shrink-0" style={{ backgroundColor: feat.iconColor }} />
+                  </div>
+                </div>
               </div>
             </div>
           ))}
         </div>
+
+        <button
+          type="button"
+          onClick={handleAdd}
+          className="mt-4 w-full py-3 rounded-xl border-2 border-dashed border-[#e8edf5] text-sm text-[#6b7a94] hover:border-[#0c2954]/30 hover:text-[#0c2954] hover:bg-[#f5f6f9] transition-colors flex items-center justify-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          إضافة بطاقة جديدة
+        </button>
+
         <div className="mt-5 flex justify-end">
           <DashboardButton disabled={saving} onClick={() => onSave(features)}>
             {saving ? "جاري الحفظ..." : "حفظ التغييرات"}

@@ -13,8 +13,13 @@ import {
   TERMS_OF_USE,
   RETURN_POLICY,
 } from "@/lib/policy-data";
+interface SocialLink { key: string; label: string; url: string; iconUrl?: string }
+interface ContactInfo { phone: string; email: string; legalEmail: string; whatsappNumber: string; location: string }
+interface PlatformLinks { loginUrl: string; registerUrl: string; supportCenterUrl: string }
+interface WorkHours { days: string; time: string }
 
-export { PLANS, COMPARE_ROWS, FAQ_ITEMS, CONTACT_INFO, CHANNELS, INQUIRY_OPTIONS, PRIVACY_POLICY, TERMS_OF_USE, RETURN_POLICY };
+export { PLANS, COMPARE_ROWS, FAQ_ITEMS, CHANNELS, INQUIRY_OPTIONS, PRIVACY_POLICY, TERMS_OF_USE, RETURN_POLICY };
+export { CONTACT_INFO as CONTACT_PAGE_INFO };
 
 export const HOME_HERO = {
   badge: "منصة سحابية للتطوير العقاري",
@@ -85,15 +90,24 @@ export const FEATURE_SECTIONS = [
   },
 ];
 
-export const BENTO_FEATURES = [
-  { iconName: "Bell", title: "إشعارات لحظية", description: "عند كل تحديث للمراحل", iconBg: "#e9f9f0", iconColor: "#1a9a5a" },
-  { iconName: "Globe", title: "صفحات هبوط", description: "برابط خاص لكل مشروع", iconBg: "#eef2ff", iconColor: "#4f46e5" },
-  { iconName: "Users", title: "نظام CRM", description: "إدارة العملاء والمبيعات", iconBg: "#f0f4ff", iconColor: "#2d2e83" },
-  { iconName: "Smartphone", title: "تطبيق مخصص", description: "iOS و Android للعملاء", iconBg: "#fff7ed", iconColor: "#f97316" },
-  { iconName: "ImageIcon", title: "صور وفيديو", description: "توثيق المراحل من الموقع", iconBg: "#fdf2f8", iconColor: "#ec4899" },
-  { iconName: "Cloud", title: "سحابي 100%", description: "بدون تثبيت أو خوادم", iconBg: "#e7fafd", iconColor: "#06b6d4" },
-  { iconName: "LayoutGrid", title: "مشاريع متعددة", description: "فيلات، شقق، تجاري", iconBg: "#f3eefe", iconColor: "#8b5cf6" },
-  { iconName: "MessageCircle", title: "دعم فني 7/24", description: "واتساب أو بريد إلكتروني", iconBg: "#fff8e8", iconColor: "#f59e0b" },
+export interface BentoFeature {
+  iconName: string;
+  iconUrl: string | null;
+  title: string;
+  description: string;
+  iconBg: string;
+  iconColor: string;
+}
+
+export const BENTO_FEATURES: BentoFeature[] = [
+  { iconName: "Bell", iconUrl: null, title: "إشعارات لحظية", description: "عند كل تحديث للمراحل", iconBg: "#e9f9f0", iconColor: "#1a9a5a" },
+  { iconName: "Globe", iconUrl: null, title: "صفحات هبوط", description: "برابط خاص لكل مشروع", iconBg: "#eef2ff", iconColor: "#4f46e5" },
+  { iconName: "Users", iconUrl: null, title: "نظام CRM", description: "إدارة العملاء والمبيعات", iconBg: "#f0f4ff", iconColor: "#2d2e83" },
+  { iconName: "Smartphone", iconUrl: null, title: "تطبيق مخصص", description: "iOS و Android للعملاء", iconBg: "#fff7ed", iconColor: "#f97316" },
+  { iconName: "ImageIcon", iconUrl: null, title: "صور وفيديو", description: "توثيق المراحل من الموقع", iconBg: "#fdf2f8", iconColor: "#ec4899" },
+  { iconName: "Cloud", iconUrl: null, title: "سحابي 100%", description: "بدون تثبيت أو خوادم", iconBg: "#e7fafd", iconColor: "#06b6d4" },
+  { iconName: "LayoutGrid", iconUrl: null, title: "مشاريع متعددة", description: "فيلات، شقق، تجاري", iconBg: "#f3eefe", iconColor: "#8b5cf6" },
+  { iconName: "MessageCircle", iconUrl: null, title: "دعم فني 7/24", description: "واتساب أو بريد إلكتروني", iconBg: "#fff8e8", iconColor: "#f59e0b" },
 ];
 
 export const APP_SECTION = {
@@ -151,11 +165,29 @@ export const NAV_LINKS = [
   { label: "اتصل بنا", href: "/contact" },
 ];
 
-export const SOCIAL_LINKS = {
-  xUrl: "https://x.com/aysar_ksa",
-  instagramUrl: "https://instagram.com/aysar_ksa",
-  tiktokUrl: "https://tiktok.com/@aysar_sa",
+export const SOCIAL_LINKS: SocialLink[] = [
+  { key: "x", label: "X (Twitter)", url: "https://x.com/aysar_ksa" },
+  { key: "instagram", label: "Instagram", url: "https://instagram.com/aysar_ksa" },
+  { key: "tiktok", label: "TikTok", url: "https://tiktok.com/@aysar_sa" },
+];
+
+export const SITE_CONTACT_INFO: ContactInfo = {
+  phone: "+966125101107",
+  email: "support@aysar.sa",
+  legalEmail: "legal@aysar.sa",
   whatsappNumber: "966125101107",
+  location: "جدة، المملكة العربية السعودية",
+};
+
+export const PLATFORM_LINKS: PlatformLinks = {
+  loginUrl: "https://platform.aysar.sa/",
+  registerUrl: "https://platform.aysar.sa/ar/company/dashboard/register",
+  supportCenterUrl: "https://support.aysar.sa/",
+};
+
+export const WORK_HOURS: WorkHours = {
+  days: "الأحد – الخميس",
+  time: "10:00 ص – 5:00 م",
 };
 
 export const APP_LINKS_DEFAULTS = {

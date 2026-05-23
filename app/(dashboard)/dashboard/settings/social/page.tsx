@@ -4,16 +4,16 @@ import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/app/components/ui/Input";
 import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2, Plus, Upload, Globe } from "lucide-react";
 import { SOCIAL_LINKS } from "@/app/lib/dashboard/placeholders";
-
-interface SocialInfo { xUrl: string; instagramUrl: string; tiktokUrl: string; whatsappNumber: string }
+import type { SocialLink } from "@/app/lib/settings-data";
 
 export default function SocialSettingsPage() {
-  const [data, setData] = useState<SocialInfo>(SOCIAL_LINKS);
+  const [links, setLinks] = useState<SocialLink[]>([...SOCIAL_LINKS]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [uploadingKey, setUploadingKey] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -21,7 +21,7 @@ export default function SocialSettingsPage() {
         const res = await fetch("/api/settings");
         const json = await res.json();
         if (json.success && json.data?.socialLinks) {
-          setData(json.data.socialLinks);
+          setLinks(json.data.socialLinks);
         }
       } catch { /* keep defaults */ }
       finally { setLoading(false); }
@@ -36,7 +36,7 @@ export default function SocialSettingsPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ socialLinks: data }),
+        body: JSON.stringify({ socialLinks: links }),
       });
       if (res.ok) {
         setFeedback("تم الحفظ بنجاح");
@@ -44,7 +44,48 @@ export default function SocialSettingsPage() {
       }
     } catch { /* silent */ }
     setSaving(false);
-  }, [data]);
+  }, [links]);
+
+  const handleIconUpload = useCallback(async (key: string, file: File) => {
+    setUploadingKey(key);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("key", key);
+    try {
+      const res = await fetch("/api/settings/upload-icon", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      if (res.ok) {
+        const json = await res.json();
+        setLinks(prev => prev.map(l => l.key === key ? { ...l, iconUrl: json.iconUrl } : l));
+      }
+    } catch { /* silent */ }
+    setUploadingKey(null);
+  }, []);
+
+  const addLink = () => {
+    setLinks(prev => [...prev, { key: `custom-${Date.now()}`, label: "", url: "" }]);
+  };
+
+  const removeLink = (index: number) => {
+    setLinks(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateLink = (index: number, field: keyof SocialLink, value: string) => {
+    setLinks(prev => prev.map((l, i) => i === index ? { ...l, [field]: value } : l));
+  };
+
+  function extractDomain(url: string): string {
+    try { return new URL(url).hostname; } catch { return ""; }
+  }
+
+  function iconPreviewUrl(url: string, iconUrl?: string): string | null {
+    if (iconUrl) return iconUrl;
+    const domain = extractDomain(url);
+    return domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=40` : null;
+  }
 
   if (loading) return (
     <div className="flex items-center justify-center h-[40vh]">
@@ -53,13 +94,85 @@ export default function SocialSettingsPage() {
   );
 
   return (
-    <ContentCard title="وسائل التواصل الاجتماعي" subtitle="روابط حسابات التواصل الاجتماعي">
-      <div className="form-grid-2">
-        <Input label="X (Twitter)" value={data.xUrl} onChange={(e) => setData({ ...data, xUrl: e.target.value })} />
-        <Input label="Instagram" value={data.instagramUrl} onChange={(e) => setData({ ...data, instagramUrl: e.target.value })} />
-        <Input label="TikTok" value={data.tiktokUrl} onChange={(e) => setData({ ...data, tiktokUrl: e.target.value })} />
-        <Input label="رقم WhatsApp" value={data.whatsappNumber} onChange={(e) => setData({ ...data, whatsappNumber: e.target.value })} />
+    <ContentCard title="وسائل التواصل الاجتماعي" subtitle="روابط حسابات التواصل الاجتماعي وأيقوناتها">
+      <div className="space-y-4">
+        {links.map((link, index) => (
+          <div key={link.key} className="flex flex-col lg:flex-row items-start gap-3 p-3 rounded-lg border border-[#e8edf5]">
+            <Input
+              label="اسم المنصة"
+              value={link.label}
+              onChange={(e) => updateLink(index, "label", e.target.value)}
+              placeholder="مثال: X (Twitter)"
+              wrapperClassName="w-full lg:w-[180px]"
+            />
+            <Input
+              label="الرابط"
+              value={link.url}
+              onChange={(e) => updateLink(index, "url", e.target.value)}
+              placeholder="https://..."
+              wrapperClassName="w-full lg:flex-1"
+            />
+            <div className="flex items-center gap-2 self-start lg:self-center pt-[18px] lg:pt-0">
+              <div className="relative w-9 h-9 rounded-lg border border-[#e8edf5] flex items-center justify-center overflow-hidden bg-white shrink-0">
+                {uploadingKey === link.key ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-[#6b7a94]" />
+                ) : (
+                  <>
+                    <Globe className="w-4 h-4 text-[#6b7a94]" />
+                    {(() => {
+                      const src = iconPreviewUrl(link.url, link.iconUrl);
+                      return src ? (
+                        <img
+                          src={src}
+                          alt=""
+                          className="absolute inset-0 w-full h-full object-contain p-1.5"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                        />
+                      ) : null;
+                    })()}
+                  </>
+                )}
+              </div>
+              <label className="flex items-center gap-1 text-xs text-[#6b7a94] cursor-pointer hover:text-[#0c2954] transition-colors whitespace-nowrap">
+                <Upload className="w-3.5 h-3.5" />
+                {uploadingKey === link.key ? "..." : "أيقونة"}
+                <input
+                  type="file"
+                  accept=".svg,.png,.jpg,.jpeg,.webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleIconUpload(link.key, file);
+                  }}
+                />
+              </label>
+              {link.iconUrl && (
+                <span className="text-[10px] text-[#1a9a5a] whitespace-nowrap">مخصصة</span>
+              )}
+            </div>
+            <DashboardButton
+              variant="danger"
+              size="icon-sm"
+              onClick={() => removeLink(index)}
+              aria-label="حذف"
+              className="self-end lg:self-center"
+            >
+              <Trash2 className="w-4 h-4" />
+            </DashboardButton>
+          </div>
+        ))}
       </div>
+
+      <DashboardButton
+        variant="secondary"
+        size="sm"
+        className="mt-4"
+        onClick={addLink}
+      >
+        <Plus className="w-4 h-4 ml-1" />
+        إضافة منصة
+      </DashboardButton>
+
       <div className="mt-5 flex items-center justify-between">
         <span className="text-xs text-[#1a9a5a]">{feedback}</span>
         <DashboardButton disabled={saving} onClick={handleSave}>

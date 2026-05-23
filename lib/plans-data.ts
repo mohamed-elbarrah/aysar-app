@@ -20,6 +20,8 @@ export interface Plan {
   featuresTitle: string;
 }
 
+const PLATFORM_REGISTER_URL = "https://platform.aysar.sa/ar/company/dashboard/register";
+
 export const PLANS: Plan[] = [
   {
     id: "free",
@@ -30,7 +32,7 @@ export const PLANS: Plan[] = [
     isFree: true,
     isFeatured: false,
     ctaLabel: "ابدأ مجاناً",
-    ctaHref: "https://platform.aysar.sa/ar/company/dashboard/register",
+    ctaHref: PLATFORM_REGISTER_URL,
     featuresTitle: "ما تحصل عليه",
     features: [
       { text: "مشروع واحد فقط", enabled: true },
@@ -52,7 +54,7 @@ export const PLANS: Plan[] = [
     isFree: false,
     isFeatured: false,
     ctaLabel: "اختر الباقة",
-    ctaHref: "https://platform.aysar.sa/ar/company/dashboard/register",
+    ctaHref: PLATFORM_REGISTER_URL,
     featuresTitle: "ما تحصل عليه",
     features: [
       { text: "نماذج مختلفة من المشاريع", enabled: true },
@@ -77,7 +79,7 @@ export const PLANS: Plan[] = [
     isFree: false,
     isFeatured: true,
     ctaLabel: "اختر الباقة",
-    ctaHref: "https://platform.aysar.sa/ar/company/dashboard/register",
+    ctaHref: PLATFORM_REGISTER_URL,
     featuresTitle: "كل شيء في المتقدمة، و+",
     features: [
       { text: "مشاريع غير محدودة", enabled: true },
@@ -97,6 +99,7 @@ export const PLANS: Plan[] = [
   },
 ];
 
+// Old types (kept for migration compatibility)
 export interface CompareSection {
   section: string;
 }
@@ -110,7 +113,61 @@ export interface CompareRowItem {
 
 export type CompareRowData = CompareSection | CompareRowItem;
 
-export const COMPARE_ROWS: CompareRowData[] = [
+// New types
+export interface CompareColumn {
+  id: string;
+  label: string;
+}
+
+export interface CompareSectionRow {
+  type: "section";
+  label: string;
+}
+
+export interface CompareFeatureRow {
+  type: "feature";
+  label: string;
+  values: Record<string, string | null>;
+}
+
+export type CompareRow = CompareSectionRow | CompareFeatureRow;
+
+export interface CompareTableData {
+  featureLabel: string;
+  columns: CompareColumn[];
+  rows: CompareRow[];
+}
+
+export function isOldCompareFormat(data: unknown): data is CompareRowData[] {
+  return Array.isArray(data) && (data.length === 0 || "section" in data[0] || "label" in data[0]);
+}
+
+export function migrateCompareRows(oldData: CompareRowData[]): CompareTableData {
+  const columns: CompareColumn[] = [
+    { id: "col_0", label: "المجانية" },
+    { id: "col_1", label: "المتقدمة" },
+    { id: "col_2", label: "المميزة" },
+  ];
+
+  const rows: CompareRow[] = oldData.map((row) => {
+    if ("section" in row) {
+      return { type: "section" as const, label: row.section };
+    }
+    return {
+      type: "feature" as const,
+      label: row.label,
+      values: {
+        col_0: row.free ?? null,
+        col_1: row.advanced ?? null,
+        col_2: row.featured ?? null,
+      },
+    };
+  });
+
+  return { featureLabel: "الميزة", columns, rows };
+}
+
+export const COMPARE_ROWS: CompareTableData = migrateCompareRows([
   { section: "إدارة المشاريع" },
   { label: "نماذج المشاريع", free: "واحد فقط", advanced: "غير محدود", featured: "غير محدود" },
   { label: "عدد المشاريع", free: "1 مشروع", advanced: "10 مشاريع", featured: "غير محدود" },
@@ -139,7 +196,7 @@ export const COMPARE_ROWS: CompareRowData[] = [
   { label: "دعم مباشر (هاتف + محادثة)", free: null, advanced: "✓", featured: "✓" },
   { label: "مدير حساب شخصي", free: "✓", advanced: null, featured: "✓" },
   { label: "تدريب مجاني للفريق", free: null, advanced: "جلسة واحدة", featured: "جلسات متعددة" },
-];
+]);
 
 export interface FAQItem {
   question: string;

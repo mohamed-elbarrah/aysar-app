@@ -2,10 +2,10 @@ import type { Response } from "express";
 import { prisma } from "@/app/lib/db";
 import { contactPageUpdateSchema } from "@/app/lib/shared-types";
 import type { AuthenticatedRequest, ApiResponse } from "@/app/lib/shared-types";
-import { CONTACT_HERO, CONTACT_INFO, CHANNELS } from "@/app/lib/dashboard/placeholders";
+import { CONTACT_HERO, CONTACT_PAGE_INFO, CHANNELS } from "@/app/lib/dashboard/placeholders";
 import { INQUIRY_OPTIONS } from "@/lib/contact-data";
+import { migrateFormFields, FORM_FIELDS_DEFAULTS, CONTACT_FORM_DEFAULTS } from "@/app/lib/contact-page-data";
 
-const FORM_FIELDS_DEFAULTS = { name: true, phone: true, email: true, type: true, message: true };
 const SUCCESS_MESSAGE_DEFAULT = "تم إرسال رسالتك بنجاح! سنتواصل معك خلال 24 ساعة.";
 
 function deepMerge<T extends Record<string, unknown>>(existing: T, incoming: Partial<T>): T {
@@ -32,18 +32,19 @@ function deepMerge<T extends Record<string, unknown>>(existing: T, incoming: Par
 
 const CONTACT_DEFAULTS = {
   hero: CONTACT_HERO,
-  contactInfo: CONTACT_INFO,
+  contactInfo: CONTACT_PAGE_INFO,
   channels: CHANNELS,
   inquiryOptions: INQUIRY_OPTIONS,
   successMessage: SUCCESS_MESSAGE_DEFAULT,
   formFields: FORM_FIELDS_DEFAULTS,
+  formConfig: CONTACT_FORM_DEFAULTS,
 };
 
 export async function getContactPageHandler(
   _req: AuthenticatedRequest,
   res: Response<ApiResponse>
 ): Promise<void> {
-  let page = await prisma.contactPage.findUnique({ where: { id: "CONTACT" } });
+  const page = await prisma.contactPage.findUnique({ where: { id: "CONTACT" } });
 
   if (!page) {
     res.json({
@@ -57,7 +58,13 @@ export async function getContactPageHandler(
     return;
   }
 
-  res.json({ success: true, data: page });
+  res.json({
+    success: true,
+    data: {
+      ...page,
+      formFields: migrateFormFields(page.formFields),
+    },
+  });
 }
 
 export async function updateContactPageHandler(

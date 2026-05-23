@@ -27,6 +27,7 @@ export const featureSectionSchema = z.object({
 
 export const bentoFeatureSchema = z.object({
   iconName: requiredString,
+  iconUrl: z.string().nullable().optional(),
   title: requiredString,
   description: requiredString,
   iconBg: requiredString,
@@ -94,4 +95,30 @@ export const socialLinksSchema = z.object({
 export const appLinksSchema = z.object({
   appStoreUrl: urlString,
   googlePlayUrl: urlString,
+});
+
+export const socialLinkSchema = z.object({
+  key: requiredString,
+  label: requiredString,
+  url: z.string().url("رابط غير صالح"),
+  iconUrl: optionalString,
+});
+
+export const contactInfoSchema = z.object({
+  phone: requiredString,
+  email: z.string().email("بريد إلكتروني غير صالح"),
+  legalEmail: z.string().email("بريد إلكتروني غير صالح").optional().or(z.literal("")),
+  whatsappNumber: requiredString,
+  location: requiredString,
+});
+
+export const platformLinksSchema = z.object({
+  loginUrl: z.string().url("رابط غير صالح"),
+  registerUrl: z.string().url("رابط غير صالح"),
+  supportCenterUrl: z.string().url("رابط غير صالح"),
+});
+
+export const workHoursSchema = z.object({
+  days: requiredString,
+  time: requiredString,
 });

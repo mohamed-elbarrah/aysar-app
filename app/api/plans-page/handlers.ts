@@ -2,7 +2,7 @@ import type { Response } from "express";
 import { prisma } from "@/app/lib/db";
 import { plansPageUpdateSchema } from "@/app/lib/shared-types";
 import type { AuthenticatedRequest, ApiResponse } from "@/app/lib/shared-types";
-import { PLANS, COMPARE_ROWS, FAQ_ITEMS } from "@/lib/plans-data";
+import { PLANS, COMPARE_ROWS, FAQ_ITEMS, isOldCompareFormat, migrateCompareRows } from "@/lib/plans-data";
 
 const PLANS_HERO_DEFAULTS = {
   badge: "الأسعار والباقات",
@@ -54,7 +54,12 @@ export async function getPlansPageHandler(
     return;
   }
 
-  res.json({ success: true, data: page });
+  const data = page as Record<string, unknown>;
+  if (isOldCompareFormat(data.compareRows)) {
+    data.compareRows = migrateCompareRows(data.compareRows as any);
+  }
+
+  res.json({ success: true, data: data });
 }
 
 export async function updatePlansPageHandler(
@@ -68,14 +73,23 @@ export async function updatePlansPageHandler(
   }
 
   const existing = await prisma.plansPage.findUnique({ where: { id: "PLANS" } });
-  const current = existing ?? {
-    hero: PLANS_HERO_DEFAULTS,
-    plans: PLANS,
-    compareRows: COMPARE_ROWS,
-    faqItems: FAQ_ITEMS,
-  };
 
-  const merged = deepMerge(current as unknown as Record<string, unknown>, parsed.data as Record<string, unknown>);
+  let current: Record<string, unknown>;
+  if (existing) {
+    current = existing as unknown as Record<string, unknown>;
+    if (isOldCompareFormat(current.compareRows)) {
+      current.compareRows = migrateCompareRows(current.compareRows as any);
+    }
+  } else {
+    current = {
+      hero: PLANS_HERO_DEFAULTS,
+      plans: PLANS,
+      compareRows: COMPARE_ROWS,
+      faqItems: FAQ_ITEMS,
+    } as unknown as Record<string, unknown>;
+  }
+
+  const merged = deepMerge(current, parsed.data as Record<string, unknown>);
 
   const page = await prisma.plansPage.upsert({
     where: { id: "PLANS" },

@@ -12,9 +12,8 @@ interface TOCItem {
   label: string;
 }
 
-function TocSidebar({ tocItems, isSticky, sidebarCard }: {
+function TocSidebar({ tocItems, sidebarCard }: {
   tocItems: TOCItem[];
-  isSticky: boolean;
   sidebarCard?: PolicyData["sidebarCard"];
 }) {
   const [activeId, setActiveId] = useState(tocItems[0]?.id ?? "");
@@ -49,12 +48,10 @@ function TocSidebar({ tocItems, isSticky, sidebarCard }: {
   const progress = docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0;
 
   return (
-    <aside className={cn("toc", isSticky && "toc-sticky")}>
-      {isSticky && (
-        <div className="toc-progress-bar">
-          <div className="toc-progress-fill" style={{ width: `${progress * 100}%` }} />
-        </div>
-      )}
+    <aside className="toc">
+      <div className="toc-progress-bar">
+        <div className="toc-progress-fill" style={{ width: `${progress * 100}%` }} />
+      </div>
       <div className="toc-title">المحتويات</div>
       <ul className="toc-list" ref={listRef}>
         {tocItems.map((item) => (
@@ -122,17 +119,6 @@ function PolicyFooterBar({ data }: { data: PolicyData }) {
 }
 
 export default function PolicyTemplate({ data }: { data: PolicyData }) {
-  const [isSticky, setIsSticky] = useState(false);
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-    const observer = new IntersectionObserver(([entry]) => { setIsSticky(!entry.isIntersecting); }, { threshold: 0 });
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, []);
-
   const tocItems: TOCItem[] = useMemo(() =>
     data.parts.map((p, i) => ({
       id: p.id,
@@ -173,11 +159,10 @@ export default function PolicyTemplate({ data }: { data: PolicyData }) {
 
       <div className="policy-content-root">
         <TocMobileAccordion data={data} />
-        <div ref={sentinelRef} className="toc-sentinel" />
 
         <div className="policy-content-wrap">
-          <div className="hidden lg:block">
-            <TocSidebar tocItems={tocItems} isSticky={isSticky} sidebarCard={data.sidebarCard} />
+          <div className="hidden lg:block policy-sidebar">
+            <TocSidebar tocItems={tocItems} sidebarCard={data.sidebarCard} />
           </div>
           <ContentBody parts={data.parts} />
         </div>

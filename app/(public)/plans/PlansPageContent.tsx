@@ -10,8 +10,15 @@ import { Accordion } from "@/app/components/ui/Accordion";
 import { Section } from "@/app/components/Section";
 import CTASection from "@/app/sections/CTASection";
 import type { PlansPageResponse } from "@/app/lib/plans-page-data";
+import type { PlatformLinks, ContactInfo as SiteContactInfo } from "@/app/lib/settings-data";
 
-export default function PlansPageContent({ data }: { data: PlansPageResponse }) {
+interface Props {
+  data: PlansPageResponse;
+  platformLinks: PlatformLinks;
+  contactInfo: SiteContactInfo;
+}
+
+export default function PlansPageContent({ data, platformLinks, contactInfo }: Props) {
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
   const { hero, plans, compareRows, faqItems } = data;
 
@@ -36,7 +43,7 @@ export default function PlansPageContent({ data }: { data: PlansPageResponse }) 
       <CompareTable
         title="قارن بين الباقات"
         subtitle="تفاصيل دقيقة لكل ما ستحصل عليه"
-        rows={compareRows}
+        data={compareRows}
       />
 
       <Accordion
@@ -51,11 +58,11 @@ export default function PlansPageContent({ data }: { data: PlansPageResponse }) 
         subtitle="انضم لمطورين عقاريين يستخدمون أيسَر لتوفير الوقت ورفع مستوى تجربة عملائهم."
         primaryCta={{
           label: "ابدأ مجاناً الآن",
-          href: "https://platform.aysar.sa/ar/company/dashboard/register",
+          href: platformLinks.registerUrl,
         }}
         secondaryCta={{
           label: "تواصل على واتساب",
-          href: "http://wa.me/966125101107",
+          href: `https://wa.me/${contactInfo.whatsappNumber}`,
         }}
         note="لا بطاقة ائتمان · فريقنا يتواصل معك خلال 24 ساعة"
       />
