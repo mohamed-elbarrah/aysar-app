@@ -1,8 +1,17 @@
-import type { Response } from "express";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/db";
 import { settingsUpdateSchema } from "@/app/lib/shared-types";
-import type { AuthenticatedRequest, ApiResponse } from "@/app/lib/shared-types";
-import { SITE_SETTINGS, NAV_LINKS, SOCIAL_LINKS, APP_LINKS_DEFAULTS, DEFAULT_FOOTER_COLUMNS, SITE_CONTACT_INFO, PLATFORM_LINKS, WORK_HOURS } from "@/app/lib/dashboard/placeholders";
+import { deepMerge, requireAdmin } from "@/app/lib/api-utils";
+import {
+  SITE_SETTINGS,
+  NAV_LINKS,
+  SOCIAL_LINKS,
+  APP_LINKS_DEFAULTS,
+  DEFAULT_FOOTER_COLUMNS,
+  SITE_CONTACT_INFO,
+  PLATFORM_LINKS,
+  WORK_HOURS,
+} from "@/app/lib/dashboard/placeholders";
 
 interface SocialLink { key: string; label: string; url: string; iconUrl?: string }
 
@@ -40,41 +49,15 @@ const DEFAULTS = {
   workHours: WORK_HOURS,
 };
 
-function deepMerge<T extends Record<string, unknown>>(existing: T, incoming: Partial<T>): T {
-  const result = { ...existing };
-  for (const key of Object.keys(incoming) as (keyof T)[]) {
-    const incomingVal = incoming[key];
-    const existingVal = result[key];
-    if (
-      incomingVal !== null &&
-      incomingVal !== undefined &&
-      typeof incomingVal === "object" &&
-      !Array.isArray(incomingVal) &&
-      typeof existingVal === "object" &&
-      existingVal !== null &&
-      !Array.isArray(existingVal)
-    ) {
-      result[key] = deepMerge(existingVal as Record<string, unknown>, incomingVal as Record<string, unknown>) as T[keyof T];
-    } else if (incomingVal !== undefined) {
-      result[key] = incomingVal as T[keyof T];
-    }
-  }
-  return result;
-}
-
-export async function getSettingsHandler(
-  _req: AuthenticatedRequest,
-  res: Response<ApiResponse>
-): Promise<void> {
+export async function GET() {
   const row = await prisma.siteSettings.findUnique({ where: { id: "SETTINGS" } });
 
   if (!row) {
     const data = { ...DEFAULTS, id: "SETTINGS", updatedAt: new Date().toISOString(), socialLinks: [...SOCIAL_LINKS] };
-    res.json({ success: true, data });
-    return;
+    return NextResponse.json({ success: true, data });
   }
 
-  res.json({
+  return NextResponse.json({
     success: true,
     data: {
       id: row.id,
@@ -94,14 +77,14 @@ export async function getSettingsHandler(
   });
 }
 
-export async function updateSettingsHandler(
-  req: AuthenticatedRequest,
-  res: Response<ApiResponse>
-): Promise<void> {
-  const parsed = settingsUpdateSchema.safeParse(req.body);
+export async function PATCH(request: NextRequest) {
+  const adminResult = requireAdmin(request);
+  if (adminResult instanceof NextResponse) return adminResult;
+
+  const body = await request.json();
+  const parsed = settingsUpdateSchema.safeParse(body);
   if (!parsed.success) {
-    res.status(422).json({ success: false, error: "بيانات غير صالحة" });
-    return;
+    return NextResponse.json({ success: false, error: "بيانات غير صالحة" }, { status: 422 });
   }
 
   const existing = await prisma.siteSettings.findUnique({ where: { id: "SETTINGS" } });
@@ -115,7 +98,7 @@ export async function updateSettingsHandler(
     update: merged,
   });
 
-  res.json({
+  return NextResponse.json({
     success: true,
     data: {
       id: page.id,

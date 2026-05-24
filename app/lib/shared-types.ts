@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { Request } from "express";
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -53,5 +52,3 @@ export const settingsUpdateSchema = jsonValueSchema;
 export type HomePageUpdate = z.infer<typeof homePageUpdateSchema>;
 
 export interface JwtPayload { userId: string; email: string; role: string; }
-
-export type AuthenticatedRequest = Request & { user?: JwtPayload };
