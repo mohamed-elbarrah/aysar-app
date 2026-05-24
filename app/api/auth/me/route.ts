@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAuth } from "@/app/lib/api-utils";
-import { prisma } from "@/app/lib/db";
+import { supabase } from "@/app/lib/db";
 
 export async function GET(request: NextRequest) {
   const payload = verifyAuth(request);
@@ -8,8 +8,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: false, error: "الرجاء تسجيل الدخول" }, { status: 401 });
   }
 
-  const user = await prisma.user.findUnique({ where: { id: payload.userId } });
-  if (!user) {
+  const { data: user, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", payload.userId)
+    .single();
+
+  if (error || !user) {
     return NextResponse.json({ success: false, error: "المستخدم غير موجود" }, { status: 401 });
   }
 

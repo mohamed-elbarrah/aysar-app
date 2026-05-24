@@ -1,8 +1,10 @@
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import "dotenv/config";
+import { createClient } from "@supabase/supabase-js";
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-const prisma = new PrismaClient({ adapter });
+const supabase = createClient(
+  process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+);
 
 const FOOTER_QUICK = [
   { label: "الرئيسية", href: "/" },
@@ -25,7 +27,11 @@ const DEFAULT_TAGLINE = "أيسَر برنامج لإدارة العقارات �
 async function main() {
   console.log("Starting footer columns migration...");
 
-  const existing = await prisma.siteSettings.findUnique({ where: { id: "SETTINGS" } });
+  const { data: existing } = await supabase
+    .from("site_settings")
+    .select("*")
+    .eq("id", "SETTINGS")
+    .single();
 
   const defaultColumns = [
     { type: "brand", title: "أيسَر", tagline: DEFAULT_TAGLINE, copyright: DEFAULT_COPYRIGHT },
@@ -43,21 +49,22 @@ async function main() {
 
   if (!existing) {
     console.log("No existing settings found, creating with defaults...");
-    await prisma.siteSettings.create({
-      data: {
+    const { error } = await supabase
+      .from("site_settings")
+      .insert({
         id: "SETTINGS",
-        footerColumns: defaultColumns,
-      },
-    });
-    console.log("Done! Created settings with footerColumns.");
+        footer_columns: defaultColumns,
+      });
+    if (error) console.error("Error creating settings:", error);
+    else console.log("Done! Created settings with footer_columns.");
     return;
   }
 
-  const row = existing as any;
-  const quickLinks = Array.isArray(row.footerQuickLinks) ? row.footerQuickLinks : FOOTER_QUICK;
-  const helpLinks = Array.isArray(row.footerHelpLinks) ? row.footerHelpLinks : FOOTER_HELP;
-  const tagline = row.footerTagline || DEFAULT_TAGLINE;
-  const copyright = row.footerCopyright || DEFAULT_COPYRIGHT;
+  const row = existing as Record<string, unknown>;
+  const quickLinks = Array.isArray(row.footer_quick_links) ? row.footer_quick_links : FOOTER_QUICK;
+  const helpLinks = Array.isArray(row.footer_help_links) ? row.footer_help_links : FOOTER_HELP;
+  const tagline = (row.footer_tagline as string) || DEFAULT_TAGLINE;
+  const copyright = (row.footer_copyright as string) || DEFAULT_COPYRIGHT;
 
   const migratedColumns = [
     { type: "brand" as const, title: "أيسَر", tagline, copyright },
@@ -73,15 +80,15 @@ async function main() {
     },
   ];
 
-  await prisma.siteSettings.upsert({
-    where: { id: "SETTINGS" },
-    create: { id: "SETTINGS", footerColumns: migratedColumns },
-    update: { footerColumns: migratedColumns },
-  });
+  const { error } = await supabase
+    .from("site_settings")
+    .upsert({
+      id: "SETTINGS",
+      footer_columns: migratedColumns,
+    }, { onConflict: "id" });
 
-  console.log("Migration complete! footerColumns populated from old data.");
+  if (error) console.error("Error upserting settings:", error);
+  else console.log("Migration complete! footer_columns populated from old data.");
 }
 
-main()
-  .catch(console.error)
-  .finally(() => prisma.$disconnect());
+main().catch(console.error);

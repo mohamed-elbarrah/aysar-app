@@ -1,6 +1,5 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { createClient } from "@supabase/supabase-js";
 import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
@@ -8,28 +7,30 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-const prisma = new PrismaClient({ adapter });
+const supabase = createClient(
+  process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+);
 
 async function main() {
-  const [users, homePages, plansPages, contactPages, policies, settings, messages] = await Promise.all([
-    prisma.user.findMany(),
-    prisma.homePage.findMany(),
-    prisma.plansPage.findMany(),
-    prisma.contactPage.findMany(),
-    prisma.policies.findMany(),
-    prisma.siteSettings.findMany(),
-    prisma.contactMessage.findMany(),
+  const [usersRes, homePagesRes, plansPagesRes, contactPagesRes, policiesRes, settingsRes, messagesRes] = await Promise.all([
+    supabase.from("users").select("*"),
+    supabase.from("home_page").select("*"),
+    supabase.from("plans_page").select("*"),
+    supabase.from("contact_page").select("*"),
+    supabase.from("policies").select("*"),
+    supabase.from("site_settings").select("*"),
+    supabase.from("contact_messages").select("*"),
   ]);
 
   const dump = {
-    users,
-    homePages,
-    plansPages,
-    contactPages,
-    policies,
-    settings,
-    messages,
+    users: usersRes.data || [],
+    homePages: homePagesRes.data || [],
+    plansPages: plansPagesRes.data || [],
+    contactPages: contactPagesRes.data || [],
+    policies: policiesRes.data || [],
+    settings: settingsRes.data || [],
+    messages: messagesRes.data || [],
   };
 
   const outPath = path.resolve(__dirname, "../prisma/seed-data.json");
@@ -37,4 +38,4 @@ async function main() {
   console.log(`Seed data written to ${outPath}`);
 }
 
-main().catch((e) => { console.error(e); process.exit(1); }).finally(() => prisma.$disconnect());
+main().catch((e) => { console.error(e); process.exit(1); });

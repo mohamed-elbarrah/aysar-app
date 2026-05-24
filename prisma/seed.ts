@@ -1,6 +1,5 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 import * as fs from "fs";
 import * as path from "path";
@@ -9,8 +8,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-const prisma = new PrismaClient({ adapter });
+const supabase = createClient(
+  process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+);
 
 async function main() {
   const seedDataPath = path.resolve(__dirname, "seed-data.json");
@@ -20,140 +21,83 @@ async function main() {
   const adminUser = data.users[0];
   const passwordHash = await bcrypt.hash("admin123", 12);
 
-  await prisma.user.upsert({
-    where: { email: adminUser?.email ?? "admin@aysar.sa" },
-    update: {},
-    create: {
+  await supabase
+    .from("users")
+    .upsert({
+      id: adminUser?.id,
       email: adminUser?.email ?? "admin@aysar.sa",
-      passwordHash: adminUser?.passwordHash ?? passwordHash,
+      password_hash: adminUser?.passwordHash ?? passwordHash,
       name: adminUser?.name ?? "مدير النظام",
       role: adminUser?.role ?? "ADMIN",
-    },
-  });
+    }, { onConflict: "email" });
 
   const homePage = data.homePages[0];
   if (homePage) {
-    await prisma.homePage.upsert({
-      where: { id: "HOME" },
-      update: {
-        hero: homePage.hero as any,
-        featureSections: homePage.featureSections as any,
-        bentoFeatures: homePage.bentoFeatures as any,
-        projectOverview: homePage.projectOverview as any,
-        appSection: homePage.appSection as any,
-        ctaSection: homePage.ctaSection as any,
-      },
-      create: {
-        id: "HOME",
-        hero: homePage.hero as any,
-        featureSections: homePage.featureSections as any,
-        bentoFeatures: homePage.bentoFeatures as any,
-        projectOverview: homePage.projectOverview as any,
-        appSection: homePage.appSection as any,
-        ctaSection: homePage.ctaSection as any,
-      },
-    });
+    await supabase.from("home_page").upsert({
+      id: "HOME",
+      hero: homePage.hero,
+      feature_sections: homePage.featureSections,
+      bento_features: homePage.bentoFeatures,
+      project_overview: homePage.projectOverview,
+      app_section: homePage.appSection,
+      cta_section: homePage.ctaSection,
+    }, { onConflict: "id" });
   }
 
   const plansPage = data.plansPages[0];
   if (plansPage) {
-    await prisma.plansPage.upsert({
-      where: { id: "PLANS" },
-      update: {
-        hero: plansPage.hero as any,
-        plans: plansPage.plans as any,
-        compareRows: plansPage.compareRows as any,
-        faqItems: plansPage.faqItems as any,
-      },
-      create: {
-        id: "PLANS",
-        hero: plansPage.hero as any,
-        plans: plansPage.plans as any,
-        compareRows: plansPage.compareRows as any,
-        faqItems: plansPage.faqItems as any,
-      },
-    });
+    await supabase.from("plans_page").upsert({
+      id: "PLANS",
+      hero: plansPage.hero,
+      plans: plansPage.plans,
+      compare_rows: plansPage.compareRows,
+      faq_items: plansPage.faqItems,
+    }, { onConflict: "id" });
   }
 
   const contactPage = data.contactPages[0];
   if (contactPage) {
-    await prisma.contactPage.upsert({
-      where: { id: "CONTACT" },
-      update: {
-        hero: contactPage.hero as any,
-        contactInfo: contactPage.contactInfo as any,
-        channels: contactPage.channels as any,
-        inquiryOptions: contactPage.inquiryOptions as any,
-        successMessage: contactPage.successMessage,
-        formFields: contactPage.formFields as any,
-        formConfig: contactPage.formConfig as any,
-      },
-      create: {
-        id: "CONTACT",
-        hero: contactPage.hero as any,
-        contactInfo: contactPage.contactInfo as any,
-        channels: contactPage.channels as any,
-        inquiryOptions: contactPage.inquiryOptions as any,
-        successMessage: contactPage.successMessage,
-        formFields: contactPage.formFields as any,
-        formConfig: contactPage.formConfig as any,
-      },
-    });
+    await supabase.from("contact_page").upsert({
+      id: "CONTACT",
+      hero: contactPage.hero,
+      contact_info: contactPage.contactInfo,
+      channels: contactPage.channels,
+      inquiry_options: contactPage.inquiryOptions,
+      success_message: contactPage.successMessage,
+      form_fields: contactPage.formFields,
+      form_config: contactPage.formConfig,
+    }, { onConflict: "id" });
   }
 
   const policies = data.policies[0];
   if (policies) {
-    await prisma.policies.upsert({
-      where: { id: "POLICIES" },
-      update: {
-        privacy: policies.privacy as any,
-        terms: policies.terms as any,
-        returns: policies.returns as any,
-      },
-      create: {
-        id: "POLICIES",
-        privacy: policies.privacy as any,
-        terms: policies.terms as any,
-        returns: policies.returns as any,
-      },
-    });
+    await supabase.from("policies").upsert({
+      id: "POLICIES",
+      privacy: policies.privacy,
+      terms: policies.terms,
+      returns: policies.returns,
+    }, { onConflict: "id" });
   }
 
   const settings = data.settings[0];
   if (settings) {
-    await prisma.siteSettings.upsert({
-      where: { id: "SETTINGS" },
-      update: {
-        siteTitle: settings.siteTitle,
-        siteDescription: settings.siteDescription,
-        faviconUrl: settings.faviconUrl,
-        seoKeywords: settings.seoKeywords,
-        navLinks: settings.navLinks as any,
-        socialLinks: settings.socialLinks as any,
-        appLinks: settings.appLinks as any,
-        footerColumns: settings.footerColumns as any,
-        contactInfo: settings.contactInfo as any,
-        platformLinks: settings.platformLinks as any,
-        workHours: settings.workHours as any,
-      },
-      create: {
-        id: "SETTINGS",
-        siteTitle: settings.siteTitle,
-        siteDescription: settings.siteDescription,
-        faviconUrl: settings.faviconUrl,
-        seoKeywords: settings.seoKeywords,
-        navLinks: settings.navLinks as any,
-        socialLinks: settings.socialLinks as any,
-        appLinks: settings.appLinks as any,
-        footerColumns: settings.footerColumns as any,
-        contactInfo: settings.contactInfo as any,
-        platformLinks: settings.platformLinks as any,
-        workHours: settings.workHours as any,
-      },
-    });
+    await supabase.from("site_settings").upsert({
+      id: "SETTINGS",
+      site_title: settings.siteTitle,
+      site_description: settings.siteDescription,
+      favicon_url: settings.faviconUrl,
+      seo_keywords: settings.seoKeywords,
+      nav_links: settings.navLinks,
+      social_links: settings.socialLinks,
+      app_links: settings.appLinks,
+      footer_columns: settings.footerColumns,
+      contact_info: settings.contactInfo,
+      platform_links: settings.platformLinks,
+      work_hours: settings.workHours,
+    }, { onConflict: "id" });
   }
 
   console.log("Seed complete: all tables populated from seed-data.json");
 }
 
-main().catch((e) => { console.error(e); process.exit(1); }).finally(async () => { await prisma.$disconnect(); });
+main().catch((e) => { console.error(e); process.exit(1); });

@@ -1,4 +1,4 @@
-import { prisma } from "@/app/lib/db";
+import { supabase } from "@/app/lib/db";
 import { SITE_SETTINGS, NAV_LINKS, SOCIAL_LINKS, APP_LINKS_DEFAULTS, DEFAULT_FOOTER_COLUMNS, SITE_CONTACT_INFO, PLATFORM_LINKS, WORK_HOURS } from "@/app/lib/dashboard/placeholders";
 
 export interface NavLink { label: string; href: string }
@@ -71,7 +71,11 @@ function normalizeSocialLinks(raw: unknown): SocialLink[] {
 }
 
 export async function getSiteSettings(): Promise<SiteSettingsResponse> {
-  const row = await prisma.siteSettings.findUnique({ where: { id: "SETTINGS" } });
+  const { data: row } = await supabase
+    .from("site_settings")
+    .select("*")
+    .eq("id", "SETTINGS")
+    .single();
 
   if (!row) {
     return {
@@ -93,19 +97,19 @@ export async function getSiteSettings(): Promise<SiteSettingsResponse> {
 
   return {
     id: row.id,
-    siteTitle: row.siteTitle,
-    siteDescription: row.siteDescription,
-    faviconUrl: row.faviconUrl,
-    seoKeywords: row.seoKeywords,
-    navLinks: safeJsonArray<NavLink>(row.navLinks, NAV_LINKS),
-    socialLinks: normalizeSocialLinks(row.socialLinks),
-    appLinks: (row.appLinks && typeof row.appLinks === "object" && !Array.isArray(row.appLinks)
-      ? row.appLinks
+    siteTitle: row.site_title,
+    siteDescription: row.site_description,
+    faviconUrl: row.favicon_url,
+    seoKeywords: row.seo_keywords,
+    navLinks: safeJsonArray<NavLink>(row.nav_links, NAV_LINKS),
+    socialLinks: normalizeSocialLinks(row.social_links),
+    appLinks: (row.app_links && typeof row.app_links === "object" && !Array.isArray(row.app_links)
+      ? row.app_links
       : APP_LINKS_DEFAULTS) as unknown as AppLinkInfo,
-    footerColumns: safeJsonArray<FooterColumn>(row.footerColumns, DEFAULT_FOOTER_COLUMNS),
-    contactInfo: safeJsonField<ContactInfo>(row.contactInfo, SITE_CONTACT_INFO),
-    platformLinks: safeJsonField<PlatformLinks>(row.platformLinks, PLATFORM_LINKS),
-    workHours: safeJsonField<WorkHours>(row.workHours, WORK_HOURS),
-    updatedAt: row.updatedAt.toISOString(),
+    footerColumns: safeJsonArray<FooterColumn>(row.footer_columns, DEFAULT_FOOTER_COLUMNS),
+    contactInfo: safeJsonField<ContactInfo>(row.contact_info, SITE_CONTACT_INFO),
+    platformLinks: safeJsonField<PlatformLinks>(row.platform_links, PLATFORM_LINKS),
+    workHours: safeJsonField<WorkHours>(row.work_hours, WORK_HOURS),
+    updatedAt: row.updated_at,
   };
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { prisma } from "@/app/lib/db";
+import { supabase } from "@/app/lib/db";
 import { loginSchema } from "@/app/lib/shared-types";
 
 const JWT_SECRET = process.env.JWT_SECRET || "aysar-dev-secret-change-in-production";
@@ -24,12 +24,17 @@ export async function POST(request: NextRequest) {
 
     const { email, password } = parsed.data;
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email)
+      .single();
+
+    if (error || !user) {
       return NextResponse.json({ success: false, error: "بريد إلكتروني أو كلمة مرور غير صحيحة" }, { status: 401 });
     }
 
-    const valid = await bcrypt.compare(password, user.passwordHash);
+    const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
       return NextResponse.json({ success: false, error: "بريد إلكتروني أو كلمة مرور غير صحيحة" }, { status: 401 });
     }

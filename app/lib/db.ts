@@ -1,12 +1,25 @@
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+let _supabase: SupabaseClient | null = null;
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-
-export const prisma = globalForPrisma.prisma || new PrismaClient({ adapter });
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+function getSupabase(): SupabaseClient {
+  if (!_supabase) {
+    const url =
+      process.env.SUPABASE_URL ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_KEY;
+    if (!url || !key) {
+      throw new Error(
+        "Missing SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and SUPABASE_SERVICE_KEY environment variables"
+      );
+    }
+    _supabase = createClient(url, key);
+  }
+  return _supabase;
 }
+
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    return (getSupabase() as unknown as Record<string | symbol, unknown>)[prop];
+  },
+});

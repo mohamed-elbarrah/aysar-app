@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/app/lib/db";
+import { supabase } from "@/app/lib/db";
 import { settingsUpdateSchema } from "@/app/lib/shared-types";
 import { deepMerge, requireAdmin } from "@/app/lib/api-utils";
 import {
@@ -36,24 +36,49 @@ function normalizeObjectField<T>(value: unknown, fallback: T): T {
 }
 
 const DEFAULTS = {
-  siteTitle: SITE_SETTINGS.siteTitle,
-  siteDescription: SITE_SETTINGS.siteDescription,
-  faviconUrl: SITE_SETTINGS.faviconUrl,
-  seoKeywords: SITE_SETTINGS.seoKeywords,
-  navLinks: NAV_LINKS,
-  socialLinks: SOCIAL_LINKS,
-  appLinks: APP_LINKS_DEFAULTS,
-  footerColumns: DEFAULT_FOOTER_COLUMNS,
-  contactInfo: SITE_CONTACT_INFO,
-  platformLinks: PLATFORM_LINKS,
-  workHours: WORK_HOURS,
+  site_title: SITE_SETTINGS.siteTitle,
+  site_description: SITE_SETTINGS.siteDescription,
+  favicon_url: SITE_SETTINGS.faviconUrl,
+  seo_keywords: SITE_SETTINGS.seoKeywords,
+  nav_links: NAV_LINKS,
+  social_links: SOCIAL_LINKS,
+  app_links: APP_LINKS_DEFAULTS,
+  footer_columns: DEFAULT_FOOTER_COLUMNS,
+  contact_info: SITE_CONTACT_INFO,
+  platform_links: PLATFORM_LINKS,
+  work_hours: WORK_HOURS,
 };
 
+function toSnakeCase(data: Record<string, unknown>): Record<string, unknown> {
+  const map: Record<string, string> = {
+    siteTitle: "site_title",
+    siteDescription: "site_description",
+    faviconUrl: "favicon_url",
+    seoKeywords: "seo_keywords",
+    navLinks: "nav_links",
+    socialLinks: "social_links",
+    appLinks: "app_links",
+    footerColumns: "footer_columns",
+    contactInfo: "contact_info",
+    platformLinks: "platform_links",
+    workHours: "work_hours",
+  };
+  const result: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(data)) {
+    result[map[key] || key] = val;
+  }
+  return result;
+}
+
 export async function GET() {
-  const row = await prisma.siteSettings.findUnique({ where: { id: "SETTINGS" } });
+  const { data: row } = await supabase
+    .from("site_settings")
+    .select("*")
+    .eq("id", "SETTINGS")
+    .single();
 
   if (!row) {
-    const data = { ...DEFAULTS, id: "SETTINGS", updatedAt: new Date().toISOString(), socialLinks: [...SOCIAL_LINKS] };
+    const data = { ...DEFAULTS, id: "SETTINGS", updated_at: new Date().toISOString(), social_links: [...SOCIAL_LINKS] };
     return NextResponse.json({ success: true, data });
   }
 
@@ -61,18 +86,18 @@ export async function GET() {
     success: true,
     data: {
       id: row.id,
-      siteTitle: row.siteTitle,
-      siteDescription: row.siteDescription,
-      faviconUrl: row.faviconUrl,
-      seoKeywords: row.seoKeywords,
-      navLinks: Array.isArray(row.navLinks) ? row.navLinks : [...NAV_LINKS],
-      socialLinks: normalizeSocialLinks(row.socialLinks),
-      appLinks: normalizeObjectField(row.appLinks, APP_LINKS_DEFAULTS),
-      footerColumns: Array.isArray(row.footerColumns) ? row.footerColumns : [...DEFAULT_FOOTER_COLUMNS],
-      contactInfo: normalizeObjectField(row.contactInfo, SITE_CONTACT_INFO),
-      platformLinks: normalizeObjectField(row.platformLinks, PLATFORM_LINKS),
-      workHours: normalizeObjectField(row.workHours, WORK_HOURS),
-      updatedAt: row.updatedAt.toISOString(),
+      site_title: row.site_title,
+      site_description: row.site_description,
+      favicon_url: row.favicon_url,
+      seo_keywords: row.seo_keywords,
+      nav_links: Array.isArray(row.nav_links) ? row.nav_links : [...NAV_LINKS],
+      social_links: normalizeSocialLinks(row.social_links),
+      app_links: normalizeObjectField(row.app_links, APP_LINKS_DEFAULTS),
+      footer_columns: Array.isArray(row.footer_columns) ? row.footer_columns : [...DEFAULT_FOOTER_COLUMNS],
+      contact_info: normalizeObjectField(row.contact_info, SITE_CONTACT_INFO),
+      platform_links: normalizeObjectField(row.platform_links, PLATFORM_LINKS),
+      work_hours: normalizeObjectField(row.work_hours, WORK_HOURS),
+      updated_at: row.updated_at,
     },
   });
 }
@@ -87,33 +112,42 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ success: false, error: "بيانات غير صالحة" }, { status: 422 });
   }
 
-  const existing = await prisma.siteSettings.findUnique({ where: { id: "SETTINGS" } });
+  const { data: existing } = await supabase
+    .from("site_settings")
+    .select("*")
+    .eq("id", "SETTINGS")
+    .single();
+
   const current = existing ? (existing as unknown as Record<string, unknown>) : (DEFAULTS as unknown as Record<string, unknown>);
 
-  const merged = deepMerge(current, parsed.data as Record<string, unknown>);
+  const merged = deepMerge(current, toSnakeCase(parsed.data as Record<string, unknown>));
 
-  const page = await prisma.siteSettings.upsert({
-    where: { id: "SETTINGS" },
-    create: { id: "SETTINGS", ...merged },
-    update: merged,
-  });
+  const { data: page, error } = await supabase
+    .from("site_settings")
+    .upsert({ id: "SETTINGS", ...merged }, { onConflict: "id" })
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
 
   return NextResponse.json({
     success: true,
     data: {
       id: page.id,
-      siteTitle: page.siteTitle,
-      siteDescription: page.siteDescription,
-      faviconUrl: page.faviconUrl,
-      seoKeywords: page.seoKeywords,
-      navLinks: Array.isArray(page.navLinks) ? page.navLinks : [...NAV_LINKS],
-      socialLinks: normalizeSocialLinks(page.socialLinks),
-      appLinks: normalizeObjectField(page.appLinks, APP_LINKS_DEFAULTS),
-      footerColumns: Array.isArray(page.footerColumns) ? page.footerColumns : [...DEFAULT_FOOTER_COLUMNS],
-      contactInfo: normalizeObjectField(page.contactInfo, SITE_CONTACT_INFO),
-      platformLinks: normalizeObjectField(page.platformLinks, PLATFORM_LINKS),
-      workHours: normalizeObjectField(page.workHours, WORK_HOURS),
-      updatedAt: page.updatedAt.toISOString(),
+      site_title: page.site_title,
+      site_description: page.site_description,
+      favicon_url: page.favicon_url,
+      seo_keywords: page.seo_keywords,
+      nav_links: Array.isArray(page.nav_links) ? page.nav_links : [...NAV_LINKS],
+      social_links: normalizeSocialLinks(page.social_links),
+      app_links: normalizeObjectField(page.app_links, APP_LINKS_DEFAULTS),
+      footer_columns: Array.isArray(page.footer_columns) ? page.footer_columns : [...DEFAULT_FOOTER_COLUMNS],
+      contact_info: normalizeObjectField(page.contact_info, SITE_CONTACT_INFO),
+      platform_links: normalizeObjectField(page.platform_links, PLATFORM_LINKS),
+      work_hours: normalizeObjectField(page.work_hours, WORK_HOURS),
+      updated_at: page.updated_at,
     },
   });
 }

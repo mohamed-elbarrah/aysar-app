@@ -1,4 +1,4 @@
-import { prisma } from "@/app/lib/db";
+import { supabase } from "@/app/lib/db";
 import {
   HOME_HERO,
   FEATURE_SECTIONS,
@@ -67,7 +67,11 @@ export interface HomePageResponse {
 }
 
 export async function getHomePageData(): Promise<HomePageResponse> {
-  let page = await prisma.homePage.findUnique({ where: { id: "HOME" } });
+  const { data: page } = await supabase
+    .from("home_page")
+    .select("*")
+    .eq("id", "HOME")
+    .single();
 
   if (!page) {
     return {
@@ -85,11 +89,11 @@ export async function getHomePageData(): Promise<HomePageResponse> {
   return {
     id: page.id,
     hero: page.hero as HomePageResponse["hero"],
-    featureSections: page.featureSections as HomePageResponse["featureSections"],
-    bentoFeatures: page.bentoFeatures as HomePageResponse["bentoFeatures"],
-    projectOverview: page.projectOverview as HomePageResponse["projectOverview"],
-    appSection: page.appSection as HomePageResponse["appSection"],
-    ctaSection: page.ctaSection as HomePageResponse["ctaSection"],
-    updatedAt: page.updatedAt.toISOString(),
+    featureSections: page.feature_sections as HomePageResponse["featureSections"],
+    bentoFeatures: page.bento_features as HomePageResponse["bentoFeatures"],
+    projectOverview: page.project_overview as HomePageResponse["projectOverview"],
+    appSection: page.app_section as HomePageResponse["appSection"],
+    ctaSection: page.cta_section as HomePageResponse["ctaSection"],
+    updatedAt: page.updated_at,
   };
 }

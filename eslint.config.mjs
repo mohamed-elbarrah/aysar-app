@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Hostinger Supabase connection test file (CommonJS)
+    "db.js",
   ]),
 ]);
 

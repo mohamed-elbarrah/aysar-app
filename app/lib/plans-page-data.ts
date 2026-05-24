@@ -1,4 +1,4 @@
-import { prisma } from "@/app/lib/db";
+import { supabase } from "@/app/lib/db";
 import { PLANS, COMPARE_ROWS, FAQ_ITEMS } from "@/lib/plans-data";
 import { isOldCompareFormat, migrateCompareRows } from "@/lib/plans-data";
 import type { Plan, CompareTableData, FAQItem } from "@/lib/plans-data";
@@ -25,7 +25,11 @@ export interface PlansPageResponse {
 }
 
 export async function getPlansPageData(): Promise<PlansPageResponse> {
-  let page = await prisma.plansPage.findUnique({ where: { id: "PLANS" } });
+  const { data: page } = await supabase
+    .from("plans_page")
+    .select("*")
+    .eq("id", "PLANS")
+    .single();
 
   if (!page) {
     return {
@@ -38,7 +42,7 @@ export async function getPlansPageData(): Promise<PlansPageResponse> {
     };
   }
 
-  const rawCompareRows = page.compareRows as unknown;
+  const rawCompareRows = page.compare_rows as unknown;
 
   return {
     id: page.id,
@@ -47,7 +51,7 @@ export async function getPlansPageData(): Promise<PlansPageResponse> {
     compareRows: isOldCompareFormat(rawCompareRows)
       ? migrateCompareRows(rawCompareRows)
       : (rawCompareRows as CompareTableData),
-    faqItems: page.faqItems as unknown as PlansPageResponse["faqItems"],
-    updatedAt: page.updatedAt.toISOString(),
+    faqItems: page.faq_items as unknown as PlansPageResponse["faqItems"],
+    updatedAt: page.updated_at,
   };
 }

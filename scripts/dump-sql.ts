@@ -1,6 +1,5 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { createClient } from "@supabase/supabase-js";
 import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
@@ -8,8 +7,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-const prisma = new PrismaClient({ adapter });
+const supabase = createClient(
+  process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+);
 
 function escape(val: unknown): string {
   if (val === null || val === undefined) return "NULL";
@@ -25,15 +26,23 @@ function jsonb(val: unknown): string {
 }
 
 async function main() {
-  const [users, homePages, plansPages, contactPages, policies, settings, messages] = await Promise.all([
-    prisma.user.findMany(),
-    prisma.homePage.findMany(),
-    prisma.plansPage.findMany(),
-    prisma.contactPage.findMany(),
-    prisma.policies.findMany(),
-    prisma.siteSettings.findMany(),
-    prisma.contactMessage.findMany(),
+  const [usersRes, homePagesRes, plansPagesRes, contactPagesRes, policiesRes, settingsRes, messagesRes] = await Promise.all([
+    supabase.from("users").select("*"),
+    supabase.from("home_page").select("*"),
+    supabase.from("plans_page").select("*"),
+    supabase.from("contact_page").select("*"),
+    supabase.from("policies").select("*"),
+    supabase.from("site_settings").select("*"),
+    supabase.from("contact_messages").select("*"),
   ]);
+
+  const users = usersRes.data || [];
+  const homePages = homePagesRes.data || [];
+  const plansPages = plansPagesRes.data || [];
+  const contactPages = contactPagesRes.data || [];
+  const policies = policiesRes.data || [];
+  const settings = settingsRes.data || [];
+  const messages = messagesRes.data || [];
 
   const lines: string[] = [
     "-- ============================================================",
@@ -45,58 +54,51 @@ async function main() {
     "",
   ];
 
-  // Users
   for (const u of users) {
     lines.push(`INSERT INTO users (id, email, password_hash, name, role, created_at, updated_at)
-  VALUES (${escape(u.id)}, ${escape(u.email)}, ${escape(u.passwordHash)}, ${escape(u.name)}, ${escape(u.role)}, ${escape(u.createdAt.toISOString?.() ?? u.createdAt)}, ${escape(u.updatedAt.toISOString?.() ?? u.updatedAt)});`);
+  VALUES (${escape(u.id)}, ${escape(u.email)}, ${escape(u.password_hash)}, ${escape(u.name)}, ${escape(u.role)}, ${escape(u.created_at)}, ${escape(u.updated_at)});`);
   }
 
   lines.push("");
 
-  // HomePage
   for (const h of homePages) {
     lines.push(`INSERT INTO home_page (id, hero, feature_sections, bento_features, project_overview, app_section, cta_section, updated_at)
-  VALUES (${escape(h.id)}, ${jsonb(h.hero)}, ${jsonb(h.featureSections)}, ${jsonb(h.bentoFeatures)}, ${jsonb(h.projectOverview)}, ${jsonb(h.appSection)}, ${jsonb(h.ctaSection)}, ${escape(h.updatedAt.toISOString?.() ?? h.updatedAt)});`);
+  VALUES (${escape(h.id)}, ${jsonb(h.hero)}, ${jsonb(h.feature_sections)}, ${jsonb(h.bento_features)}, ${jsonb(h.project_overview)}, ${jsonb(h.app_section)}, ${jsonb(h.cta_section)}, ${escape(h.updated_at)});`);
   }
 
   lines.push("");
 
-  // PlansPage
   for (const p of plansPages) {
     lines.push(`INSERT INTO plans_page (id, hero, plans, compare_rows, faq_items, updated_at)
-  VALUES (${escape(p.id)}, ${jsonb(p.hero)}, ${jsonb(p.plans)}, ${jsonb(p.compareRows)}, ${jsonb(p.faqItems)}, ${escape(p.updatedAt.toISOString?.() ?? p.updatedAt)});`);
+  VALUES (${escape(p.id)}, ${jsonb(p.hero)}, ${jsonb(p.plans)}, ${jsonb(p.compare_rows)}, ${jsonb(p.faq_items)}, ${escape(p.updated_at)});`);
   }
 
   lines.push("");
 
-  // ContactPage
   for (const c of contactPages) {
     lines.push(`INSERT INTO contact_page (id, hero, contact_info, channels, inquiry_options, success_message, form_fields, form_config, updated_at)
-  VALUES (${escape(c.id)}, ${jsonb(c.hero)}, ${jsonb(c.contactInfo)}, ${jsonb(c.channels)}, ${jsonb(c.inquiryOptions)}, ${escape(c.successMessage)}, ${jsonb(c.formFields)}, ${jsonb(c.formConfig)}, ${escape(c.updatedAt.toISOString?.() ?? c.updatedAt)});`);
+  VALUES (${escape(c.id)}, ${jsonb(c.hero)}, ${jsonb(c.contact_info)}, ${jsonb(c.channels)}, ${jsonb(c.inquiry_options)}, ${escape(c.success_message)}, ${jsonb(c.form_fields)}, ${jsonb(c.form_config)}, ${escape(c.updated_at)});`);
   }
 
   lines.push("");
 
-  // Policies
   for (const p of policies) {
     lines.push(`INSERT INTO policies (id, privacy, terms, returns, updated_at)
-  VALUES (${escape(p.id)}, ${jsonb(p.privacy)}, ${jsonb(p.terms)}, ${jsonb(p.returns)}, ${escape(p.updatedAt.toISOString?.() ?? p.updatedAt)});`);
+  VALUES (${escape(p.id)}, ${jsonb(p.privacy)}, ${jsonb(p.terms)}, ${jsonb(p.returns)}, ${escape(p.updated_at)});`);
   }
 
   lines.push("");
 
-  // SiteSettings
   for (const s of settings) {
     lines.push(`INSERT INTO site_settings (id, site_title, site_description, favicon_url, seo_keywords, nav_links, social_links, app_links, footer_columns, contact_info, platform_links, work_hours, updated_at)
-  VALUES (${escape(s.id)}, ${escape(s.siteTitle)}, ${escape(s.siteDescription)}, ${escape(s.faviconUrl)}, ${escape(s.seoKeywords)}, ${jsonb(s.navLinks)}, ${jsonb(s.socialLinks)}, ${jsonb(s.appLinks)}, ${jsonb(s.footerColumns)}, ${jsonb(s.contactInfo)}, ${jsonb(s.platformLinks)}, ${jsonb(s.workHours)}, ${escape(s.updatedAt.toISOString?.() ?? s.updatedAt)});`);
+  VALUES (${escape(s.id)}, ${escape(s.site_title)}, ${escape(s.site_description)}, ${escape(s.favicon_url)}, ${escape(s.seo_keywords)}, ${jsonb(s.nav_links)}, ${jsonb(s.social_link)}, ${jsonb(s.app_links)}, ${jsonb(s.footer_columns)}, ${jsonb(s.contact_info)}, ${jsonb(s.platform_links)}, ${jsonb(s.work_hours)}, ${escape(s.updated_at)});`);
   }
 
   lines.push("");
 
-  // ContactMessages
   for (const m of messages) {
     lines.push(`INSERT INTO contact_messages (id, full_name, email, phone, inquiry, subject, message, is_read, created_at)
-  VALUES (${escape(m.id)}, ${escape(m.fullName)}, ${escape(m.email)}, ${escape(m.phone)}, ${escape(m.inquiry)}, ${escape(m.subject)}, ${escape(m.message)}, ${m.isRead ? "TRUE" : "FALSE"}, ${escape(m.createdAt.toISOString?.() ?? m.createdAt)});`);
+  VALUES (${escape(m.id)}, ${escape(m.full_name)}, ${escape(m.email)}, ${escape(m.phone)}, ${escape(m.inquiry)}, ${escape(m.subject)}, ${escape(m.message)}, ${m.is_read ? "TRUE" : "FALSE"}, ${escape(m.created_at)});`);
   }
 
   lines.push("");
@@ -106,4 +108,4 @@ async function main() {
   console.log(`SQL dump written to ${outPath}`);
 }
 
-main().catch((e) => { console.error(e); process.exit(1); }).finally(() => prisma.$disconnect());
+main().catch((e) => { console.error(e); process.exit(1); });
