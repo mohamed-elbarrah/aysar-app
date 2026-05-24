@@ -123,6 +123,13 @@ pnpm build
 
 # Lint
 pnpm lint
+
+# Database
+pnpm db:migrate          # Run pending migrations
+pnpm db:seed             # Seed DB from prisma/seed-data.json
+pnpm db:update-seed      # Refresh seed-data.json from current DB state
+pnpm db:dump-sql         # Generate raw SQL dump at scripts/seed-data.sql
+pnpm db:studio           # Open Prisma Studio
 ```
 
 ---

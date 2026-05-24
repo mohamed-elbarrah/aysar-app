@@ -9,6 +9,7 @@ import { ContentCard } from "@/app/components/dashboard/ContentCard";
 import { PLANS, FAQ_ITEMS, COMPARE_ROWS } from "@/app/lib/dashboard/placeholders";
 import type { Plan, FAQItem, CompareTableData, CompareColumn, CompareRow } from "@/lib/plans-data";
 import { ScrollText, ChevronUp, Loader2, Plus, Trash2, GripVertical } from "lucide-react";
+import { SaveBar } from "@/app/components/dashboard/SaveBar";
 
 const sections = [
   { id: "banner", label: "البانر" },
@@ -51,6 +52,8 @@ export default function PlansPageEditor() {
   const [fetchError, setFetchError] = useState("");
   const [saving, setSaving] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<string>();
+  const [globalDirty, setGlobalDirty] = useState(false);
+  const markDirty = useCallback(() => setGlobalDirty(true), []);
   const [activeSection, setActiveSection] = useState("banner");
   const pageRef = useRef<HTMLDivElement>(null);
 
@@ -112,10 +115,32 @@ export default function PlansPageEditor() {
     const ok = await saveSection(sectionKey, sectionData);
     setSaving(null);
     if (ok) {
+      setGlobalDirty(false);
       setLastSaved(new Date().toLocaleTimeString("ar-SA"));
       setTimeout(() => setLastSaved(undefined), 5000);
     }
   }, []);
+
+  const handleGlobalSave = useCallback(async () => {
+    setGlobalDirty(false);
+    setSaving("all");
+    const sectionsToSave = [
+      ["hero", data.hero],
+      ["plans", data.plans],
+      ["compareRows", data.compareRows],
+      ["faqItems", data.faqItems],
+    ] as const;
+    let allOk = true;
+    for (const [key, sectionData] of sectionsToSave) {
+      const ok = await saveSection(key, sectionData);
+      if (!ok) allOk = false;
+    }
+    setSaving(null);
+    if (allOk) {
+      setLastSaved(new Date().toLocaleTimeString("ar-SA"));
+      setTimeout(() => setLastSaved(undefined), 5000);
+    }
+  }, [data]);
 
   if (loading) {
     return (
@@ -137,11 +162,17 @@ export default function PlansPageEditor() {
           {fetchError && <p className="text-xs text-amber-600 mt-1">{fetchError}</p>}
         </div>
         <div className="space-y-6 pb-24">
-          <BannerSection data={data.hero} saving={saving === "hero"} onSave={(d) => handleSectionSave("hero", d)} />
-          <PlansSection data={data.plans} saving={saving === "plans"} onSave={(d) => handleSectionSave("plans", d)} />
-          <CompareSection data={data.compareRows} saving={saving === "compareRows"} onSave={(d) => handleSectionSave("compareRows", d)} />
-          <FAQSection data={data.faqItems} saving={saving === "faqItems"} onSave={(d) => handleSectionSave("faqItems", d)} />
+          <BannerSection data={data.hero} saving={saving === "hero"} onSave={(d) => handleSectionSave("hero", d)} onDirty={markDirty} />
+          <PlansSection data={data.plans} saving={saving === "plans"} onSave={(d) => handleSectionSave("plans", d)} onDirty={markDirty} />
+          <CompareSection data={data.compareRows} saving={saving === "compareRows"} onSave={(d) => handleSectionSave("compareRows", d)} onDirty={markDirty} />
+          <FAQSection data={data.faqItems} saving={saving === "faqItems"} onSave={(d) => handleSectionSave("faqItems", d)} onDirty={markDirty} />
         </div>
+        <SaveBar
+          isDirty={globalDirty}
+          isSubmitting={saving === "all"}
+          onSave={handleGlobalSave}
+          lastSaved={lastSaved ?? null}
+        />
       </div>
       <div className="hidden xl:block w-[200px] shrink-0">
         <div className="sticky top-0">
@@ -160,16 +191,20 @@ export default function PlansPageEditor() {
   );
 }
 
-function BannerSection({ data: initial, saving, onSave }: { data: PlansPageData["hero"]; saving: boolean; onSave: (d: PlansPageData["hero"]) => void }) {
+function BannerSection({ data: initial, saving, onSave, onDirty }: { data: PlansPageData["hero"]; saving: boolean; onSave: (d: PlansPageData["hero"]) => void; onDirty?: () => void }) {
   const [data, setData] = useState(initial);
+  const handleChange = useCallback((patch: Partial<PlansPageData["hero"]>) => {
+    setData((prev) => ({ ...prev, ...patch }));
+    onDirty?.();
+  }, [onDirty]);
   return (
     <section id="banner">
       <ContentCard title="البانر" subtitle="عنوان صفحة الخطط والأسعار">
         <div className="form-grid-2">
-          <Input label="الشارة" value={data.badge} onChange={(e) => setData({ ...data, badge: e.target.value })} />
-          <Input label="العنوان" value={data.title} onChange={(e) => setData({ ...data, title: e.target.value })} />
-          <Input label="عنوان مميز" value={data.titleAccent} onChange={(e) => setData({ ...data, titleAccent: e.target.value })} />
-          <Textarea label="الوصف" value={data.subtitle} onChange={(e) => setData({ ...data, subtitle: e.target.value })} rows={3} />
+          <Input label="الشارة" value={data.badge} onChange={(e) => handleChange({ badge: e.target.value })} />
+          <Input label="العنوان" value={data.title} onChange={(e) => handleChange({ title: e.target.value })} />
+          <Input label="عنوان مميز" value={data.titleAccent} onChange={(e) => handleChange({ titleAccent: e.target.value })} />
+          <Textarea label="الوصف" value={data.subtitle} onChange={(e) => handleChange({ subtitle: e.target.value })} rows={3} />
         </div>
         <div className="mt-5 flex justify-end">
           <DashboardButton disabled={saving} onClick={() => onSave(data)}>
@@ -181,7 +216,7 @@ function BannerSection({ data: initial, saving, onSave }: { data: PlansPageData[
   );
 }
 
-function PlansSection({ data: initial, saving, onSave }: { data: Plan[]; saving: boolean; onSave: (d: Plan[]) => void }) {
+function PlansSection({ data: initial, saving, onSave, onDirty }: { data: Plan[]; saving: boolean; onSave: (d: Plan[]) => void; onDirty?: () => void }) {
   const [plans, setPlans] = useState<Plan[]>(initial);
   return (
     <section id="plans">
@@ -195,18 +230,18 @@ function PlansSection({ data: initial, saving, onSave }: { data: Plan[]; saving:
               </div>
               <div className="p-4 space-y-4">
                 <div className="form-grid-2">
-                  <Input label="الاسم" value={plan.name} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], name: e.target.value }; setPlans(n); }} />
-                  <Input label="السعر الشهري" type="number" value={plan.priceMonthly ?? ""} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], priceMonthly: e.target.value ? Number(e.target.value) : null }; setPlans(n); }} />
-                  <Input label="السعر السنوي" type="number" value={plan.priceYearly ?? ""} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], priceYearly: e.target.value ? Number(e.target.value) : null }; setPlans(n); }} />
+                  <Input label="الاسم" value={plan.name} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], name: e.target.value }; setPlans(n); onDirty?.(); }} />
+                  <Input label="السعر الشهري" type="number" value={plan.priceMonthly ?? ""} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], priceMonthly: e.target.value ? Number(e.target.value) : null }; setPlans(n); onDirty?.(); }} />
+                  <Input label="السعر السنوي" type="number" value={plan.priceYearly ?? ""} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], priceYearly: e.target.value ? Number(e.target.value) : null }; setPlans(n); onDirty?.(); }} />
                 </div>
-                <Textarea label="الوصف" value={plan.description} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], description: e.target.value }; setPlans(n); }} rows={2} />
+                <Textarea label="الوصف" value={plan.description} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], description: e.target.value }; setPlans(n); onDirty?.(); }} rows={2} />
                 <div className="flex items-center gap-6">
-                  <label className="flex items-center gap-2 text-sm"><Checkbox checked={plan.isFree} onCheckedChange={(v) => { const n = [...plans]; n[idx] = { ...n[idx], isFree: !!v }; setPlans(n); }} /> مجانية</label>
-                  <label className="flex items-center gap-2 text-sm"><Checkbox checked={plan.isFeatured} onCheckedChange={(v) => { const n = [...plans]; n[idx] = { ...n[idx], isFeatured: !!v }; setPlans(n); }} /> مميزة (موصى بها)</label>
+                  <label className="flex items-center gap-2 text-sm"><Checkbox checked={plan.isFree} onCheckedChange={(v) => { const n = [...plans]; n[idx] = { ...n[idx], isFree: !!v }; setPlans(n); onDirty?.(); }} /> مجانية</label>
+                  <label className="flex items-center gap-2 text-sm"><Checkbox checked={plan.isFeatured} onCheckedChange={(v) => { const n = [...plans]; n[idx] = { ...n[idx], isFeatured: !!v }; setPlans(n); onDirty?.(); }} /> مميزة (موصى بها)</label>
                 </div>
                 <div className="form-grid-2">
-                  <Input label="نص الزر" value={plan.ctaLabel} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], ctaLabel: e.target.value }; setPlans(n); }} />
-                  <Input label="رابط الزر" value={plan.ctaHref} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], ctaHref: e.target.value }; setPlans(n); }} />
+                  <Input label="نص الزر" value={plan.ctaLabel} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], ctaLabel: e.target.value }; setPlans(n); onDirty?.(); }} />
+                  <Input label="رابط الزر" value={plan.ctaHref} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], ctaHref: e.target.value }; setPlans(n); onDirty?.(); }} />
                 </div>
                 <div className="mt-2">
                   <p className="text-xs font-semibold text-[#3a4a60] mb-2">المميزات</p>
@@ -215,11 +250,12 @@ function PlansSection({ data: initial, saving, onSave }: { data: Plan[]; saving:
                       <div key={fidx} className="flex items-center gap-2 group">
                         <button
                           type="button"
-                          onClick={() => {
-                            const n = [...plans];
-                            n[idx].features = n[idx].features.filter((_, i) => i !== fidx);
-                            setPlans(n);
-                          }}
+                    onClick={() => {
+                      const n = [...plans];
+                      n[idx].features = n[idx].features.filter((_, i) => i !== fidx);
+                      setPlans(n);
+                      onDirty?.();
+                    }}
                           className="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 transition-colors shrink-0"
                           title="حذف الميزة"
                         >
@@ -230,7 +266,7 @@ function PlansSection({ data: initial, saving, onSave }: { data: Plan[]; saving:
                           onCheckedChange={(v) => {
                             const n = [...plans];
                             n[idx].features[fidx] = { ...n[idx].features[fidx], enabled: !!v };
-                            setPlans(n);
+                            setPlans(n); onDirty?.();
                           }}
                         />
                         <input
@@ -239,7 +275,7 @@ function PlansSection({ data: initial, saving, onSave }: { data: Plan[]; saving:
                           onChange={(e) => {
                             const n = [...plans];
                             n[idx].features[fidx] = { ...n[idx].features[fidx], text: e.target.value };
-                            setPlans(n);
+                            setPlans(n); onDirty?.();
                           }}
                         />
                         <label className="flex items-center gap-1 text-xs shrink-0">
@@ -248,7 +284,7 @@ function PlansSection({ data: initial, saving, onSave }: { data: Plan[]; saving:
                             onCheckedChange={(v) => {
                               const n = [...plans];
                               n[idx].features[fidx] = { ...n[idx].features[fidx], soon: !!v };
-                              setPlans(n);
+                              setPlans(n); onDirty?.();
                             }}
                           /> قريباً
                         </label>
@@ -259,7 +295,7 @@ function PlansSection({ data: initial, saving, onSave }: { data: Plan[]; saving:
                       onClick={() => {
                         const n = [...plans];
                         n[idx].features = [...n[idx].features, { text: "ميزة جديدة", enabled: true }];
-                        setPlans(n);
+                        setPlans(n); onDirty?.();
                       }}
                       className="w-full py-1.5 rounded-md border border-dashed border-[#e8edf5] text-xs text-[#6b7a94] hover:border-[#0c2954]/30 hover:text-[#0c2954] hover:bg-[#f5f6f9] transition-colors flex items-center justify-center gap-1"
                     >
@@ -282,7 +318,7 @@ function PlansSection({ data: initial, saving, onSave }: { data: Plan[]; saving:
   );
 }
 
-function CompareSection({ data: initial, saving, onSave }: { data: CompareTableData; saving: boolean; onSave: (d: CompareTableData) => void }) {
+function CompareSection({ data: initial, saving, onSave, onDirty }: { data: CompareTableData; saving: boolean; onSave: (d: CompareTableData) => void; onDirty?: () => void }) {
   const [compare, setCompare] = useState<CompareTableData>(initial);
 
   const addColumn = () => {
@@ -296,6 +332,7 @@ function CompareSection({ data: initial, saving, onSave }: { data: CompareTableD
       return row;
     });
     setCompare(n);
+    onDirty?.();
   };
 
   const deleteColumn = (colId: string) => {
@@ -309,6 +346,7 @@ function CompareSection({ data: initial, saving, onSave }: { data: CompareTableD
       return row;
     });
     setCompare(n);
+    onDirty?.();
   };
 
   const addFeatureAt = (afterIdx: number) => {
@@ -318,10 +356,12 @@ function CompareSection({ data: initial, saving, onSave }: { data: CompareTableD
     const newRow: CompareRow = { type: "feature" as const, label: "ميزة جديدة", values: blankValues };
     n.rows = [...n.rows.slice(0, afterIdx + 1), newRow, ...n.rows.slice(afterIdx + 1)];
     setCompare(n);
+    onDirty?.();
   };
 
   const addSection = () => {
     setCompare({ ...compare, rows: [...compare.rows, { type: "section" as const, label: "قسم جديد" }] });
+    onDirty?.();
   };
 
   return (
@@ -332,7 +372,7 @@ function CompareSection({ data: initial, saving, onSave }: { data: CompareTableD
             <input
               className="form-control-contact text-xs font-bold"
               value={compare.featureLabel}
-              onChange={(e) => setCompare({ ...compare, featureLabel: e.target.value })}
+              onChange={(e) => { setCompare({ ...compare, featureLabel: e.target.value }); onDirty?.(); }}
               placeholder="الميزة"
             />
             {compare.columns.map((col) => (
@@ -344,6 +384,7 @@ function CompareSection({ data: initial, saving, onSave }: { data: CompareTableD
                     const n = { ...compare };
                     n.columns = n.columns.map((c) => (c.id === col.id ? { ...c, label: e.target.value } : c));
                     setCompare(n);
+                    onDirty?.();
                   }}
                   placeholder="اسم الباقة"
                 />
@@ -380,11 +421,12 @@ function CompareSection({ data: initial, saving, onSave }: { data: CompareTableD
                         const n = { ...compare };
                         n.rows = n.rows.map((r, i) => (i === ridx ? { ...r, label: e.target.value } : r));
                         setCompare(n);
+                        onDirty?.();
                       }}
                     />
                     <button
                       type="button"
-                      onClick={() => setCompare({ ...compare, rows: compare.rows.filter((_, i) => i !== ridx) })}
+                      onClick={() => { setCompare({ ...compare, rows: compare.rows.filter((_, i) => i !== ridx) }); onDirty?.(); }}
                       className="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 shrink-0"
                       title="حذف القسم"
                     >
@@ -404,14 +446,15 @@ function CompareSection({ data: initial, saving, onSave }: { data: CompareTableD
                       <input
                         className="form-control-contact text-sm"
                         value={row.label}
-                        onChange={(e) => {
-                          const n = { ...compare };
-                          n.rows = n.rows.map((r, i) =>
-                            i === ridx && r.type === "feature" ? { ...r, label: e.target.value } : r
-                          );
-                          setCompare(n);
-                        }}
-                        placeholder="الميزة"
+                      onChange={(e) => {
+                        const n = { ...compare };
+                        n.rows = n.rows.map((r, i) =>
+                          i === ridx && r.type === "feature" ? { ...r, label: e.target.value } : r
+                        );
+                        setCompare(n);
+                        onDirty?.();
+                      }}
+                      placeholder="الميزة"
                       />
                       {compare.columns.map((col) => (
                         <input
@@ -426,6 +469,7 @@ function CompareSection({ data: initial, saving, onSave }: { data: CompareTableD
                                 : r
                             );
                             setCompare(n);
+                            onDirty?.();
                           }}
                           placeholder="—"
                         />
@@ -433,7 +477,7 @@ function CompareSection({ data: initial, saving, onSave }: { data: CompareTableD
                     </div>
                     <button
                       type="button"
-                      onClick={() => setCompare({ ...compare, rows: compare.rows.filter((_, i) => i !== ridx) })}
+                      onClick={() => { setCompare({ ...compare, rows: compare.rows.filter((_, i) => i !== ridx) }); onDirty?.(); }}
                       className="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 shrink-0"
                       title="حذف الميزة"
                     >
@@ -463,7 +507,7 @@ function CompareSection({ data: initial, saving, onSave }: { data: CompareTableD
   );
 }
 
-function FAQSection({ data: initial, saving, onSave }: { data: FAQItem[]; saving: boolean; onSave: (d: FAQItem[]) => void }) {
+function FAQSection({ data: initial, saving, onSave, onDirty }: { data: FAQItem[]; saving: boolean; onSave: (d: FAQItem[]) => void; onDirty?: () => void }) {
   const [items, setItems] = useState<FAQItem[]>(initial);
   const dragIdx = useRef<number | null>(null);
 
@@ -479,6 +523,7 @@ function FAQSection({ data: initial, saving, onSave }: { data: FAQItem[]; saving
     n.splice(idx, 0, moved);
     dragIdx.current = idx;
     setItems(n);
+    onDirty?.();
   };
 
   const handleDragEnd = () => {
@@ -487,10 +532,12 @@ function FAQSection({ data: initial, saving, onSave }: { data: FAQItem[]; saving
 
   const handleAdd = () => {
     setItems([...items, { question: "سؤال جديد", answer: "الإجابة هنا" }]);
+    onDirty?.();
   };
 
   const handleDelete = (idx: number) => {
     setItems(items.filter((_, i) => i !== idx));
+    onDirty?.();
   };
 
   return (
@@ -532,6 +579,7 @@ function FAQSection({ data: initial, saving, onSave }: { data: FAQItem[]; saving
                   const n = [...items];
                   n[idx] = { ...n[idx], question: e.target.value };
                   setItems(n);
+                  onDirty?.();
                 }}
               />
               <Textarea
@@ -541,6 +589,7 @@ function FAQSection({ data: initial, saving, onSave }: { data: FAQItem[]; saving
                   const n = [...items];
                   n[idx] = { ...n[idx], answer: e.target.value };
                   setItems(n);
+                  onDirty?.();
                 }}
                 rows={4}
               />

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Input, Textarea } from "@/app/components/ui/Input";
 import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
+import { SaveBar } from "@/app/components/dashboard/SaveBar";
 import { LinkListEditor } from "@/app/components/dashboard/LinkListEditor";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { DEFAULT_FOOTER_COLUMNS } from "@/app/lib/dashboard/placeholders";
@@ -13,7 +14,8 @@ export default function FooterSettingsPage() {
   const [columns, setColumns] = useState<FooterColumn[]>(DEFAULT_FOOTER_COLUMNS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [feedback, setFeedback] = useState("");
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const [savedData, setSavedData] = useState<FooterColumn[]>(DEFAULT_FOOTER_COLUMNS);
 
   useEffect(() => {
     async function load() {
@@ -22,12 +24,18 @@ export default function FooterSettingsPage() {
         const json = await res.json();
         if (json.success && json.data?.footerColumns) {
           setColumns(json.data.footerColumns);
+          setSavedData(JSON.parse(JSON.stringify(json.data.footerColumns)));
         }
       } catch { /* keep defaults */ }
       finally { setLoading(false); }
     }
     load();
   }, []);
+
+  const isDirty = useMemo(
+    () => JSON.stringify(savedData) !== JSON.stringify(columns),
+    [savedData, columns]
+  );
 
   const handleSave = useCallback(async () => {
     setSaving(true);
@@ -39,12 +47,17 @@ export default function FooterSettingsPage() {
         body: JSON.stringify({ footerColumns: columns }),
       });
       if (res.ok) {
-        setFeedback("تم الحفظ بنجاح");
-        setTimeout(() => setFeedback(""), 3000);
+        setSavedData(JSON.parse(JSON.stringify(columns)));
+        setLastSaved(new Date().toLocaleTimeString("ar-SA"));
+        setTimeout(() => setLastSaved(null), 5000);
       }
     } catch { /* silent */ }
     setSaving(false);
   }, [columns]);
+
+  const handleReset = useCallback(() => {
+    setColumns(JSON.parse(JSON.stringify(savedData)));
+  }, [savedData]);
 
   const addColumn = () => {
     setColumns([...columns, { type: "links", title: "", links: [] }]);
@@ -140,12 +153,14 @@ export default function FooterSettingsPage() {
         إضافة عمود جديد
       </DashboardButton>
 
-      <div className="flex items-center justify-between pt-4 border-t border-[#e8edf5]">
-        <span className="text-xs text-[#1a9a5a]">{feedback}</span>
-        <DashboardButton disabled={saving} onClick={handleSave}>
-          {saving ? "جاري الحفظ..." : "حفظ جميع الأعمدة"}
-        </DashboardButton>
-      </div>
+      <SaveBar
+        isDirty={isDirty}
+        isSubmitting={saving}
+        onSave={handleSave}
+        onReset={handleReset}
+        lastSaved={lastSaved}
+        saveButtonText="حفظ جميع الأعمدة"
+      />
     </div>
   );
 }

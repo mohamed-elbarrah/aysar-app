@@ -10,6 +10,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
+    "db:update-seed": "tsx scripts/update-seed-data.ts",
+    "db:dump-sql": "tsx scripts/dump-sql.ts",
     "lint": "eslint"
   },
   "dependencies": {

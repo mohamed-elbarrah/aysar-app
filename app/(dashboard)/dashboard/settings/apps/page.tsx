@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Input } from "@/app/components/ui/Input";
-import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
+import { SaveBar } from "@/app/components/dashboard/SaveBar";
 import { Loader2 } from "lucide-react";
 import { APP_LINKS_DEFAULTS } from "@/app/lib/dashboard/placeholders";
 
@@ -13,7 +13,8 @@ export default function AppsSettingsPage() {
   const [data, setData] = useState<AppLinkInfo>(APP_LINKS_DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [feedback, setFeedback] = useState("");
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const [savedData, setSavedData] = useState<AppLinkInfo>(APP_LINKS_DEFAULTS);
 
   useEffect(() => {
     async function load() {
@@ -22,12 +23,18 @@ export default function AppsSettingsPage() {
         const json = await res.json();
         if (json.success && json.data?.appLinks) {
           setData(json.data.appLinks);
+          setSavedData(JSON.parse(JSON.stringify(json.data.appLinks)));
         }
       } catch { /* keep defaults */ }
       finally { setLoading(false); }
     }
     load();
   }, []);
+
+  const isDirty = useMemo(
+    () => JSON.stringify(savedData) !== JSON.stringify(data),
+    [savedData, data]
+  );
 
   const handleSave = useCallback(async () => {
     setSaving(true);
@@ -39,12 +46,17 @@ export default function AppsSettingsPage() {
         body: JSON.stringify({ appLinks: data }),
       });
       if (res.ok) {
-        setFeedback("تم الحفظ بنجاح");
-        setTimeout(() => setFeedback(""), 3000);
+        setSavedData(JSON.parse(JSON.stringify(data)));
+        setLastSaved(new Date().toLocaleTimeString("ar-SA"));
+        setTimeout(() => setLastSaved(null), 5000);
       }
     } catch { /* silent */ }
     setSaving(false);
   }, [data]);
+
+  const handleReset = useCallback(() => {
+    setData(JSON.parse(JSON.stringify(savedData)));
+  }, [savedData]);
 
   if (loading) return (
     <div className="flex items-center justify-center h-[40vh]">
@@ -58,12 +70,13 @@ export default function AppsSettingsPage() {
         <Input label="App Store" value={data.appStoreUrl} onChange={(e) => setData({ ...data, appStoreUrl: e.target.value })} />
         <Input label="Google Play" value={data.googlePlayUrl} onChange={(e) => setData({ ...data, googlePlayUrl: e.target.value })} />
       </div>
-      <div className="mt-5 flex items-center justify-between">
-        <span className="text-xs text-[#1a9a5a]">{feedback}</span>
-        <DashboardButton disabled={saving} onClick={handleSave}>
-          {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-        </DashboardButton>
-      </div>
+      <SaveBar
+        isDirty={isDirty}
+        isSubmitting={saving}
+        onSave={handleSave}
+        onReset={handleReset}
+        lastSaved={lastSaved}
+      />
     </ContentCard>
   );
 }

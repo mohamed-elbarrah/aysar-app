@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Input, Textarea } from "@/app/components/ui/Input";
-import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
+import { SaveBar } from "@/app/components/dashboard/SaveBar";
 import { Loader2, Upload, ImageIcon, X } from "lucide-react";
 import { SITE_SETTINGS } from "@/app/lib/dashboard/placeholders";
 
@@ -17,7 +17,8 @@ export default function MetadataSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [feedback, setFeedback] = useState("");
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const [savedData, setSavedData] = useState(data);
 
   useEffect(() => {
     async function load() {
@@ -25,18 +26,25 @@ export default function MetadataSettingsPage() {
         const res = await fetch("/api/settings");
         const json = await res.json();
         if (json.success && json.data) {
-          setData({
+          const loaded = {
             siteTitle: json.data.siteTitle || "",
             siteDescription: json.data.siteDescription || "",
             faviconUrl: json.data.faviconUrl || "",
             seoKeywords: json.data.seoKeywords || "",
-          });
+          };
+          setData(loaded);
+          setSavedData(loaded);
         }
       } catch { /* keep defaults */ }
       finally { setLoading(false); }
     }
     load();
   }, []);
+
+  const isDirty = useMemo(
+    () => JSON.stringify(savedData) !== JSON.stringify(data),
+    [savedData, data]
+  );
 
   useEffect(() => {
     const href = data.faviconUrl || "/favicon.ico";
@@ -62,12 +70,17 @@ export default function MetadataSettingsPage() {
         }),
       });
       if (res.ok) {
-        setFeedback("تم الحفظ بنجاح");
-        setTimeout(() => setFeedback(""), 3000);
+        setSavedData(JSON.parse(JSON.stringify(data)));
+        setLastSaved(new Date().toLocaleTimeString("ar-SA"));
+        setTimeout(() => setLastSaved(null), 5000);
       }
     } catch { /* silent */ }
     setSaving(false);
   }, [data]);
+
+  const handleReset = useCallback(() => {
+    setData(JSON.parse(JSON.stringify(savedData)));
+  }, [savedData]);
 
   const handleFaviconUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -157,12 +170,13 @@ export default function MetadataSettingsPage() {
         <Textarea label="وصف الموقع" value={data.siteDescription} onChange={(e) => setData({ ...data, siteDescription: e.target.value })} rows={3} />
         <Textarea label="كلمات مفتاحية (SEO)" value={data.seoKeywords} onChange={(e) => setData({ ...data, seoKeywords: e.target.value })} rows={2} />
       </div>
-      <div className="mt-5 flex items-center justify-between">
-        <span className="text-xs text-[#1a9a5a]">{feedback}</span>
-        <DashboardButton disabled={saving} onClick={handleSave}>
-          {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-        </DashboardButton>
-      </div>
+      <SaveBar
+        isDirty={isDirty}
+        isSubmitting={saving}
+        onSave={handleSave}
+        onReset={handleReset}
+        lastSaved={lastSaved}
+      />
     </ContentCard>
   );
 }

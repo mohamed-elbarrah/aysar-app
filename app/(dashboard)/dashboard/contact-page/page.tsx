@@ -13,6 +13,7 @@ import { FORM_FIELDS_DEFAULTS, CONTACT_FORM_DEFAULTS } from "@/app/lib/form-fiel
 import type { Channel, InquiryType } from "@/lib/contact-data";
 import type { FormFieldConfig } from "@/app/lib/form-fields-data";
 import { ScrollText, ChevronUp, Loader2, Plus, Trash2, GripVertical } from "lucide-react";
+import { SaveBar } from "@/app/components/dashboard/SaveBar";
 
 const sections = [
   { id: "banner", label: "البانر" },
@@ -62,6 +63,8 @@ export default function ContactPageEditor() {
   const [fetchError, setFetchError] = useState("");
   const [saving, setSaving] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<string>();
+  const [globalDirty, setGlobalDirty] = useState(false);
+  const markDirty = useCallback(() => setGlobalDirty(true), []);
   const [activeSection, setActiveSection] = useState("banner");
   const pageRef = useRef<HTMLDivElement>(null);
 
@@ -124,10 +127,36 @@ export default function ContactPageEditor() {
     const ok = await saveSection(sectionKey, sectionData);
     setSaving(null);
     if (ok) {
+      setGlobalDirty(false);
       setLastSaved(new Date().toLocaleTimeString("ar-SA"));
       setTimeout(() => setLastSaved(undefined), 5000);
     }
   }, []);
+
+  const handleGlobalSave = useCallback(async () => {
+    setGlobalDirty(false);
+    setSaving("all");
+    let allOk = true;
+    let ok = await saveSection("hero", data.hero);
+    if (!ok) allOk = false;
+    ok = await saveSection("inquiryOptions", data.inquiryOptions);
+    if (!ok) allOk = false;
+    ok = await saveSection("successMessage", data.successMessage);
+    if (!ok) allOk = false;
+    ok = await saveSection("formFields", data.formFields);
+    if (!ok) allOk = false;
+    ok = await saveSection("formConfig", { thirdPartyFormScript: data.thirdPartyFormScript, formReplaced: data.formReplaced });
+    if (!ok) allOk = false;
+    ok = await saveSection("channels", data.channels);
+    if (!ok) allOk = false;
+    ok = await saveSection("contactInfo", data.contactInfo);
+    if (!ok) allOk = false;
+    setSaving(null);
+    if (allOk) {
+      setLastSaved(new Date().toLocaleTimeString("ar-SA"));
+      setTimeout(() => setLastSaved(undefined), 5000);
+    }
+  }, [data]);
 
   if (loading) {
     return (
@@ -149,10 +178,16 @@ export default function ContactPageEditor() {
           {fetchError && <p className="text-xs text-amber-600 mt-1">{fetchError}</p>}
         </div>
         <div className="space-y-6 pb-24">
-          <BannerSection data={data.hero} saving={saving === "hero"} onSave={(d) => handleSectionSave("hero", d)} />
-          <FormSection data={data} saving={saving === "form"} onSave={(d) => handleFormSave(d)} />
-          <ChannelsSection data={data} saving={saving === "channels"} onSave={(d) => handleChannelsSave(d)} />
+          <BannerSection data={data.hero} saving={saving === "hero"} onSave={(d) => handleSectionSave("hero", d)} onDirty={markDirty} />
+          <FormSection data={data} saving={saving === "form"} onSave={(d) => handleFormSave(d)} onDirty={markDirty} />
+          <ChannelsSection data={data} saving={saving === "channels"} onSave={(d) => handleChannelsSave(d)} onDirty={markDirty} />
         </div>
+        <SaveBar
+          isDirty={globalDirty}
+          isSubmitting={saving === "all"}
+          onSave={handleGlobalSave}
+          lastSaved={lastSaved ?? null}
+        />
       </div>
       <div className="hidden xl:block w-[200px] shrink-0">
         <div className="sticky top-0">
@@ -191,16 +226,16 @@ export default function ContactPageEditor() {
   }
 }
 
-function BannerSection({ data: initial, saving, onSave }: { data: typeof CONTACT_HERO; saving: boolean; onSave: (d: typeof CONTACT_HERO) => void }) {
+function BannerSection({ data: initial, saving, onSave, onDirty }: { data: typeof CONTACT_HERO; saving: boolean; onSave: (d: typeof CONTACT_HERO) => void; onDirty?: () => void }) {
   const [data, setData] = useState(initial);
   return (
     <section id="banner">
       <ContentCard title="البانر" subtitle="عنوان صفحة التواصل">
         <div className="form-grid-2">
-          <Input label="الشارة" value={data.badge} onChange={(e) => setData({ ...data, badge: e.target.value })} />
-          <Input label="العنوان (السطر الأول)" value={data.titleLine1} onChange={(e) => setData({ ...data, titleLine1: e.target.value })} />
-          <Input label="العنوان (السطر الثاني)" value={data.titleLine2} onChange={(e) => setData({ ...data, titleLine2: e.target.value })} />
-          <Textarea label="الوصف" value={data.subtitle} onChange={(e) => setData({ ...data, subtitle: e.target.value })} rows={3} />
+          <Input label="الشارة" value={data.badge} onChange={(e) => { setData({ ...data, badge: e.target.value }); onDirty?.(); }} />
+          <Input label="العنوان (السطر الأول)" value={data.titleLine1} onChange={(e) => { setData({ ...data, titleLine1: e.target.value }); onDirty?.(); }} />
+          <Input label="العنوان (السطر الثاني)" value={data.titleLine2} onChange={(e) => { setData({ ...data, titleLine2: e.target.value }); onDirty?.(); }} />
+          <Textarea label="الوصف" value={data.subtitle} onChange={(e) => { setData({ ...data, subtitle: e.target.value }); onDirty?.(); }} rows={3} />
         </div>
         <div className="mt-5 flex justify-end">
           <DashboardButton disabled={saving} onClick={() => onSave(data)}>
@@ -212,7 +247,7 @@ function BannerSection({ data: initial, saving, onSave }: { data: typeof CONTACT
   );
 }
 
-function FormSection({ data, saving, onSave }: { data: ContactSectionData; saving: boolean; onSave: (d: { inquiryOptions: typeof INQUIRY_OPTIONS; successMessage: string; formFields: FormFieldConfig[]; thirdPartyFormScript: string; formReplaced: boolean }) => void }) {
+function FormSection({ data, saving, onSave, onDirty }: { data: ContactSectionData; saving: boolean; onSave: (d: { inquiryOptions: typeof INQUIRY_OPTIONS; successMessage: string; formFields: FormFieldConfig[]; thirdPartyFormScript: string; formReplaced: boolean }) => void; onDirty?: () => void }) {
   const [inquiryTypes, setInquiryTypes] = useState(data.inquiryOptions.filter((o) => o.value !== ""));
   const [successMessage, setSuccessMessage] = useState(data.successMessage);
   const [fields, setFields] = useState<FormFieldConfig[]>(data.formFields);
@@ -229,6 +264,7 @@ function FormSection({ data, saving, onSave }: { data: ContactSectionData; savin
     n.splice(idx, 0, moved);
     dragIdx.current = idx;
     setFields(n);
+    onDirty?.();
   };
   const handleDragEnd = () => { dragIdx.current = null; };
 
@@ -236,6 +272,7 @@ function FormSection({ data, saving, onSave }: { data: ContactSectionData; savin
     const n = [...fields];
     n[idx] = { ...n[idx], ...patch };
     setFields(n);
+    onDirty?.();
   };
 
   const handleAdd = () => {
@@ -251,10 +288,12 @@ function FormSection({ data, saving, onSave }: { data: ContactSectionData; savin
         enabled: true,
       },
     ]);
+    onDirty?.();
   };
 
   const handleDelete = (idx: number) => {
     setFields(fields.filter((_, i) => i !== idx));
+    onDirty?.();
   };
 
   return (
@@ -338,11 +377,11 @@ function FormSection({ data, saving, onSave }: { data: ContactSectionData; savin
             </button>
           </div>
 
-          <Textarea label="رسالة النجاح" value={successMessage} onChange={(e) => setSuccessMessage(e.target.value)} rows={2} />
+          <Textarea label="رسالة النجاح" value={successMessage} onChange={(e) => { setSuccessMessage(e.target.value); onDirty?.(); }} rows={2} />
 
           <div>
             <p className="text-xs font-semibold text-[#3a4a60] mb-2">أنواع الاستفسارات</p>
-            <DynamicList items={inquiryTypes.map((o) => o.label)} onChange={(items) => { setInquiryTypes(items.map((label) => ({ value: "" as "" | InquiryType, label }))); }} />
+            <DynamicList items={inquiryTypes.map((o) => o.label)} onChange={(items) => { setInquiryTypes(items.map((label) => ({ value: "" as "" | InquiryType, label }))); onDirty?.(); }} />
           </div>
 
           <div className="border-t border-[#e8edf5] pt-5">
@@ -350,12 +389,12 @@ function FormSection({ data, saving, onSave }: { data: ContactSectionData; savin
             <p className="text-[11px] text-[#6b7a94] mb-3 leading-[1.6]">أضف كود النموذج من مزود خارجي (مثل زيتون). اتركه فارغًا لاستخدام النموذج الافتراضي.</p>
             <div className="mb-2">
               <p className="text-xs font-semibold text-[#3a4a60] mb-2">كود السكريبت</p>
-              <CodeEditor value={scriptCode} onChange={setScriptCode} />
+              <CodeEditor value={scriptCode} onChange={(v) => { setScriptCode(v); onDirty?.(); }} />
             </div>
             <label className="flex items-center gap-2 text-sm cursor-pointer">
               <Checkbox
                 checked={scriptReplaced}
-                onCheckedChange={(v) => setScriptReplaced(!!v)}
+                onCheckedChange={(v) => { setScriptReplaced(!!v); onDirty?.(); }}
                 disabled={!scriptCode.trim()}
               />
               <span className="text-xs text-[#3a4a60]">استبدال الحقول الافتراضية بهذا السكريبت</span>
@@ -378,7 +417,7 @@ function FormSection({ data, saving, onSave }: { data: ContactSectionData; savin
   );
 }
 
-function ChannelsSection({ data, saving, onSave }: { data: ContactSectionData; saving: boolean; onSave: (d: { channels: Channel[]; contactInfo: typeof CONTACT_PAGE_INFO }) => void }) {
+function ChannelsSection({ data, saving, onSave, onDirty }: { data: ContactSectionData; saving: boolean; onSave: (d: { channels: Channel[]; contactInfo: typeof CONTACT_PAGE_INFO }) => void; onDirty?: () => void }) {
   const [channels, setChannels] = useState<Channel[]>(data.channels);
   const [info, setInfo] = useState(data.contactInfo);
 
@@ -390,10 +429,10 @@ function ChannelsSection({ data, saving, onSave }: { data: ContactSectionData; s
             <div key={ch.id} className="rounded-lg border border-[#e8edf5] p-4 bg-[#fafbfc]">
               <p className="text-sm font-bold text-[#0c2954] mb-3">{ch.name}</p>
               <div className="form-grid-2">
-                <Input label="اسم القناة" value={ch.name} onChange={(e) => { const n = [...channels]; n[idx] = { ...n[idx], name: e.target.value }; setChannels(n); }} />
-                <Input label="القيمة" value={ch.value} onChange={(e) => { const n = [...channels]; n[idx] = { ...n[idx], value: e.target.value }; setChannels(n); }} />
-                <Input label="الرابط" value={ch.href} onChange={(e) => { const n = [...channels]; n[idx] = { ...n[idx], href: e.target.value }; setChannels(n); }} />
-                <Input label="نص الزر" value={ch.actionLabel} onChange={(e) => { const n = [...channels]; n[idx] = { ...n[idx], actionLabel: e.target.value }; setChannels(n); }} />
+                <Input label="اسم القناة" value={ch.name} onChange={(e) => { const n = [...channels]; n[idx] = { ...n[idx], name: e.target.value }; setChannels(n); onDirty?.(); }} />
+                <Input label="القيمة" value={ch.value} onChange={(e) => { const n = [...channels]; n[idx] = { ...n[idx], value: e.target.value }; setChannels(n); onDirty?.(); }} />
+                <Input label="الرابط" value={ch.href} onChange={(e) => { const n = [...channels]; n[idx] = { ...n[idx], href: e.target.value }; setChannels(n); onDirty?.(); }} />
+                <Input label="نص الزر" value={ch.actionLabel} onChange={(e) => { const n = [...channels]; n[idx] = { ...n[idx], actionLabel: e.target.value }; setChannels(n); onDirty?.(); }} />
               </div>
             </div>
           ))}
@@ -401,11 +440,11 @@ function ChannelsSection({ data, saving, onSave }: { data: ContactSectionData; s
         <div className="mt-6">
           <ContentCard title="معلومات التواصل الأساسية" className="mt-0">
             <div className="form-grid-2">
-              <Input label="الهاتف" value={info.phone} onChange={(e) => setInfo({ ...info, phone: e.target.value })} />
-              <Input label="البريد الإلكتروني" value={info.email} onChange={(e) => setInfo({ ...info, email: e.target.value })} />
-              <Input label="الموقع" value={info.location} onChange={(e) => setInfo({ ...info, location: e.target.value })} />
-              <Input label="أيام العمل" value={info.hoursDays} onChange={(e) => setInfo({ ...info, hoursDays: e.target.value })} />
-              <Input label="ساعات العمل" value={info.hoursTime} onChange={(e) => setInfo({ ...info, hoursTime: e.target.value })} />
+              <Input label="الهاتف" value={info.phone} onChange={(e) => { setInfo({ ...info, phone: e.target.value }); onDirty?.(); }} />
+              <Input label="البريد الإلكتروني" value={info.email} onChange={(e) => { setInfo({ ...info, email: e.target.value }); onDirty?.(); }} />
+              <Input label="الموقع" value={info.location} onChange={(e) => { setInfo({ ...info, location: e.target.value }); onDirty?.(); }} />
+              <Input label="أيام العمل" value={info.hoursDays} onChange={(e) => { setInfo({ ...info, hoursDays: e.target.value }); onDirty?.(); }} />
+              <Input label="ساعات العمل" value={info.hoursTime} onChange={(e) => { setInfo({ ...info, hoursTime: e.target.value }); onDirty?.(); }} />
             </div>
           </ContentCard>
         </div>

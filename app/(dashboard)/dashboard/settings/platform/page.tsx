@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Input } from "@/app/components/ui/Input";
-import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
+import { SaveBar } from "@/app/components/dashboard/SaveBar";
 import { Loader2 } from "lucide-react";
 import { PLATFORM_LINKS } from "@/app/lib/dashboard/placeholders";
 import type { PlatformLinks } from "@/app/lib/settings-data";
@@ -12,7 +12,8 @@ export default function PlatformSettingsPage() {
   const [data, setData] = useState<PlatformLinks>({ ...PLATFORM_LINKS });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [feedback, setFeedback] = useState("");
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const [savedData, setSavedData] = useState<PlatformLinks>({ ...PLATFORM_LINKS });
 
   useEffect(() => {
     async function load() {
@@ -21,12 +22,18 @@ export default function PlatformSettingsPage() {
         const json = await res.json();
         if (json.success && json.data?.platformLinks) {
           setData(json.data.platformLinks);
+          setSavedData(JSON.parse(JSON.stringify(json.data.platformLinks)));
         }
       } catch { /* keep defaults */ }
       finally { setLoading(false); }
     }
     load();
   }, []);
+
+  const isDirty = useMemo(
+    () => JSON.stringify(savedData) !== JSON.stringify(data),
+    [savedData, data]
+  );
 
   const handleSave = useCallback(async () => {
     setSaving(true);
@@ -38,12 +45,17 @@ export default function PlatformSettingsPage() {
         body: JSON.stringify({ platformLinks: data }),
       });
       if (res.ok) {
-        setFeedback("تم الحفظ بنجاح");
-        setTimeout(() => setFeedback(""), 3000);
+        setSavedData(JSON.parse(JSON.stringify(data)));
+        setLastSaved(new Date().toLocaleTimeString("ar-SA"));
+        setTimeout(() => setLastSaved(null), 5000);
       }
     } catch { /* silent */ }
     setSaving(false);
   }, [data]);
+
+  const handleReset = useCallback(() => {
+    setData(JSON.parse(JSON.stringify(savedData)));
+  }, [savedData]);
 
   if (loading) return (
     <div className="flex items-center justify-center h-[40vh]">
@@ -58,12 +70,13 @@ export default function PlatformSettingsPage() {
         <Input label="رابط التسجيل" value={data.registerUrl} onChange={(e) => setData({ ...data, registerUrl: e.target.value })} placeholder="https://platform.aysar.sa/.../register" />
         <Input label="مركز المساعدة" value={data.supportCenterUrl} onChange={(e) => setData({ ...data, supportCenterUrl: e.target.value })} placeholder="https://support.aysar.sa/" />
       </div>
-      <div className="mt-5 flex items-center justify-between">
-        <span className="text-xs text-[#1a9a5a]">{feedback}</span>
-        <DashboardButton disabled={saving} onClick={handleSave}>
-          {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-        </DashboardButton>
-      </div>
+      <SaveBar
+        isDirty={isDirty}
+        isSubmitting={saving}
+        onSave={handleSave}
+        onReset={handleReset}
+        lastSaved={lastSaved}
+      />
     </ContentCard>
   );
 }

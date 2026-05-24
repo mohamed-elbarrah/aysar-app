@@ -67,6 +67,7 @@ export default function HomePageEditor() {
   const [fetchError, setFetchError] = useState("");
   const [saving, setSaving] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<string>();
+  const [globalDirty, setGlobalDirty] = useState(false);
   const [activeSection, setActiveSection] = useState("banner");
   const pageRef = useRef<HTMLDivElement>(null);
 
@@ -121,15 +122,41 @@ export default function HomePageEditor() {
     }
   };
 
+  const markDirty = useCallback(() => setGlobalDirty(true), []);
+
   const handleSectionSave = useCallback(async (sectionKey: string, sectionData: unknown) => {
     setSaving(sectionKey);
     const ok = await saveSection(sectionKey, sectionData);
     setSaving(null);
     if (ok) {
+      setGlobalDirty(false);
       setLastSaved(new Date().toLocaleTimeString("ar-SA"));
       setTimeout(() => setLastSaved(undefined), 5000);
     }
   }, []);
+
+  const handleGlobalSave = useCallback(async () => {
+    setGlobalDirty(false);
+    setSaving("all");
+    const sectionsToSave = [
+      ["hero", data.hero],
+      ["featureSections", data.featureSections],
+      ["bentoFeatures", data.bentoFeatures],
+      ["projectOverview", data.projectOverview],
+      ["appSection", data.appSection],
+      ["ctaSection", data.ctaSection],
+    ] as const;
+    let allOk = true;
+    for (const [key, sectionData] of sectionsToSave) {
+      const ok = await saveSection(key, sectionData);
+      if (!ok) allOk = false;
+    }
+    setSaving(null);
+    if (allOk) {
+      setLastSaved(new Date().toLocaleTimeString("ar-SA"));
+      setTimeout(() => setLastSaved(undefined), 5000);
+    }
+  }, [data]);
 
   if (loading) {
     return (
@@ -151,14 +178,19 @@ export default function HomePageEditor() {
           {fetchError && <p className="text-xs text-amber-600 mt-1">{fetchError}</p>}
         </div>
         <div className="space-y-6 pb-24">
-          <BannerSection data={data.hero} saving={saving === "hero"} onSave={(d) => handleSectionSave("hero", d)} />
-          <FeaturesSection data={data.featureSections} saving={saving === "featureSections"} onSave={(d) => handleSectionSave("featureSections", d)} />
-          <BentoSection data={data.bentoFeatures} saving={saving === "bentoFeatures"} onSave={(d) => handleSectionSave("bentoFeatures", d)} />
-          <OverviewSection data={data.projectOverview} saving={saving === "projectOverview"} onSave={(d) => handleSectionSave("projectOverview", d)} />
-          <AppSectionEditor data={data.appSection} saving={saving === "appSection"} onSave={(d) => handleSectionSave("appSection", d)} />
-          <CTASectionEditor data={data.ctaSection} saving={saving === "ctaSection"} onSave={(d) => handleSectionSave("ctaSection", d)} />
+          <BannerSection data={data.hero} saving={saving === "hero"} onDirty={markDirty} onSave={(d) => handleSectionSave("hero", d)} />
+          <FeaturesSection data={data.featureSections} saving={saving === "featureSections"} onDirty={markDirty} onSave={(d) => handleSectionSave("featureSections", d)} />
+          <BentoSection data={data.bentoFeatures} saving={saving === "bentoFeatures"} onDirty={markDirty} onSave={(d) => handleSectionSave("bentoFeatures", d)} />
+          <OverviewSection data={data.projectOverview} saving={saving === "projectOverview"} onDirty={markDirty} onSave={(d) => handleSectionSave("projectOverview", d)} />
+          <AppSectionEditor data={data.appSection} saving={saving === "appSection"} onDirty={markDirty} onSave={(d) => handleSectionSave("appSection", d)} />
+          <CTASectionEditor data={data.ctaSection} saving={saving === "ctaSection"} onDirty={markDirty} onSave={(d) => handleSectionSave("ctaSection", d)} />
         </div>
-        {lastSaved && <SaveBar isDirty={true} isSubmitting={false} onReset={() => {}} lastSaved={lastSaved} />}
+        <SaveBar
+          isDirty={globalDirty}
+          isSubmitting={saving === "all"}
+          onSave={handleGlobalSave}
+          lastSaved={lastSaved ?? null}
+        />
       </div>
       <div className="hidden xl:block w-[200px] shrink-0">
         <div className="sticky top-0">
@@ -183,20 +215,24 @@ export default function HomePageEditor() {
   );
 }
 
-function BannerSection({ data: initial, saving, onSave }: { data: typeof HOME_HERO; saving: boolean; onSave: (d: typeof HOME_HERO) => void }) {
+function BannerSection({ data: initial, saving, onSave, onDirty }: { data: typeof HOME_HERO; saving: boolean; onSave: (d: typeof HOME_HERO) => void; onDirty?: () => void }) {
   const [data, setData] = useState(initial);
+  const handleChange = useCallback((patch: Partial<typeof HOME_HERO>) => {
+    setData((prev) => ({ ...prev, ...patch }));
+    onDirty?.();
+  }, [onDirty]);
   return (
     <section id="banner">
       <ContentCard title="البانر الرئيسي" subtitle="عنوان الصفحة الرئيسية والوصف والأزرار">
         <div className="form-grid-2">
-          <Input label="الشارة (Badge)" value={data.badge || ""} onChange={(e) => setData({ ...data, badge: e.target.value })} />
-          <Input label="العنوان الرئيسي" value={data.title} onChange={(e) => setData({ ...data, title: e.target.value })} />
-          <Input label="عنوان مميز" value={data.titleAccent || ""} onChange={(e) => setData({ ...data, titleAccent: e.target.value })} />
-          <Textarea label="الوصف" value={data.subtitle} onChange={(e) => setData({ ...data, subtitle: e.target.value })} rows={3} />
-          <Input label="زر رئيسي — النص" value={data.primaryCtaLabel || ""} onChange={(e) => setData({ ...data, primaryCtaLabel: e.target.value })} />
-          <Input label="زر رئيسي — الرابط" value={data.primaryCtaHref || ""} onChange={(e) => setData({ ...data, primaryCtaHref: e.target.value })} />
-          <Input label="زر ثانوي — النص" value={data.secondaryCtaLabel || ""} onChange={(e) => setData({ ...data, secondaryCtaLabel: e.target.value })} />
-          <Input label="زر ثانوي — الرابط" value={data.secondaryCtaHref || ""} onChange={(e) => setData({ ...data, secondaryCtaHref: e.target.value })} />
+          <Input label="الشارة (Badge)" value={data.badge || ""} onChange={(e) => handleChange({ badge: e.target.value })} />
+          <Input label="العنوان الرئيسي" value={data.title} onChange={(e) => handleChange({ title: e.target.value })} />
+          <Input label="عنوان مميز" value={data.titleAccent || ""} onChange={(e) => handleChange({ titleAccent: e.target.value })} />
+          <Textarea label="الوصف" value={data.subtitle} onChange={(e) => handleChange({ subtitle: e.target.value })} rows={3} />
+          <Input label="زر رئيسي — النص" value={data.primaryCtaLabel || ""} onChange={(e) => handleChange({ primaryCtaLabel: e.target.value })} />
+          <Input label="زر رئيسي — الرابط" value={data.primaryCtaHref || ""} onChange={(e) => handleChange({ primaryCtaHref: e.target.value })} />
+          <Input label="زر ثانوي — النص" value={data.secondaryCtaLabel || ""} onChange={(e) => handleChange({ secondaryCtaLabel: e.target.value })} />
+          <Input label="زر ثانوي — الرابط" value={data.secondaryCtaHref || ""} onChange={(e) => handleChange({ secondaryCtaHref: e.target.value })} />
         </div>
         <div className="mt-5 flex justify-end">
           <DashboardButton disabled={saving} onClick={() => onSave(data)}>
@@ -208,8 +244,16 @@ function BannerSection({ data: initial, saving, onSave }: { data: typeof HOME_HE
   );
 }
 
-function FeaturesSection({ data: initial, saving, onSave }: { data: typeof FEATURE_SECTIONS; saving: boolean; onSave: (d: typeof FEATURE_SECTIONS) => void }) {
+function FeaturesSection({ data: initial, saving, onSave, onDirty }: { data: typeof FEATURE_SECTIONS; saving: boolean; onSave: (d: typeof FEATURE_SECTIONS) => void; onDirty?: () => void }) {
   const [sectionsData, setSectionsData] = useState(initial);
+  const updateSection = useCallback((idx: number, patch: Partial<(typeof FEATURE_SECTIONS)[number]>) => {
+    setSectionsData((prev) => {
+      const n = [...prev];
+      n[idx] = { ...n[idx], ...patch };
+      return n;
+    });
+    onDirty?.();
+  }, [onDirty]);
   return (
     <section id="features">
       <ContentCard title="المميزات الرئيسية" subtitle="4 أقسام مميزات رئيسية للمنصة">
@@ -221,23 +265,23 @@ function FeaturesSection({ data: initial, saving, onSave }: { data: typeof FEATU
                 <span className="text-sm font-bold text-[#0c2954]">{sec.title}</span>
               </div>
               <div className="form-grid-2">
-                <Input label="العنوان الفرعي" value={sec.eyebrow} onChange={(e) => { const n = [...sectionsData]; n[idx] = { ...n[idx], eyebrow: e.target.value }; setSectionsData(n); }} />
-                <Input label="العنوان" value={sec.title} onChange={(e) => { const n = [...sectionsData]; n[idx] = { ...n[idx], title: e.target.value }; setSectionsData(n); }} />
-                <Input label="عنوان مميز" value={sec.titleAccent || ""} onChange={(e) => { const n = [...sectionsData]; n[idx] = { ...n[idx], titleAccent: e.target.value }; setSectionsData(n); }} />
+                <Input label="العنوان الفرعي" value={sec.eyebrow} onChange={(e) => updateSection(idx, { eyebrow: e.target.value })} />
+                <Input label="العنوان" value={sec.title} onChange={(e) => updateSection(idx, { title: e.target.value })} />
+                <Input label="عنوان مميز" value={sec.titleAccent || ""} onChange={(e) => updateSection(idx, { titleAccent: e.target.value })} />
                 <div className="form-group-contact">
                   <label>لون التمييز</label>
                   <div className="flex items-center gap-2">
-                    <input className="form-control-contact" value={sec.accentColor} onChange={(e) => { const n = [...sectionsData]; n[idx] = { ...n[idx], accentColor: e.target.value }; setSectionsData(n); }} />
+                    <input className="form-control-contact" value={sec.accentColor} onChange={(e) => updateSection(idx, { accentColor: e.target.value })} />
                     <div className="w-6 h-6 rounded border border-[#e8edf5] shrink-0" style={{ backgroundColor: sec.accentColor }} />
                   </div>
                 </div>
-                <Textarea label="الوصف" value={sec.description} onChange={(e) => { const n = [...sectionsData]; n[idx] = { ...n[idx], description: e.target.value }; setSectionsData(n); }} rows={2} />
+                <Textarea label="الوصف" value={sec.description} onChange={(e) => updateSection(idx, { description: e.target.value })} rows={2} />
               </div>
               <div className="mt-3">
                 <DynamicList
                   label="نقاط المميزات"
                   items={sec.features}
-                  onChange={(items) => { const n = [...sectionsData]; n[idx] = { ...n[idx], features: items }; setSectionsData(n); }}
+                  onChange={(items) => { updateSection(idx, { features: items }); }}
                 />
               </div>
             </div>
@@ -262,7 +306,7 @@ const NEW_CARD_TEMPLATE: BentoFeature = {
   iconColor: "#0c2954",
 };
 
-function BentoSection({ data: initial, saving, onSave }: { data: typeof BENTO_FEATURES; saving: boolean; onSave: (d: typeof BENTO_FEATURES) => void }) {
+function BentoSection({ data: initial, saving, onSave, onDirty }: { data: typeof BENTO_FEATURES; saving: boolean; onSave: (d: typeof BENTO_FEATURES) => void; onDirty?: () => void }) {
   const [features, setFeatures] = useState(initial);
 
   const existingUploads: string[] = [];
@@ -270,19 +314,27 @@ function BentoSection({ data: initial, saving, onSave }: { data: typeof BENTO_FE
     if (f.iconUrl) existingUploads.push(f.iconUrl);
   }
 
+  const handleChange = useCallback((idx: number, patch: Partial<BentoFeature>) => {
+    setFeatures((prev) => {
+      const n = [...prev];
+      n[idx] = { ...n[idx], ...patch };
+      return n;
+    });
+    onDirty?.();
+  }, [onDirty]);
+
   const handleIconChange = (idx: number, name: string, url?: string | null) => {
-    const n = [...features];
-    n[idx] = { ...n[idx], iconName: name, iconUrl: url ?? null };
-    setFeatures(n);
+    handleChange(idx, { iconName: name, iconUrl: url ?? null });
   };
 
   const handleAdd = () => {
-    setFeatures([...features, { ...NEW_CARD_TEMPLATE, iconUrl: null }]);
+    setFeatures((prev) => [...prev, { ...NEW_CARD_TEMPLATE, iconUrl: null }]);
+    onDirty?.();
   };
 
   const handleDelete = (idx: number) => {
-    const n = features.filter((_, i) => i !== idx);
-    setFeatures(n);
+    setFeatures((prev) => prev.filter((_, i) => i !== idx));
+    onDirty?.();
   };
 
   return (
@@ -328,19 +380,19 @@ function BentoSection({ data: initial, saving, onSave }: { data: typeof BENTO_FE
                     existingUploads={existingUploads}
                   />
                 </div>
-                <Input label="العنوان" value={feat.title} onChange={(e) => { const n = [...features]; n[idx] = { ...n[idx], title: e.target.value }; setFeatures(n); }} />
-                <Input label="الوصف" value={feat.description} onChange={(e) => { const n = [...features]; n[idx] = { ...n[idx], description: e.target.value }; setFeatures(n); }} />
+                <Input label="العنوان" value={feat.title} onChange={(e) => handleChange(idx, { title: e.target.value })} />
+                <Input label="الوصف" value={feat.description} onChange={(e) => handleChange(idx, { description: e.target.value })} />
                 <div className="form-group-contact">
                   <label>لون الخلفية</label>
                   <div className="flex items-center gap-2">
-                    <input className="form-control-contact" value={feat.iconBg} onChange={(e) => { const n = [...features]; n[idx] = { ...n[idx], iconBg: e.target.value }; setFeatures(n); }} />
+                    <input className="form-control-contact" value={feat.iconBg} onChange={(e) => handleChange(idx, { iconBg: e.target.value })} />
                     <div className="w-6 h-6 rounded border border-[#e8edf5] shrink-0" style={{ backgroundColor: feat.iconBg }} />
                   </div>
                 </div>
                 <div className="form-group-contact">
                   <label>لون الأيقونة</label>
                   <div className="flex items-center gap-2">
-                    <input className="form-control-contact" value={feat.iconColor} onChange={(e) => { const n = [...features]; n[idx] = { ...n[idx], iconColor: e.target.value }; setFeatures(n); }} />
+                    <input className="form-control-contact" value={feat.iconColor} onChange={(e) => handleChange(idx, { iconColor: e.target.value })} />
                     <div className="w-6 h-6 rounded border border-[#e8edf5] shrink-0" style={{ backgroundColor: feat.iconColor }} />
                   </div>
                 </div>
@@ -368,18 +420,22 @@ function BentoSection({ data: initial, saving, onSave }: { data: typeof BENTO_FE
   );
 }
 
-function OverviewSection({ data: initial, saving, onSave }: { data: typeof PROJECT_OVERVIEW; saving: boolean; onSave: (d: typeof PROJECT_OVERVIEW) => void }) {
+function OverviewSection({ data: initial, saving, onSave, onDirty }: { data: typeof PROJECT_OVERVIEW; saving: boolean; onSave: (d: typeof PROJECT_OVERVIEW) => void; onDirty?: () => void }) {
   const [data, setData] = useState(initial);
+  const handleChange = useCallback((patch: Partial<typeof PROJECT_OVERVIEW>) => {
+    setData((prev) => ({ ...prev, ...patch }));
+    onDirty?.();
+  }, [onDirty]);
   return (
     <section id="overview">
       <ContentCard title="نظرة على المشروع" subtitle="قسم النظرة العامة مع إحصائيات المشاريع">
         <div className="form-grid-2">
-          <Input label="العنوان الفرعي" value={data.eyebrow} onChange={(e) => setData({ ...data, eyebrow: e.target.value })} />
-          <Input label="العنوان" value={data.title} onChange={(e) => setData({ ...data, title: e.target.value })} />
-          <Input label="عنوان مميز" value={data.titleAccent} onChange={(e) => setData({ ...data, titleAccent: e.target.value })} />
-          <Textarea label="الوصف" value={data.description} onChange={(e) => setData({ ...data, description: e.target.value })} rows={3} />
-          <Input label="نص الرابط" value={data.linkLabel} onChange={(e) => setData({ ...data, linkLabel: e.target.value })} />
-          <Input label="الرابط" value={data.linkHref} onChange={(e) => setData({ ...data, linkHref: e.target.value })} />
+          <Input label="العنوان الفرعي" value={data.eyebrow} onChange={(e) => handleChange({ eyebrow: e.target.value })} />
+          <Input label="العنوان" value={data.title} onChange={(e) => handleChange({ title: e.target.value })} />
+          <Input label="عنوان مميز" value={data.titleAccent} onChange={(e) => handleChange({ titleAccent: e.target.value })} />
+          <Textarea label="الوصف" value={data.description} onChange={(e) => handleChange({ description: e.target.value })} rows={3} />
+          <Input label="نص الرابط" value={data.linkLabel} onChange={(e) => handleChange({ linkLabel: e.target.value })} />
+          <Input label="الرابط" value={data.linkHref} onChange={(e) => handleChange({ linkHref: e.target.value })} />
         </div>
         <div className="mt-5">
           <DynamicList
@@ -390,7 +446,7 @@ function OverviewSection({ data: initial, saving, onSave }: { data: typeof PROJE
                 const parts = item.split(" — ");
                 return { bold: parts[0] || "", detail: parts[1] || "" };
               });
-              setData({ ...data, checkItems: parsed });
+              handleChange({ checkItems: parsed });
             }}
           />
         </div>
@@ -404,18 +460,22 @@ function OverviewSection({ data: initial, saving, onSave }: { data: typeof PROJE
   );
 }
 
-function AppSectionEditor({ data: initial, saving, onSave }: { data: typeof APP_SECTION; saving: boolean; onSave: (d: typeof APP_SECTION) => void }) {
+function AppSectionEditor({ data: initial, saving, onSave, onDirty }: { data: typeof APP_SECTION; saving: boolean; onSave: (d: typeof APP_SECTION) => void; onDirty?: () => void }) {
   const [data, setData] = useState(initial);
+  const handleChange = useCallback((patch: Partial<typeof APP_SECTION>) => {
+    setData((prev) => ({ ...prev, ...patch }));
+    onDirty?.();
+  }, [onDirty]);
   return (
     <section id="app">
       <ContentCard title="قسم التطبيق" subtitle="روابط تحميل تطبيق أيسَر">
         <div className="form-grid-2">
-          <Input label="العنوان الفرعي" value={data.eyebrow} onChange={(e) => setData({ ...data, eyebrow: e.target.value })} />
-          <Input label="العنوان" value={data.title} onChange={(e) => setData({ ...data, title: e.target.value })} />
-          <Input label="عنوان مميز" value={data.titleAccent} onChange={(e) => setData({ ...data, titleAccent: e.target.value })} />
-          <Textarea label="الوصف" value={data.description} onChange={(e) => setData({ ...data, description: e.target.value })} rows={3} />
-          <Input label="App Store" value={data.appStoreUrl} onChange={(e) => setData({ ...data, appStoreUrl: e.target.value })} />
-          <Input label="Google Play" value={data.googlePlayUrl} onChange={(e) => setData({ ...data, googlePlayUrl: e.target.value })} />
+          <Input label="العنوان الفرعي" value={data.eyebrow} onChange={(e) => handleChange({ eyebrow: e.target.value })} />
+          <Input label="العنوان" value={data.title} onChange={(e) => handleChange({ title: e.target.value })} />
+          <Input label="عنوان مميز" value={data.titleAccent} onChange={(e) => handleChange({ titleAccent: e.target.value })} />
+          <Textarea label="الوصف" value={data.description} onChange={(e) => handleChange({ description: e.target.value })} rows={3} />
+          <Input label="App Store" value={data.appStoreUrl} onChange={(e) => handleChange({ appStoreUrl: e.target.value })} />
+          <Input label="Google Play" value={data.googlePlayUrl} onChange={(e) => handleChange({ googlePlayUrl: e.target.value })} />
         </div>
         <div className="mt-5 flex justify-end">
           <DashboardButton disabled={saving} onClick={() => onSave(data)}>
@@ -427,19 +487,23 @@ function AppSectionEditor({ data: initial, saving, onSave }: { data: typeof APP_
   );
 }
 
-function CTASectionEditor({ data: initial, saving, onSave }: { data: typeof CTA_SECTION; saving: boolean; onSave: (d: typeof CTA_SECTION) => void }) {
+function CTASectionEditor({ data: initial, saving, onSave, onDirty }: { data: typeof CTA_SECTION; saving: boolean; onSave: (d: typeof CTA_SECTION) => void; onDirty?: () => void }) {
   const [data, setData] = useState(initial);
+  const handleChange = useCallback((patch: Partial<typeof CTA_SECTION>) => {
+    setData((prev) => ({ ...prev, ...patch }));
+    onDirty?.();
+  }, [onDirty]);
   return (
     <section id="cta">
       <ContentCard title="دعوة للعمل (CTA)" subtitle="القسم الأخير في الصفحة الرئيسية">
         <div className="form-grid-2">
-          <Input label="العنوان" value={data.title} onChange={(e) => setData({ ...data, title: e.target.value })} />
-          <Textarea label="الوصف" value={data.subtitle} onChange={(e) => setData({ ...data, subtitle: e.target.value })} rows={2} />
-          <Input label="زر رئيسي — النص" value={data.primaryCtaLabel} onChange={(e) => setData({ ...data, primaryCtaLabel: e.target.value })} />
-          <Input label="زر رئيسي — الرابط" value={data.primaryCtaHref} onChange={(e) => setData({ ...data, primaryCtaHref: e.target.value })} />
-          <Input label="زر ثانوي — النص" value={data.secondaryCtaLabel} onChange={(e) => setData({ ...data, secondaryCtaLabel: e.target.value })} />
-          <Input label="زر ثانوي — الرابط" value={data.secondaryCtaHref} onChange={(e) => setData({ ...data, secondaryCtaHref: e.target.value })} />
-          <Input label="ملاحظة" value={data.note || ""} onChange={(e) => setData({ ...data, note: e.target.value })} />
+          <Input label="العنوان" value={data.title} onChange={(e) => handleChange({ title: e.target.value })} />
+          <Textarea label="الوصف" value={data.subtitle} onChange={(e) => handleChange({ subtitle: e.target.value })} rows={2} />
+          <Input label="زر رئيسي — النص" value={data.primaryCtaLabel} onChange={(e) => handleChange({ primaryCtaLabel: e.target.value })} />
+          <Input label="زر رئيسي — الرابط" value={data.primaryCtaHref} onChange={(e) => handleChange({ primaryCtaHref: e.target.value })} />
+          <Input label="زر ثانوي — النص" value={data.secondaryCtaLabel} onChange={(e) => handleChange({ secondaryCtaLabel: e.target.value })} />
+          <Input label="زر ثانوي — الرابط" value={data.secondaryCtaHref} onChange={(e) => handleChange({ secondaryCtaHref: e.target.value })} />
+          <Input label="ملاحظة" value={data.note || ""} onChange={(e) => handleChange({ note: e.target.value })} />
         </div>
         <div className="mt-5 flex justify-end">
           <DashboardButton disabled={saving} onClick={() => onSave(data)}>
