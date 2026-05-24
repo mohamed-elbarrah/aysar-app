@@ -3,6 +3,8 @@ import { Noto_Kufi_Arabic } from "next/font/google";
 import "./globals.css";
 import { getSiteSettings } from "@/app/lib/settings-data";
 
+export const dynamic = "force-dynamic";
+
 const notoKufi = Noto_Kufi_Arabic({
   variable: "--font-noto-kufi",
   subsets: ["arabic"],

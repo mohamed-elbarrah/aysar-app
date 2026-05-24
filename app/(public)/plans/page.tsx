@@ -2,6 +2,8 @@ import PlansPageContent from "./PlansPageContent";
 import { getPlansPageData } from "@/app/lib/plans-page-data";
 import { getSiteSettings } from "@/app/lib/settings-data";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "الباقات والأسعار — أيسَر",
   description:

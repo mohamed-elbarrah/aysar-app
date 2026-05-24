@@ -2,6 +2,8 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { getSiteSettings } from "@/app/lib/settings-data";
 
+export const dynamic = "force-dynamic";
+
 export default async function PublicLayout({
   children,
 }: Readonly<{

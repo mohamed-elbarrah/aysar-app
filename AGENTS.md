@@ -109,6 +109,88 @@ app/sections/       # page-specific section assemblies
 - Policy pages (`privacy-policy`, `terms-of-use`, `return-policy`) share the same layout: hero banner with breadcrumb, sticky TOC sidebar, numbered sections, alert cards, footer bar. Build one reusable policy page template.
 - Do **not** delete or modify files in `/refrences/` — they are the design specification.
 
+## Supabase & Database Rules
+
+### Database Client
+
+- **Use `@supabase/supabase-js`** — the app uses Supabase JS client, NOT Prisma.
+- **`db.js`** (root) — Matches Hostinger's required format. Uses `SUPABASE_URL` + `SUPABASE_ANON_KEY`. DO NOT rename or move this file.
+- **`app/lib/db.ts`** — Server-side Supabase client using `SUPABASE_SERVICE_KEY` (bypasses RLS for admin API routes). Uses lazy Proxy pattern to avoid build-time crashes.
+- **All DB queries use snake_case column names** — Supabase returns database column names (`feature_sections`, `password_hash`, `updated_at`), NOT Prisma camelCase names. Always use snake_case in Supabase queries and response handling.
+
+### Environment Variables
+
+- **`SUPABASE_URL`** — Primary env var (auto-injected by Hostinger). Fallback: `NEXT_PUBLIC_SUPABASE_URL`.
+- **`SUPABASE_ANON_KEY`** — Public anon key (auto-injected by Hostinger). Used by `db.js` connection test.
+- **`SUPABASE_SERVICE_KEY`** — Server-side service role key (bypasses RLS). Must be set manually in Hostinger env panel.
+- **`JWT_SECRET`** — Must be set manually in Hostinger env panel.
+- **`NODE_ENV`** — Set to `production` in Hostinger env panel.
+- **NEVER commit `.env` to git** — Contains secrets. Use `.env.example` as reference.
+- **NEVER change `db.js` env var names** — Hostinger auto-injects `SUPABASE_URL` and `SUPABASE_ANON_KEY` by name.
+
+### Table Names (Supabase / PostgreSQL)
+
+| Prisma Model (old) | DB Table (Supabase) |
+|---|---|
+| `User` | `users` |
+| `HomePage` | `home_page` |
+| `PlansPage` | `plans_page` |
+| `ContactPage` | `contact_page` |
+| `Policies` | `policies` |
+| `SiteSettings` | `site_settings` |
+| `ContactMessage` | `contact_messages` |
+
+### Column Name Mapping (camelCase → snake_case)
+
+| Prisma Field (old) | DB Column (Supabase) |
+|---|---|
+| `passwordHash` | `password_hash` |
+| `featureSections` | `feature_sections` |
+| `bentoFeatures` | `bento_features` |
+| `projectOverview` | `project_overview` |
+| `appSection` | `app_section` |
+| `ctaSection` | `cta_section` |
+| `compareRows` | `compare_rows` |
+| `faqItems` | `faq_items` |
+| `contactInfo` | `contact_info` |
+| `inquiryOptions` | `inquiry_options` |
+| `successMessage` | `success_message` |
+| `formFields` | `form_fields` |
+| `formConfig` | `form_config` |
+| `siteTitle` | `site_title` |
+| `siteDescription` | `site_description` |
+| `faviconUrl` | `favicon_url` |
+| `seoKeywords` | `seo_keywords` |
+| `navLinks` | `nav_links` |
+| `socialLinks` | `social_links` |
+| `appLinks` | `app_links` |
+| `footerColumns` | `footer_columns` |
+| `platformLinks` | `platform_links` |
+| `workHours` | `work_hours` |
+| `fullName` | `full_name` |
+| `isRead` | `is_read` |
+| `createdAt` | `created_at` |
+| `updatedAt` | `updated_at` |
+
+### Deployment Rules (Hostinger)
+
+- **`export const dynamic = "force-dynamic"`** — MUST be added to EVERY page and layout that calls Supabase. Pages without this will fail to build on Hostinger because env vars are only available at runtime, not during `next build`.
+- Pages that need `force-dynamic`: `app/layout.tsx`, `app/(public)/layout.tsx`, `app/(public)/page.tsx`, `app/(public)/plans/page.tsx`, `app/(public)/contact/page.tsx`, `app/(public)/privacy-policy/page.tsx`, `app/(public)/terms-of-use/page.tsx`, `app/(public)/return-policy/page.tsx`.
+- **`scripts/check-supabase.ts`** — Runs after `next build` to verify Supabase connection. Exits with code 0 even on failure (Hostinger injects env vars at runtime, not build time).
+- **`package.json` build script** — `"build": "next build && npx tsx scripts/check-supabase.ts"` — the Supabase check must NOT block deployment.
+- **`updated_at` auto-update** — Handled by PostgreSQL triggers (not Prisma). Triggers are set up in `scripts/updated-at-triggers.sql`. If tables are recreated, re-run this SQL in Supabase SQL Editor.
+- **`prisma/` directory** — Contains only `seed.ts` and `seed-data.json` (no schema, no migrations). The `prisma` npm package and `@prisma/client` are NOT dependencies.
+- **Deployment zip** — Exclude `node_modules/`, `.next/`, `.git/`, `.env` (secrets). Include `db.js`, `package.json`, `pnpm-lock.yaml`, all source files.
+
+### Supabase Query Patterns
+
+- **Single row by ID**: `supabase.from("table").select("*").eq("id", "HOME").single()`
+- **Upsert**: `supabase.from("table").upsert(data, { onConflict: "id" })`
+- **Ordered list**: `supabase.from("table").select("*").order("created_at", { ascending: false })`
+- **Insert**: `supabase.from("table").insert(data)`
+- **Always use snake_case column names** in queries and data objects.
+- **Always handle `{ data, error }`** — check `error` before using `data`.
+
 ## Commands
 
 ```bash
@@ -118,18 +200,16 @@ pnpm install
 # Dev server
 pnpm dev        # http://localhost:3000
 
-# Production build
+# Production build (includes Supabase connection check)
 pnpm build
 
 # Lint
 pnpm lint
 
 # Database
-pnpm db:migrate          # Run pending migrations
 pnpm db:seed             # Seed DB from prisma/seed-data.json
 pnpm db:update-seed      # Refresh seed-data.json from current DB state
 pnpm db:dump-sql         # Generate raw SQL dump at scripts/seed-data.sql
-pnpm db:studio           # Open Prisma Studio
 ```
 
 ---

@@ -11,6 +11,8 @@ import { ProjectOverview } from "../sections/ProjectOverview";
 import { AppSection } from "../sections/AppSection";
 import { getHomePageData } from "../lib/home-page-data";
 
+export const dynamic = "force-dynamic";
+
 const MOCKUPS = [
   <StagesMockup key="stages" />,
   <MaintenanceMockup key="maintenance" />,
