@@ -52,6 +52,10 @@ export interface HomePageResponse {
     description: string;
     appStoreUrl: string;
     googlePlayUrl: string;
+    app_images?: {
+      left_phone?: string | null;
+      right_phone?: string | null;
+    };
   };
   ctaSection: {
     title: string;
@@ -92,7 +96,7 @@ export async function getHomePageData(): Promise<HomePageResponse> {
     featureSections: page.feature_sections as HomePageResponse["featureSections"],
     bentoFeatures: page.bento_features as HomePageResponse["bentoFeatures"],
     projectOverview: page.project_overview as HomePageResponse["projectOverview"],
-    appSection: page.app_section as HomePageResponse["appSection"],
+    appSection: { ...APP_SECTION, ...page.app_section } as HomePageResponse["appSection"],
     ctaSection: page.cta_section as HomePageResponse["ctaSection"],
     updatedAt: page.updated_at,
   };

@@ -19,6 +19,7 @@ export default async function PublicLayout({
         columns={settings.footerColumns}
         socialLinks={settings.socialLinks}
         contactInfo={settings.contactInfo}
+        appLinks={settings.appLinks}
       />
     </>
   );

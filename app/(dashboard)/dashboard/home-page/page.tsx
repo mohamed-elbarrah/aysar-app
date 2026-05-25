@@ -19,6 +19,7 @@ import {
 import { ScrollText, ChevronUp, Loader2, Plus, Trash2 } from "lucide-react";
 import { IconPicker } from "@/app/components/dashboard/IconPicker";
 import { IconPreview } from "@/app/components/dashboard/IconPreview";
+import { ImageUploadWithPreview } from "@/app/components/ImageUploadWithPreview";
 
 const sections = [
   { id: "banner", label: "البانر الرئيسي" },
@@ -80,11 +81,11 @@ export default function HomePageEditor() {
           const d = json.data;
           setData({
             hero: d.hero || DEFAULTS.hero,
-            featureSections: d.featureSections || DEFAULTS.featureSections,
-            bentoFeatures: d.bentoFeatures || DEFAULTS.bentoFeatures,
-            projectOverview: d.projectOverview || DEFAULTS.projectOverview,
-            appSection: d.appSection || DEFAULTS.appSection,
-            ctaSection: d.ctaSection || DEFAULTS.ctaSection,
+            featureSections: d.feature_sections || d.featureSections || DEFAULTS.featureSections,
+            bentoFeatures: d.bento_features || d.bentoFeatures || DEFAULTS.bentoFeatures,
+            projectOverview: d.project_overview || d.projectOverview || DEFAULTS.projectOverview,
+            appSection: d.app_section || d.appSection || DEFAULTS.appSection,
+            ctaSection: d.cta_section || d.ctaSection || DEFAULTS.ctaSection,
           });
         }
       } catch {
@@ -462,10 +463,75 @@ function OverviewSection({ data: initial, saving, onSave, onDirty }: { data: typ
 
 function AppSectionEditor({ data: initial, saving, onSave, onDirty }: { data: typeof APP_SECTION; saving: boolean; onSave: (d: typeof APP_SECTION) => void; onDirty?: () => void }) {
   const [data, setData] = useState(initial);
+  const [leftPhoneImage, setLeftPhoneImage] = useState<string | null>(initial.app_images?.left_phone || null);
+  const [rightPhoneImage, setRightPhoneImage] = useState<string | null>(initial.app_images?.right_phone || null);
+  const [uploading, setUploading] = useState(false);
+
   const handleChange = useCallback((patch: Partial<typeof APP_SECTION>) => {
     setData((prev) => ({ ...prev, ...patch }));
     onDirty?.();
   }, [onDirty]);
+
+  const handleLeftPhoneUpload = async (file: File) => {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("position", "left");
+
+    try {
+      const res = await fetch("/api/upload-app-image", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await res.json();
+      if (result.success) {
+        setLeftPhoneImage(result.imageUrl);
+        onDirty?.();
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error("Upload failed:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRightPhoneUpload = async (file: File) => {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("position", "right");
+
+    try {
+      const res = await fetch("/api/upload-app-image", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await res.json();
+      if (result.success) {
+        setRightPhoneImage(result.imageUrl);
+        onDirty?.();
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error("Upload failed:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSave = () => {
+    onSave({
+      ...data,
+      app_images: {
+        left_phone: leftPhoneImage,
+        right_phone: rightPhoneImage,
+      },
+    });
+  };
+
   return (
     <section id="app">
       <ContentCard title="قسم التطبيق" subtitle="روابط تحميل تطبيق أيسَر">
@@ -477,8 +543,32 @@ function AppSectionEditor({ data: initial, saving, onSave, onDirty }: { data: ty
           <Input label="App Store" value={data.appStoreUrl} onChange={(e) => handleChange({ appStoreUrl: e.target.value })} />
           <Input label="Google Play" value={data.googlePlayUrl} onChange={(e) => handleChange({ googlePlayUrl: e.target.value })} />
         </div>
+
+        {/* Phone Images */}
+        <div className="mt-6">
+          <h4 className="text-sm font-medium text-navy mb-4">صور الهواتف</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ImageUploadWithPreview
+              label="صورة الهاتف الأيسر"
+              currentImage={leftPhoneImage}
+              defaultImage="/app-screenshot.jpg"
+              onUpload={handleLeftPhoneUpload}
+              onRemove={() => { setLeftPhoneImage(null); onDirty?.(); }}
+              aspectRatio={{ width: 9, height: 19.5 }}
+            />
+            <ImageUploadWithPreview
+              label="صورة الهاتف الأيمن"
+              currentImage={rightPhoneImage}
+              defaultImage="/app-screenshot.jpg"
+              onUpload={handleRightPhoneUpload}
+              onRemove={() => { setRightPhoneImage(null); onDirty?.(); }}
+              aspectRatio={{ width: 9, height: 19.5 }}
+            />
+          </div>
+        </div>
+
         <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave(data)}>
+          <DashboardButton disabled={saving || uploading} onClick={handleSave}>
             {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
           </DashboardButton>
         </div>

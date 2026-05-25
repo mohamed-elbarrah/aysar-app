@@ -117,6 +117,10 @@ export const APP_SECTION = {
   description: "لن تحتاج سوى برنامج أيسَر للحصول على تطبيق مخصص لعملائك. حمِّل تطبيق أيسَر وراقب منزلك يكبر أمام عينك.",
   appStoreUrl: "https://apps.apple.com/sa/app/أيس-ر/id6746420561?l=ar&platform=iphone",
   googlePlayUrl: "https://play.google.com/store/apps/details?id=com.aysar.application",
+  app_images: {
+    left_phone: null as string | null,
+    right_phone: null as string | null,
+  },
 };
 
 export const CTA_SECTION = {

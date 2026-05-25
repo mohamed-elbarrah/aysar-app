@@ -12,6 +12,10 @@ interface AppSectionProps {
   description?: string;
   appStoreUrl?: string;
   googlePlayUrl?: string;
+  app_images?: {
+    left_phone?: string | null;
+    right_phone?: string | null;
+  };
 }
 
 const floatingCards = [
@@ -49,7 +53,8 @@ const floatingCards = [
   },
 ];
 
-function PhoneFrame({ className }: { className?: string }) {
+function PhoneFrame({ className, customImage }: { className?: string; customImage?: string | null }) {
+  const imageSrc = customImage || "/app-screenshot.jpg";
   return (
     <div
       className={`relative w-[240px] sm:w-[280px] lg:w-[300px] rounded-[44px] p-[10px] pb-4 shadow-2xl flex-shrink-0 ${className}`}
@@ -61,9 +66,9 @@ function PhoneFrame({ className }: { className?: string }) {
       }}
     >
       {/* Dynamic Island */}
-      <div className="absolute top-[14px] left-1/2 -translate-x-1/2 z-20">
+      <div className="absolute top-[18px] left-1/2 -translate-x-1/2 z-20">
         <div
-          className="w-[100px] sm:w-[110px] lg:w-[120px] h-[28px] sm:h-[30px] lg:h-[32px] rounded-full"
+          className="w-[80px] sm:w-[80px] lg:w-[100px] h-[20px] sm:h-[20px] lg:h-[24px] rounded-full"
           style={{
             background: "#000000",
             boxShadow: "inset 0 1px 2px rgba(255,255,255,0.08)",
@@ -79,13 +84,13 @@ function PhoneFrame({ className }: { className?: string }) {
       </div>
 
       {/* Screen */}
-      <div className="relative rounded-[32px] overflow-hidden bg-white">
+      <div className="relative rounded-[32px] overflow-hidden bg-white h-[480px] sm:h-[560px] lg:h-[650px]">
         <Image
-          src="/app-screenshot.jpg"
+          src={imageSrc}
           alt="تطبيق أيسَر"
           width={300}
           height={600}
-          className="w-full h-auto object-cover"
+          className="w-full h-full object-cover"
           priority
         />
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[110px] h-[5px] rounded-full bg-black/30 z-10" />
@@ -101,6 +106,7 @@ export function AppSection({
   description = "لن تحتاج سوى برنامج أيسَر للحصول على تطبيق مخصص لعملائك. حمِّل تطبيق أيسَر وراقب منزلك يكبر أمام عينك.",
   appStoreUrl = "https://apps.apple.com/sa/app/%D8%A3%D9%8A%D8%B3-%D8%B1/id6746420561?l=ar&platform=iphone",
   googlePlayUrl = "https://play.google.com/store/apps/details?id=com.aysar.application",
+  app_images,
 }: AppSectionProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
@@ -119,7 +125,7 @@ export function AppSection({
 
       <div className="section-aysar !pb-0 relative z-10" ref={ref}>
         <div className="container-aysar grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
-          <div className="order-2 lg:order-1 pb-0 lg:pb-20">
+          <div className="order-1 lg:order-1 pb-0 lg:pb-20">
             <motion.div
               className="eyebrow"
               initial={{ opacity: 0, y: 16 }}
@@ -205,7 +211,7 @@ export function AppSection({
             </motion.div>
           </div>
 
-          <div className="order-1 lg:order-2 relative flex justify-center  min-h-[420px] sm:min-h-[500px] lg:min-h-[580px]">
+          <div className="order-2 lg:order-2 relative flex justify-center  min-h-[420px] sm:min-h-[500px] lg:min-h-[580px]">
             <motion.div
               className="relative flex items-end justify-center"
               initial={{ opacity: 0, y: 40 }}
@@ -222,7 +228,10 @@ export function AppSection({
                     transformOrigin: "bottom left",
                   }}
                 >
-                  <PhoneFrame className="w-[190px] sm:w-[230px] lg:w-[250px]" />
+                  <PhoneFrame 
+                    className="w-[100px] sm:w-[120px] lg:w-[140px]" 
+                    customImage={app_images?.left_phone}
+                  />
                 </div>
 
                 {/* Right phone — rotates from bottom-left corner so bottom stays left, in front */}
@@ -233,7 +242,10 @@ export function AppSection({
                     transformOrigin: "bottom right",
                   }}
                 >
-                  <PhoneFrame className="w-[190px] sm:w-[230px] lg:w-[250px]" />
+                  <PhoneFrame 
+                    className="w-[100px] sm:w-[120px] lg:w-[140px]" 
+                    customImage={app_images?.right_phone}
+                  />
                 </div>
               </div>
 

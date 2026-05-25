@@ -88,6 +88,7 @@ export default async function Home() {
         description={appSection.description}
         appStoreUrl={appSection.appStoreUrl}
         googlePlayUrl={appSection.googlePlayUrl}
+        app_images={appSection.app_images}
       />
 
       <CTASection
