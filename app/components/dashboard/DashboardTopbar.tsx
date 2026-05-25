@@ -14,6 +14,7 @@ const pageTitles: Record<string, string> = {
   "/dashboard/policies": "الصفحات القانونية",
   "/dashboard/messages": "رسائل التواصل",
   "/dashboard/settings": "الإعدادات العامة",
+  "/dashboard/profile": "الملف الشخصي",
 };
 
 export function DashboardTopbar({

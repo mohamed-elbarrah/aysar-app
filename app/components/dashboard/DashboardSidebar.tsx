@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   LayoutDashboard,
@@ -16,11 +16,19 @@ import {
   LogOut,
   ChevronLeft,
   ChevronDown,
+  User,
   type LucideIcon,
 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+
+interface UserData {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+}
 
 interface NavItem {
   href: string;
@@ -197,6 +205,9 @@ export function DashboardSidebar({
   setMobileOpen: (open: boolean) => void;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(() => {
     // Auto-expand the current page's section
     const s = new Set<string>();
@@ -206,6 +217,24 @@ export function DashboardSidebar({
     if (active?.subItems) s.add(active.href);
     return s;
   });
+
+  // Load user data
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const res = await fetch("/api/user", { credentials: "include" });
+        const json = await res.json();
+        if (json.success && json.data) {
+          setUser(json.data);
+        }
+      } catch {
+        console.error("Failed to load user data");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadUser();
+  }, []);
 
   const toggleExpand = useCallback((href: string) => {
     setExpandedItems((prev) => {
@@ -273,23 +302,42 @@ export function DashboardSidebar({
 
         <div className="mx-2 h-px bg-white/10 mb-2" />
 
-        <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 rounded-full bg-[#5ddfb8]/20 flex items-center justify-center">
-            <span className="text-[#5ddfb8] text-xs font-bold">م</span>
+        <Link
+          href="/dashboard/profile"
+          onClick={() => setMobileOpen(false)}
+          className={cn(
+            "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-150",
+            pathname === "/dashboard/profile"
+              ? "bg-white/10 text-white"
+              : "text-white/60 hover:bg-white/5 hover:text-white"
+          )}
+        >
+          <div className="w-8 h-8 rounded-full bg-[#5ddfb8]/20 flex items-center justify-center shrink-0">
+            <span className="text-[#5ddfb8] text-xs font-bold">
+              {loading ? "م" : user?.name?.charAt(0) || "م"}
+            </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-sm font-medium truncate">
-              مدير النظام
+              {loading ? "جارٍ التحميل..." : user?.name || "مدير النظام"}
             </p>
-            <p className="text-white/40 text-[10px]">مدير النظام</p>
+            <p className="text-white/40 text-[10px]">
+              {user?.role === "admin" ? "مدير النظام" : "مستخدم"}
+            </p>
           </div>
-          <button
-            className="text-white/30 hover:text-white/60 transition-colors p-1"
-            title="تسجيل الخروج"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
+          <User className="w-4 h-4 text-white/30" />
+        </Link>
+
+        <button
+          onClick={async () => {
+            await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+            router.push("/login");
+          }}
+          className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors duration-150 w-full mt-1"
+        >
+          <LogOut className="w-4 h-4" />
+          <span className="flex-1">تسجيل الخروج</span>
+        </button>
       </div>
     </div>
   );
