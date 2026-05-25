@@ -47,6 +47,8 @@ const DEFAULTS = {
   contact_info: SITE_CONTACT_INFO,
   platform_links: PLATFORM_LINKS,
   work_hours: WORK_HOURS,
+  head_scripts: "",
+  body_scripts: "",
 };
 
 function toSnakeCase(data: Record<string, unknown>): Record<string, unknown> {
@@ -91,6 +93,8 @@ export async function GET() {
       contactInfo: SITE_CONTACT_INFO,
       platformLinks: PLATFORM_LINKS,
       workHours: WORK_HOURS,
+      headScripts: "",
+      bodyScripts: "",
       updatedAt: new Date().toISOString(),
     };
     return NextResponse.json({ success: true, data });
@@ -111,6 +115,8 @@ export async function GET() {
       contactInfo: normalizeObjectField(row.contact_info, SITE_CONTACT_INFO),
       platformLinks: normalizeObjectField(row.platform_links, PLATFORM_LINKS),
       workHours: normalizeObjectField(row.work_hours, WORK_HOURS),
+      headScripts: row.head_scripts || "",
+      bodyScripts: row.body_scripts || "",
       updatedAt: row.updated_at,
     },
   });
@@ -161,6 +167,8 @@ export async function PATCH(request: NextRequest) {
       contactInfo: normalizeObjectField(page.contact_info, SITE_CONTACT_INFO),
       platformLinks: normalizeObjectField(page.platform_links, PLATFORM_LINKS),
       workHours: normalizeObjectField(page.work_hours, WORK_HOURS),
+      headScripts: page.head_scripts || "",
+      bodyScripts: page.body_scripts || "",
       updatedAt: page.updated_at,
     },
   });

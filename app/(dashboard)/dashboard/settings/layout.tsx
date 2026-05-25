@@ -12,6 +12,7 @@ const TABS = [
   { href: "/dashboard/settings/contact", label: "معلومات الاتصال" },
   { href: "/dashboard/settings/platform", label: "روابط المنصة" },
   { href: "/dashboard/settings/hours", label: "ساعات العمل" },
+  { href: "/dashboard/settings/scripts", label: "كود مخصص" },
 ];
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {

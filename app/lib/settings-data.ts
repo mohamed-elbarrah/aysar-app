@@ -45,6 +45,8 @@ export interface SiteSettingsResponse {
   contactInfo: ContactInfo;
   platformLinks: PlatformLinks;
   workHours: WorkHours;
+  headScripts: string;
+  bodyScripts: string;
   updatedAt: string;
 }
 
@@ -91,6 +93,8 @@ export async function getSiteSettings(): Promise<SiteSettingsResponse> {
       contactInfo: { ...SITE_CONTACT_INFO },
       platformLinks: { ...PLATFORM_LINKS },
       workHours: { ...WORK_HOURS },
+      headScripts: "",
+      bodyScripts: "",
       updatedAt: new Date().toISOString(),
     };
   }
@@ -110,6 +114,8 @@ export async function getSiteSettings(): Promise<SiteSettingsResponse> {
     contactInfo: safeJsonField<ContactInfo>(row.contact_info, SITE_CONTACT_INFO),
     platformLinks: safeJsonField<PlatformLinks>(row.platform_links, PLATFORM_LINKS),
     workHours: safeJsonField<WorkHours>(row.work_hours, WORK_HOURS),
+    headScripts: row.head_scripts || "",
+    bodyScripts: row.body_scripts || "",
     updatedAt: row.updated_at,
   };
 }
