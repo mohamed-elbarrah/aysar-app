@@ -23,7 +23,7 @@ const floatingCards = [
     value: "تحديث المرحلة",
     meta: "منذ 5 دقائق",
     metaColor: "#f97316",
-    position: "-bottom-8 -left-12 lg:-left-20",
+    position: "-top-6 -left-6 lg:-left-12",
     delay: 0,
   },
   {
@@ -33,7 +33,7 @@ const floatingCards = [
     title: "مشروع الحمراء E-8",
     progress: 75,
     progressColor: "#2d2e83",
-    position: "-top-8 -left-16 lg:-left-28",
+    position: "top-14 left-1/2 -translate-x-1/2",
     delay: 1.3,
   },
   {
@@ -44,7 +44,7 @@ const floatingCards = [
     value: "تم رفع الطلب",
     status: "مفتوح",
     statusColor: "#ef4444",
-    position: "-top-10 -right-12 lg:-right-24",
+    position: "-top-6 -right-6 lg:-right-12",
     delay: 2.6,
   },
 ];
@@ -159,10 +159,10 @@ export function AppSection({
                 href={appStoreUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 bg-navy hover:opacity-[0.88] hover:-translate-y-px active:translate-y-0 transition-all duration-150 rounded-xl px-5 py-[11px]"
+                className="inline-flex items-center gap-2.5 bg-white hover:bg-[#f5f6f9] transition-colors duration-150 rounded-xl px-4 py-2.5 border border-[#e8edf5] shadow-sm"
               >
                 <Image
-                  src="/apple-svgrepo-com.svg"
+                  src="/apple-logo-svgrepo.svg"
                   alt="App Store"
                   width={20}
                   height={20}
@@ -170,10 +170,10 @@ export function AppSection({
                   unoptimized
                 />
                 <div>
-                  <div className="text-[10px] text-white/55 leading-none">
-                    تحميل عبر
+                  <div className="text-[10px] text-navy leading-none">
+                    Download on the
                   </div>
-                  <div className="text-[13px] font-bold text-white leading-tight">
+                  <div className="text-[13px] font-bold text-navy leading-tight">
                     App Store
                   </div>
                 </div>
@@ -183,7 +183,7 @@ export function AppSection({
                 href={googlePlayUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 bg-navy hover:opacity-[0.88] hover:-translate-y-px active:translate-y-0 transition-all duration-150 rounded-xl px-5 py-[11px]"
+                className="inline-flex items-center gap-2.5 bg-white hover:bg-[#f5f6f9] transition-colors duration-150 rounded-xl px-4 py-2.5 border border-[#e8edf5] shadow-sm"
               >
                 <Image
                   src="/google-play.svg"
@@ -194,10 +194,10 @@ export function AppSection({
                   unoptimized
                 />
                 <div>
-                  <div className="text-[10px] text-white/55 leading-none">
-                    تحميل من
+                  <div className="text-[10px] text-navy leading-none">
+                    GET IT ON
                   </div>
-                  <div className="text-[13px] font-bold text-white leading-tight">
+                  <div className="text-[13px] font-bold text-navy leading-tight">
                     Google Play
                   </div>
                 </div>
@@ -213,7 +213,7 @@ export function AppSection({
               transition={{ duration: 0.7, ease: "easeOut", delay: 0.3 }}
             >
               {/* Both phones in a V shape — bottoms together, tops spread apart */}
-              <div className="relative w-[400px] sm:w-[500px] lg:w-[600px] h-[420px] sm:h-[500px] lg:h-[540px] flex items-end justify-center">
+              <div className="relative w-[400px] sm:w-[500px] lg:w-[600px] h-[420px] sm:h-[500px] lg:h-[540px] flex items-end justify-center translate-y-[45%]">
                 {/* Left phone — rotates from bottom-right corner so bottom stays right */}
                 <div
                   className="relative z-10 -ml-80 sm:-ml-100"
