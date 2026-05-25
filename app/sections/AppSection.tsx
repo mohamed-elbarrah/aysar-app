@@ -23,7 +23,7 @@ const floatingCards = [
     value: "تحديث المرحلة",
     meta: "منذ 5 دقائق",
     metaColor: "#f97316",
-    position: "-bottom-4 -left-6 lg:-left-10",
+    position: "-bottom-8 -left-12 lg:-left-20",
     delay: 0,
   },
   {
@@ -33,7 +33,7 @@ const floatingCards = [
     title: "مشروع الحمراء E-8",
     progress: 75,
     progressColor: "#2d2e83",
-    position: "-top-4 -left-8 lg:-left-14",
+    position: "-top-8 -left-16 lg:-left-28",
     delay: 1.3,
   },
   {
@@ -44,10 +44,55 @@ const floatingCards = [
     value: "تم رفع الطلب",
     status: "مفتوح",
     statusColor: "#ef4444",
-    position: "-top-6 -right-6 lg:-right-14",
+    position: "-top-10 -right-12 lg:-right-24",
     delay: 2.6,
   },
 ];
+
+function PhoneFrame({ className }: { className?: string }) {
+  return (
+    <div
+      className={`relative w-[240px] sm:w-[280px] lg:w-[300px] rounded-[44px] p-[10px] pb-4 shadow-2xl flex-shrink-0 ${className}`}
+      style={{
+        background:
+          "linear-gradient(145deg, #050505 0%, #141414 50%, #050505 100%)",
+        boxShadow:
+          "0 30px 70px -12px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)",
+      }}
+    >
+      {/* Dynamic Island */}
+      <div className="absolute top-[14px] left-1/2 -translate-x-1/2 z-20">
+        <div
+          className="w-[100px] sm:w-[110px] lg:w-[120px] h-[28px] sm:h-[30px] lg:h-[32px] rounded-full"
+          style={{
+            background: "#000000",
+            boxShadow: "inset 0 1px 2px rgba(255,255,255,0.08)",
+          }}
+        />
+      </div>
+
+      {/* Side buttons (controlled by className - hidden by default) */}
+      <div className="side-buttons hidden">
+        <div className="power-btn absolute right-[-2px] top-[80px] w-[2px] h-[28px] bg-[#1a1a1a] rounded-l-sm" />
+        <div className="vol-up absolute right-[-2px] top-[120px] w-[2px] h-[50px] bg-[#1a1a1a] rounded-l-sm" />
+        <div className="vol-down absolute left-[-2px] top-[100px] w-[2px] h-[40px] bg-[#1a1a1a] rounded-r-sm" />
+      </div>
+
+      {/* Screen */}
+      <div className="relative rounded-[32px] overflow-hidden bg-white">
+        <Image
+          src="/app-screenshot.jpg"
+          alt="تطبيق أيسَر"
+          width={300}
+          height={600}
+          className="w-full h-auto object-cover"
+          priority
+        />
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[110px] h-[5px] rounded-full bg-black/30 z-10" />
+      </div>
+    </div>
+  );
+}
 
 export function AppSection({
   eyebrow = "تطبيق أيسَر",
@@ -160,59 +205,35 @@ export function AppSection({
             </motion.div>
           </div>
 
-          <div className="order-1 lg:order-2 relative flex justify-center items-end">
+          <div className="order-1 lg:order-2 relative flex justify-center  min-h-[420px] sm:min-h-[500px] lg:min-h-[580px]">
             <motion.div
-              className="relative"
+              className="relative flex items-end justify-center"
               initial={{ opacity: 0, y: 40 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
               transition={{ duration: 0.7, ease: "easeOut", delay: 0.3 }}
             >
-              <div
-                className="relative w-[220px] sm:w-[240px] lg:w-[260px] rounded-[36px] p-[14px] px-3 pb-5 shadow-2xl"
-                style={{
-                  background:
-                    "linear-gradient(145deg, #162340 0%, #1e3050 40%, #0f1c30 100%)",
-                  boxShadow:
-                    "0 25px 60px -12px rgba(12,41,84,0.55), inset 0 1px 0 rgba(255,255,255,0.12)",
-                }}
-              >
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
-                  <div
-                    className="h-[22px] w-[80px] rounded-full bg-transparent"
-                    style={{
-                      background:
-                        "linear-gradient(180deg, #0c1a2e 0%, #0c1a2e 100%)",
-                      boxShadow:
-                        "inset 0 1px 3px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.06)",
-                    }}
-                  >
-                    <div
-                      className="absolute left-[14px] top-1/2 -translate-y-1/2 w-[7px] h-[7px] rounded-full"
-                      style={{
-                        background:
-                          "radial-gradient(circle at 30% 30%, #2a4080, #0c1a2e)",
-                      }}
-                    />
-                  </div>
-                </div>
-
+              {/* Both phones in a V shape — bottoms together, tops spread apart */}
+              <div className="relative w-[400px] sm:w-[500px] lg:w-[600px] h-[420px] sm:h-[500px] lg:h-[540px] flex items-end justify-center">
+                {/* Left phone — rotates from bottom-right corner so bottom stays right */}
                 <div
-                  className="relative rounded-[18px] overflow-hidden bg-white"
+                  className="relative z-10 -ml-80 sm:-ml-100"
                   style={{
-                    boxShadow:
-                      "inset 0 0 8px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.15)",
+                    transform: "rotate(-16deg)",
+                    transformOrigin: "bottom left",
                   }}
                 >
-                  <Image
-                    src="/app-screenshot.jpg"
-                    alt="تطبيق أيسَر"
-                    width={260}
-                    height={520}
-                    className="w-full h-auto object-cover"
-                    priority
-                  />
+                  <PhoneFrame className="w-[190px] sm:w-[230px] lg:w-[250px]" />
+                </div>
 
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[90px] h-[4px] rounded-full bg-black/20 z-10" />
+                {/* Right phone — rotates from bottom-left corner so bottom stays left, in front */}
+                <div
+                  className="relative z-0"
+                  style={{
+                    transform: "rotate(16deg)",
+                    transformOrigin: "bottom right",
+                  }}
+                >
+                  <PhoneFrame className="w-[190px] sm:w-[230px] lg:w-[250px]" />
                 </div>
               </div>
 
@@ -227,7 +248,7 @@ export function AppSection({
                 return (
                   <div
                     key={idx}
-                    className={`absolute ${card.position} z-20 anim-float-smooth ${delayClass} ${
+                    className={`absolute ${card.position} z-30 anim-float-smooth ${delayClass} ${
                       idx === 0
                         ? "hidden sm:block"
                         : idx === 1
