@@ -25,6 +25,8 @@ export const HOME_HERO = {
   badge: "منصة سحابية للتطوير العقاري",
   title: "إدارة مشاريعك العقارية",
   titleAccent: "بسهولة وشفافية كاملة",
+  accentColor: "#ffffff",
+  accentOpacity: 0.55,
   subtitle: "أيسَر تمنحك لوحة تحكم احترافية لإدارة مشاريعك وعملاءك — من تتبع مراحل الإنشاء وإشعارات فورية، حتى صفحات هبوط واستقبال حجوزات ونظام CRM متكامل.",
   primaryCtaLabel: "اطلب تجربة مجانية",
   primaryCtaHref: "#",
@@ -153,6 +155,8 @@ export const CONTACT_HERO = {
   badge: "اتصل بنا",
   titleLine1: "تواصل معنا",
   titleLine2: "بكل سهولة",
+  line2Color: "#ffffff",
+  line2Opacity: 0.5,
   subtitle: "سواء كنت مطوراً عقارياً أو عميلاً يبحث عن دعم، نحن هنا لخدمتك والإجابة عن جميع استفساراتك.",
 };
 

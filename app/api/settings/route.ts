@@ -78,7 +78,21 @@ export async function GET() {
     .single();
 
   if (!row) {
-    const data = { ...DEFAULTS, id: "SETTINGS", updated_at: new Date().toISOString(), social_links: [...SOCIAL_LINKS] };
+    const data = {
+      id: "SETTINGS",
+      siteTitle: SITE_SETTINGS.siteTitle,
+      siteDescription: SITE_SETTINGS.siteDescription,
+      faviconUrl: SITE_SETTINGS.faviconUrl,
+      seoKeywords: SITE_SETTINGS.seoKeywords,
+      navLinks: NAV_LINKS,
+      socialLinks: [...SOCIAL_LINKS],
+      appLinks: APP_LINKS_DEFAULTS,
+      footerColumns: DEFAULT_FOOTER_COLUMNS,
+      contactInfo: SITE_CONTACT_INFO,
+      platformLinks: PLATFORM_LINKS,
+      workHours: WORK_HOURS,
+      updatedAt: new Date().toISOString(),
+    };
     return NextResponse.json({ success: true, data });
   }
 
@@ -86,18 +100,18 @@ export async function GET() {
     success: true,
     data: {
       id: row.id,
-      site_title: row.site_title,
-      site_description: row.site_description,
-      favicon_url: row.favicon_url,
-      seo_keywords: row.seo_keywords,
-      nav_links: Array.isArray(row.nav_links) ? row.nav_links : [...NAV_LINKS],
-      social_links: normalizeSocialLinks(row.social_links),
-      app_links: normalizeObjectField(row.app_links, APP_LINKS_DEFAULTS),
-      footer_columns: Array.isArray(row.footer_columns) ? row.footer_columns : [...DEFAULT_FOOTER_COLUMNS],
-      contact_info: normalizeObjectField(row.contact_info, SITE_CONTACT_INFO),
-      platform_links: normalizeObjectField(row.platform_links, PLATFORM_LINKS),
-      work_hours: normalizeObjectField(row.work_hours, WORK_HOURS),
-      updated_at: row.updated_at,
+      siteTitle: row.site_title,
+      siteDescription: row.site_description,
+      faviconUrl: row.favicon_url,
+      seoKeywords: row.seo_keywords,
+      navLinks: Array.isArray(row.nav_links) ? row.nav_links : [...NAV_LINKS],
+      socialLinks: normalizeSocialLinks(row.social_links),
+      appLinks: normalizeObjectField(row.app_links, APP_LINKS_DEFAULTS),
+      footerColumns: Array.isArray(row.footer_columns) ? row.footer_columns : [...DEFAULT_FOOTER_COLUMNS],
+      contactInfo: normalizeObjectField(row.contact_info, SITE_CONTACT_INFO),
+      platformLinks: normalizeObjectField(row.platform_links, PLATFORM_LINKS),
+      workHours: normalizeObjectField(row.work_hours, WORK_HOURS),
+      updatedAt: row.updated_at,
     },
   });
 }
@@ -136,18 +150,18 @@ export async function PATCH(request: NextRequest) {
     success: true,
     data: {
       id: page.id,
-      site_title: page.site_title,
-      site_description: page.site_description,
-      favicon_url: page.favicon_url,
-      seo_keywords: page.seo_keywords,
-      nav_links: Array.isArray(page.nav_links) ? page.nav_links : [...NAV_LINKS],
-      social_links: normalizeSocialLinks(page.social_links),
-      app_links: normalizeObjectField(page.app_links, APP_LINKS_DEFAULTS),
-      footer_columns: Array.isArray(page.footer_columns) ? page.footer_columns : [...DEFAULT_FOOTER_COLUMNS],
-      contact_info: normalizeObjectField(page.contact_info, SITE_CONTACT_INFO),
-      platform_links: normalizeObjectField(page.platform_links, PLATFORM_LINKS),
-      work_hours: normalizeObjectField(page.work_hours, WORK_HOURS),
-      updated_at: page.updated_at,
+      siteTitle: page.site_title,
+      siteDescription: page.site_description,
+      faviconUrl: page.favicon_url,
+      seoKeywords: page.seo_keywords,
+      navLinks: Array.isArray(page.nav_links) ? page.nav_links : [...NAV_LINKS],
+      socialLinks: normalizeSocialLinks(page.social_links),
+      appLinks: normalizeObjectField(page.app_links, APP_LINKS_DEFAULTS),
+      footerColumns: Array.isArray(page.footer_columns) ? page.footer_columns : [...DEFAULT_FOOTER_COLUMNS],
+      contactInfo: normalizeObjectField(page.contact_info, SITE_CONTACT_INFO),
+      platformLinks: normalizeObjectField(page.platform_links, PLATFORM_LINKS),
+      workHours: normalizeObjectField(page.work_hours, WORK_HOURS),
+      updatedAt: page.updated_at,
     },
   });
 }

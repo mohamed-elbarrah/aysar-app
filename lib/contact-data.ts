@@ -1,14 +1,18 @@
 export interface ContactInfo {
   phone: string;
   email: string;
-  location: string;
-  hoursDays: string;
-  hoursTime: string;
+  address: string;
+  whatsapp: string;
+  location?: string;
+  hoursDays?: string;
+  hoursTime?: string;
 }
 
 export const CONTACT_INFO: ContactInfo = {
   phone: "+966125101107",
   email: "support@aysar.sa",
+  address: "جدة، المملكة العربية السعودية",
+  whatsapp: "+966125101107",
   location: "جدة، المملكة العربية السعودية",
   hoursDays: "الأحد – الخميس",
   hoursTime: "10:00 ص – 5:00 م",
@@ -17,36 +21,40 @@ export const CONTACT_INFO: ContactInfo = {
 export type ChannelId = "whatsapp" | "email" | "help";
 
 export interface Channel {
-  id: ChannelId;
-  name: string;
-  value: string;
+  key: ChannelId;
+  label: string;
+  enabled: boolean;
   href: string;
-  iconBg: string;
-  actionLabel: string;
+  displayText: string;
+  iconBg?: string;
+  actionLabel?: string;
 }
 
 export const CHANNELS: Channel[] = [
   {
-    id: "whatsapp",
-    name: "واتساب",
-    value: "+966125101107",
+    key: "whatsapp",
+    label: "واتساب",
+    enabled: true,
     href: "http://wa.me/966125101107",
+    displayText: "+966125101107",
     iconBg: "#e9faf0",
     actionLabel: "تواصل الآن",
   },
   {
-    id: "email",
-    name: "البريد الإلكتروني",
-    value: "support@aysar.sa",
+    key: "email",
+    label: "البريد الإلكتروني",
+    enabled: true,
     href: "mailto:support@aysar.sa",
+    displayText: "support@aysar.sa",
     iconBg: "#eef2ff",
     actionLabel: "راسلنا",
   },
   {
-    id: "help",
-    name: "مركز المساعدة",
-    value: "support.aysar.sa",
+    key: "help",
+    label: "مركز المساعدة",
+    enabled: true,
     href: "https://support.aysar.sa/",
+    displayText: "support.aysar.sa",
     iconBg: "#fff7ed",
     actionLabel: "اطرح سؤالاً",
   },

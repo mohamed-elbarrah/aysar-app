@@ -1,100 +1,29 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
+import { useDashboard } from "@/app/components/dashboard/DashboardContext";
 import { Input, Textarea } from "@/app/components/ui/Input";
 import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
 import { CodeEditor } from "@/app/components/dashboard/CodeEditor";
-import { DynamicList } from "@/app/components/dashboard/DynamicList";
-import { CONTACT_HERO, CONTACT_PAGE_INFO, CHANNELS } from "@/app/lib/dashboard/placeholders";
+import { CONTACT_HERO, CONTACT_PAGE_INFO } from "@/app/lib/dashboard/placeholders";
 import { INQUIRY_OPTIONS } from "@/lib/contact-data";
-import { FORM_FIELDS_DEFAULTS, CONTACT_FORM_DEFAULTS } from "@/app/lib/form-fields-data";
-import type { Channel, InquiryType } from "@/lib/contact-data";
-import type { FormFieldConfig } from "@/app/lib/form-fields-data";
+import type { InquiryType } from "@/lib/contact-data";
 import { ScrollText, ChevronUp, Loader2, Plus, Trash2, GripVertical } from "lucide-react";
-import { SaveBar } from "@/app/components/dashboard/SaveBar";
+import { ColorPicker } from "@/app/components/dashboard/ColorPicker";
+import type { FormFieldConfig } from "@/app/lib/form-fields-data";
+import { FORM_FIELDS_DEFAULTS, CONTACT_FORM_DEFAULTS } from "@/app/lib/form-fields-data";
 
 const sections = [
   { id: "banner", label: "البانر" },
   { id: "form", label: "النموذج" },
-  { id: "channels", label: "القنوات" },
 ];
 
-interface ContactSectionData {
-  hero: typeof CONTACT_HERO;
-  contactInfo: typeof CONTACT_PAGE_INFO;
-  channels: typeof CHANNELS;
-  inquiryOptions: typeof INQUIRY_OPTIONS;
-  successMessage: string;
-  formFields: FormFieldConfig[];
-  thirdPartyFormScript: string;
-  formReplaced: boolean;
-}
-
-const DEFAULTS: ContactSectionData = {
-  hero: CONTACT_HERO,
-  contactInfo: CONTACT_PAGE_INFO,
-  channels: CHANNELS,
-  inquiryOptions: INQUIRY_OPTIONS,
-  successMessage: "تم إرسال رسالتك بنجاح! سنتواصل معك خلال 24 ساعة.",
-  formFields: FORM_FIELDS_DEFAULTS,
-  thirdPartyFormScript: CONTACT_FORM_DEFAULTS.thirdPartyFormScript,
-  formReplaced: CONTACT_FORM_DEFAULTS.formReplaced,
-};
-
-async function saveSection(section: string, data: unknown): Promise<boolean> {
-  try {
-    const res = await fetch("/api/contact-page", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ [section]: data }),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
 export default function ContactPageEditor() {
-  const [data, setData] = useState<ContactSectionData>(DEFAULTS);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState("");
-  const [saving, setSaving] = useState<string | null>(null);
-  const [lastSaved, setLastSaved] = useState<string>();
-  const [globalDirty, setGlobalDirty] = useState(false);
-  const markDirty = useCallback(() => setGlobalDirty(true), []);
+  const { contactData, loading, setContactData } = useDashboard();
   const [activeSection, setActiveSection] = useState("banner");
   const pageRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/contact-page");
-        const json = await res.json();
-        if (json.success && json.data) {
-          const d = json.data;
-          const fc = d.formConfig as Record<string, unknown> | undefined;
-          setData({
-            hero: d.hero || DEFAULTS.hero,
-            contactInfo: d.contactInfo || DEFAULTS.contactInfo,
-            channels: d.channels || DEFAULTS.channels,
-            inquiryOptions: d.inquiryOptions || DEFAULTS.inquiryOptions,
-            successMessage: d.successMessage || DEFAULTS.successMessage,
-            formFields: Array.isArray(d.formFields) ? d.formFields : DEFAULTS.formFields,
-            thirdPartyFormScript: (fc?.thirdPartyFormScript as string) ?? DEFAULTS.thirdPartyFormScript,
-            formReplaced: (fc?.formReplaced as boolean) ?? DEFAULTS.formReplaced,
-          });
-        }
-      } catch {
-        setFetchError("تعذر تحميل البيانات، تم استخدام القيم الافتراضية");
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -122,43 +51,7 @@ export default function ContactPageEditor() {
     }
   };
 
-  const handleSectionSave = useCallback(async (sectionKey: string, sectionData: unknown) => {
-    setSaving(sectionKey);
-    const ok = await saveSection(sectionKey, sectionData);
-    setSaving(null);
-    if (ok) {
-      setGlobalDirty(false);
-      setLastSaved(new Date().toLocaleTimeString("ar-SA"));
-      setTimeout(() => setLastSaved(undefined), 5000);
-    }
-  }, []);
-
-  const handleGlobalSave = useCallback(async () => {
-    setGlobalDirty(false);
-    setSaving("all");
-    let allOk = true;
-    let ok = await saveSection("hero", data.hero);
-    if (!ok) allOk = false;
-    ok = await saveSection("inquiryOptions", data.inquiryOptions);
-    if (!ok) allOk = false;
-    ok = await saveSection("successMessage", data.successMessage);
-    if (!ok) allOk = false;
-    ok = await saveSection("formFields", data.formFields);
-    if (!ok) allOk = false;
-    ok = await saveSection("formConfig", { thirdPartyFormScript: data.thirdPartyFormScript, formReplaced: data.formReplaced });
-    if (!ok) allOk = false;
-    ok = await saveSection("channels", data.channels);
-    if (!ok) allOk = false;
-    ok = await saveSection("contactInfo", data.contactInfo);
-    if (!ok) allOk = false;
-    setSaving(null);
-    if (allOk) {
-      setLastSaved(new Date().toLocaleTimeString("ar-SA"));
-      setTimeout(() => setLastSaved(undefined), 5000);
-    }
-  }, [data]);
-
-  if (loading) {
+  if (loading.contact || !contactData) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <div className="text-center">
@@ -174,20 +67,34 @@ export default function ContactPageEditor() {
       <div ref={pageRef} className="flex-1 overflow-y-auto pr-2 -mr-2">
         <div className="mb-6">
           <h1 className="text-xl font-bold text-[#0c2954] mb-1">صفحة التواصل</h1>
-          <p className="text-sm text-[#6b7a94]">تعديل البانر، نموذج التواصل، وقنوات الاتصال</p>
-          {fetchError && <p className="text-xs text-amber-600 mt-1">{fetchError}</p>}
+          <p className="text-sm text-[#6b7a94]">تعديل نموذج التواصل، معلومات الاتصال، والقنوات</p>
         </div>
-        <div className="space-y-6 pb-24">
-          <BannerSection data={data.hero} saving={saving === "hero"} onSave={(d) => handleSectionSave("hero", d)} onDirty={markDirty} />
-          <FormSection data={data} saving={saving === "form"} onSave={(d) => handleFormSave(d)} onDirty={markDirty} />
-          <ChannelsSection data={data} saving={saving === "channels"} onSave={(d) => handleChannelsSave(d)} onDirty={markDirty} />
+        <div className="space-y-6 pb-8">
+          <BannerSection 
+            data={(contactData.hero as typeof CONTACT_HERO) || CONTACT_HERO} 
+            onChange={(data) => setContactData({ hero: data }, "hero")} 
+          />
+          <FormSection 
+            data={{
+              formFields: (contactData.formFields as FormFieldConfig[]) || FORM_FIELDS_DEFAULTS,
+              thirdPartyFormScript: (contactData.thirdPartyFormScript as string) || CONTACT_FORM_DEFAULTS.thirdPartyFormScript,
+              formReplaced: (contactData.formReplaced as boolean) ?? CONTACT_FORM_DEFAULTS.formReplaced,
+              successMessage: (contactData.successMessage as string) || "تم إرسال رسالتك بنجاح! سنتواصل معك خلال 24 ساعة.",
+            }}
+            onFieldsChange={(data) => setContactData({ formFields: data }, "formFields")}
+            onScriptChange={(script) => setContactData({ thirdPartyFormScript: script }, "thirdPartyFormScript")}
+            onReplacedChange={(replaced) => setContactData({ formReplaced: replaced }, "formReplaced")}
+            onSuccessChange={(msg) => setContactData({ successMessage: msg }, "successMessage")}
+          />
+          <ContactInfoSection 
+            data={(contactData.contactInfo as typeof CONTACT_PAGE_INFO) || CONTACT_PAGE_INFO} 
+            onChange={(data) => setContactData({ contactInfo: data }, "contactInfo")} 
+          />
+          <InquiryOptionsSection 
+            data={(contactData.inquiryOptions as typeof INQUIRY_OPTIONS) || INQUIRY_OPTIONS} 
+            onChange={(data) => setContactData({ inquiryOptions: data }, "inquiryOptions")} 
+          />
         </div>
-        <SaveBar
-          isDirty={globalDirty}
-          isSubmitting={saving === "all"}
-          onSave={handleGlobalSave}
-          lastSaved={lastSaved ?? null}
-        />
       </div>
       <div className="hidden xl:block w-[200px] shrink-0">
         <div className="sticky top-0">
@@ -204,254 +111,189 @@ export default function ContactPageEditor() {
       </div>
     </div>
   );
-
-  async function handleFormSave(formData: { inquiryOptions: typeof INQUIRY_OPTIONS; successMessage: string; formFields: FormFieldConfig[]; thirdPartyFormScript: string; formReplaced: boolean }) {
-    setSaving("form");
-    await saveSection("inquiryOptions", formData.inquiryOptions);
-    await saveSection("successMessage", formData.successMessage);
-    await saveSection("formFields", formData.formFields);
-    await saveSection("formConfig", { thirdPartyFormScript: formData.thirdPartyFormScript, formReplaced: formData.formReplaced });
-    setSaving(null);
-    setLastSaved(new Date().toLocaleTimeString("ar-SA"));
-    setTimeout(() => setLastSaved(undefined), 5000);
-  }
-
-  async function handleChannelsSave(chData: { channels: Channel[]; contactInfo: typeof CONTACT_PAGE_INFO }) {
-    setSaving("channels");
-    await saveSection("channels", chData.channels);
-    await saveSection("contactInfo", chData.contactInfo);
-    setSaving(null);
-    setLastSaved(new Date().toLocaleTimeString("ar-SA"));
-    setTimeout(() => setLastSaved(undefined), 5000);
-  }
 }
 
-function BannerSection({ data: initial, saving, onSave, onDirty }: { data: typeof CONTACT_HERO; saving: boolean; onSave: (d: typeof CONTACT_HERO) => void; onDirty?: () => void }) {
+function BannerSection({ data: initial, onChange }: { data: typeof CONTACT_HERO; onChange: (d: typeof CONTACT_HERO) => void }) {
   const [data, setData] = useState(initial);
+  
+  useEffect(() => {
+    setData(initial);
+  }, [initial]);
+
+  const handleChange = useCallback((patch: Partial<typeof CONTACT_HERO>) => {
+    const newData = { ...data, ...patch };
+    setData(newData);
+    onChange(newData);
+  }, [data, onChange]);
+
   return (
     <section id="banner">
       <ContentCard title="البانر" subtitle="عنوان صفحة التواصل">
         <div className="form-grid-2">
-          <Input label="الشارة" value={data.badge} onChange={(e) => { setData({ ...data, badge: e.target.value }); onDirty?.(); }} />
-          <Input label="العنوان (السطر الأول)" value={data.titleLine1} onChange={(e) => { setData({ ...data, titleLine1: e.target.value }); onDirty?.(); }} />
-          <Input label="العنوان (السطر الثاني)" value={data.titleLine2} onChange={(e) => { setData({ ...data, titleLine2: e.target.value }); onDirty?.(); }} />
-          <Textarea label="الوصف" value={data.subtitle} onChange={(e) => { setData({ ...data, subtitle: e.target.value }); onDirty?.(); }} rows={3} />
-        </div>
-        <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave(data)}>
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-          </DashboardButton>
+          <Input label="الشارة" value={data.badge} onChange={(e) => handleChange({ badge: e.target.value })} />
+          <Input label="عنوان السطر الأول" value={data.titleLine1} onChange={(e) => handleChange({ titleLine1: e.target.value })} />
+          <Input label="عنوان السطر الثاني" value={data.titleLine2} onChange={(e) => handleChange({ titleLine2: e.target.value })} />
+          <ColorPicker label="لون السطر الثاني" color={data.line2Color} onChange={(color) => handleChange({ line2Color: color })} />
+          <div className="form-group-contact">
+            <label>شفافية اللون (%) — {Math.round((data.line2Opacity || 0.5) * 100)}%</label>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={data.line2Opacity || 0.5}
+              onChange={(e) => handleChange({ line2Opacity: parseFloat(e.target.value) })}
+              className="w-full h-2 bg-[#e8edf5] rounded-lg appearance-none cursor-pointer mt-2"
+            />
+          </div>
+          <Textarea label="الوصف" value={data.subtitle} onChange={(e) => handleChange({ subtitle: e.target.value })} rows={3} />
         </div>
       </ContentCard>
     </section>
   );
 }
 
-function FormSection({ data, saving, onSave, onDirty }: { data: ContactSectionData; saving: boolean; onSave: (d: { inquiryOptions: typeof INQUIRY_OPTIONS; successMessage: string; formFields: FormFieldConfig[]; thirdPartyFormScript: string; formReplaced: boolean }) => void; onDirty?: () => void }) {
-  const [inquiryTypes, setInquiryTypes] = useState(data.inquiryOptions.filter((o) => o.value !== ""));
-  const [successMessage, setSuccessMessage] = useState(data.successMessage);
-  const [fields, setFields] = useState<FormFieldConfig[]>(data.formFields);
-  const [scriptCode, setScriptCode] = useState(data.thirdPartyFormScript ?? "");
-  const [scriptReplaced, setScriptReplaced] = useState(data.formReplaced ?? false);
-  const dragIdx = useRef<number | null>(null);
+function FormSection({ data, onFieldsChange, onScriptChange, onReplacedChange, onSuccessChange }: { data: { formFields: FormFieldConfig[]; thirdPartyFormScript: string; formReplaced: boolean; successMessage: string; }; onFieldsChange: (fields: FormFieldConfig[]) => void; onScriptChange: (script: string) => void; onReplacedChange: (replaced: boolean) => void; onSuccessChange: (msg: string) => void; }) {
+  const [fields, setFields] = useState(data.formFields);
+  const [script, setScript] = useState(data.thirdPartyFormScript);
+  const [replaced, setReplaced] = useState(data.formReplaced);
+  const [successMsg, setSuccessMsg] = useState(data.successMessage);
 
-  const handleDragStart = (idx: number) => { dragIdx.current = idx; };
-  const handleDragOver = (e: React.DragEvent, idx: number) => {
-    e.preventDefault();
-    if (dragIdx.current === null || dragIdx.current === idx) return;
-    const n = [...fields];
-    const [moved] = n.splice(dragIdx.current, 1);
-    n.splice(idx, 0, moved);
-    dragIdx.current = idx;
-    setFields(n);
-    onDirty?.();
-  };
-  const handleDragEnd = () => { dragIdx.current = null; };
-
-  const updateField = (idx: number, patch: Partial<FormFieldConfig>) => {
-    const n = [...fields];
-    n[idx] = { ...n[idx], ...patch };
-    setFields(n);
-    onDirty?.();
-  };
-
-  const handleAdd = () => {
-    const idx = fields.length;
-    setFields([
-      ...fields,
-      {
-        key: `custom_${Date.now()}`,
-        label: `حقل مخصص ${idx + 1}`,
-        placeholder: "",
-        type: "text",
-        required: false,
-        enabled: true,
-      },
-    ]);
-    onDirty?.();
-  };
-
-  const handleDelete = (idx: number) => {
-    setFields(fields.filter((_, i) => i !== idx));
-    onDirty?.();
-  };
+  useEffect(() => {
+    setFields(data.formFields);
+    setScript(data.thirdPartyFormScript);
+    setReplaced(data.formReplaced);
+    setSuccessMsg(data.successMessage);
+  }, [data]);
 
   return (
     <section id="form">
-      <ContentCard title="نموذج التواصل" subtitle="إعدادات نموذج الاتصال">
-        <div className="space-y-5">
-
-          <div>
-            <p className="text-xs font-semibold text-[#3a4a60] mb-3">الحقول المخصصة <span className="text-[#6b7a94] font-normal">({fields.length} حقول)</span></p>
-            <div className="space-y-3">
-              {fields.map((field, idx) => (
-                <div
-                  key={field.key}
-                  draggable
-                  onDragStart={() => handleDragStart(idx)}
-                  onDragOver={(e) => handleDragOver(e, idx)}
-                  onDragEnd={handleDragEnd}
-                  className="rounded-lg border border-[#e8edf5] p-4 bg-[#fafbfc]"
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <button type="button" className="cursor-grab active:cursor-grabbing touch-none" title="سحب لإعادة الترتيب">
-                      <GripVertical className="w-3.5 h-3.5 text-[#6b7a94]" />
+      <ContentCard title="نموذج التواصل" subtitle="إعدادات نموذج التواصل والحقول">
+        <div className="space-y-6">
+          <div className="form-grid-2">
+            <div className="col-span-2">
+              <Checkbox checked={replaced} onCheckedChange={(v) => { setReplaced(!!v); onReplacedChange(!!v); }} />
+              <span className="mr-2 text-sm">استبدال النموذج بكود HTML/JavaScript (نموذج خارجي)</span>
+            </div>
+            {replaced ? (
+              <div className="col-span-2">
+                <div className="form-group-contact">
+                  <label>كود النموذج الخارجي (HTML/JavaScript)</label>
+                  <CodeEditor value={script} onChange={(v) => { setScript(v); onScriptChange(v); }} />
+                </div>
+              </div>
+            ) : (
+              <>
+                <Input label="رسالة النجاح" value={successMsg} onChange={(e) => { setSuccessMsg(e.target.value); onSuccessChange(e.target.value); }} />
+                <div className="col-span-2">
+                  <p className="text-sm font-semibold text-[#3a4a60] mb-3">حقول النموذج</p>
+                  <div className="space-y-3">
+                    {fields.map((field, idx) => (
+                      <div key={field.key} className="flex items-center gap-3 p-3 bg-[#fafbfc] rounded-lg border border-[#e8edf5]">
+                        <GripVertical className="w-4 h-4 text-[#6b7a94]" />
+                        <div className="flex-1 grid grid-cols-4 gap-3">
+                          <Input label="مفتاح الحقل" value={field.key} onChange={(e) => { const nf = [...fields]; nf[idx] = { ...nf[idx], key: e.target.value }; setFields(nf); onFieldsChange(nf); }} />
+                          <Input label="التسمية" value={field.label} onChange={(e) => { const nf = [...fields]; nf[idx] = { ...nf[idx], label: e.target.value }; setFields(nf); onFieldsChange(nf); }} />
+                          <select className="form-control-contact" value={field.type} onChange={(e) => { const nf = [...fields]; nf[idx] = { ...nf[idx], type: e.target.value as FormFieldConfig["type"] }; setFields(nf); onFieldsChange(nf); }}>
+                            <option value="text">نص</option>
+                            <option value="email">بريد إلكتروني</option>
+                            <option value="tel">هاتف</option>
+                            <option value="textarea">نص طويل</option>
+                            <option value="select">قائمة منسدلة</option>
+                          </select>
+                          <div className="flex items-center gap-4">
+                            <label className="flex items-center gap-2 text-sm">
+                              <Checkbox checked={field.required} onCheckedChange={(v) => { const nf = [...fields]; nf[idx] = { ...nf[idx], required: !!v }; setFields(nf); onFieldsChange(nf); }} />
+                              مطلوب
+                            </label>
+                            <label className="flex items-center gap-2 text-sm">
+                              <Checkbox checked={field.enabled} onCheckedChange={(v) => { const nf = [...fields]; nf[idx] = { ...nf[idx], enabled: !!v }; setFields(nf); onFieldsChange(nf); }} />
+                              مفعل
+                            </label>
+                          </div>
+                        </div>
+                        <DashboardButton variant="danger" size="icon-sm" onClick={() => { const nf = fields.filter((_, i) => i !== idx); setFields(nf); onFieldsChange(nf); }}>
+                          <Trash2 className="w-4 h-4" />
+                        </DashboardButton>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => { const nf = [...fields, { key: `field-${Date.now()}`, label: "حقل جديد", placeholder: "", type: "text" as const, required: false, enabled: true }]; setFields(nf); onFieldsChange(nf); }} className="w-full py-2 rounded-lg border-2 border-dashed border-[#e8edf5] text-sm text-[#6b7a94] hover:border-[#0c2954]/30 hover:text-[#0c2954] hover:bg-[#f5f6f9] transition-colors flex items-center justify-center gap-2">
+                      <Plus className="w-4 h-4" /> إضافة حقل
                     </button>
-                    <span className="rounded bg-[#0c2954]/5 px-2 py-0.5 text-[10px] font-mono text-[#0c2954]">{field.key}</span>
-                    <span className="text-sm font-bold text-[#0c2954]">{field.label || `حقل ${idx + 1}`}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(idx)}
-                      className="mr-auto w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 transition-colors"
-                      title="حذف الحقل"
-                    >
-                      <Trash2 className="w-3.5 h-3.5 text-red-400 hover:text-red-600" />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <Input label="التسمية" value={field.label} onChange={(e) => updateField(idx, { label: e.target.value })} />
-                    <Input label="النص التوجيهي" value={field.placeholder} onChange={(e) => updateField(idx, { placeholder: e.target.value })} />
-                    <div className="flex items-end gap-3">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Checkbox
-                          id={`req-${field.key}`}
-                          checked={field.required}
-                          onCheckedChange={(v) => updateField(idx, { required: !!v })}
-                        />
-                        <label htmlFor={`req-${field.key}`} className="text-xs text-[#3a4a60] cursor-pointer">مطلوب</label>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Checkbox
-                          id={`enb-${field.key}`}
-                          checked={field.enabled}
-                          onCheckedChange={(v) => updateField(idx, { enabled: !!v })}
-                        />
-                        <label htmlFor={`enb-${field.key}`} className="text-xs text-[#3a4a60] cursor-pointer">مفعل</label>
-                      </div>
-                      <div className="flex-1">
-                        <select
-                          value={field.type}
-                          onChange={(e) => updateField(idx, { type: e.target.value as FormFieldConfig["type"] })}
-                          className="w-full h-9 px-2 rounded-lg border border-[#e8edf5] text-xs text-[#0c2954] bg-white"
-                        >
-                          <option value="text">نص</option>
-                          <option value="tel">هاتف</option>
-                          <option value="email">بريد</option>
-                          <option value="select">قائمة منسدلة</option>
-                          <option value="textarea">منطقة نص</option>
-                        </select>
-                      </div>
-                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={handleAdd}
-              className="mt-3 w-full py-3 rounded-xl border-2 border-dashed border-[#e8edf5] text-sm text-[#6b7a94] hover:border-[#0c2954]/30 hover:text-[#0c2954] hover:bg-[#f5f6f9] transition-colors flex items-center justify-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              إضافة حقل جديد
-            </button>
+              </>
+            )}
           </div>
-
-          <Textarea label="رسالة النجاح" value={successMessage} onChange={(e) => { setSuccessMessage(e.target.value); onDirty?.(); }} rows={2} />
-
-          <div>
-            <p className="text-xs font-semibold text-[#3a4a60] mb-2">أنواع الاستفسارات</p>
-            <DynamicList items={inquiryTypes.map((o) => o.label)} onChange={(items) => { setInquiryTypes(items.map((label) => ({ value: "" as "" | InquiryType, label }))); onDirty?.(); }} />
-          </div>
-
-          <div className="border-t border-[#e8edf5] pt-5">
-            <p className="text-xs font-semibold text-[#3a4a60] mb-1">نموذج طرف ثالث</p>
-            <p className="text-[11px] text-[#6b7a94] mb-3 leading-[1.6]">أضف كود النموذج من مزود خارجي (مثل زيتون). اتركه فارغًا لاستخدام النموذج الافتراضي.</p>
-            <div className="mb-2">
-              <p className="text-xs font-semibold text-[#3a4a60] mb-2">كود السكريبت</p>
-              <CodeEditor value={scriptCode} onChange={(v) => { setScriptCode(v); onDirty?.(); }} />
-            </div>
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <Checkbox
-                checked={scriptReplaced}
-                onCheckedChange={(v) => { setScriptReplaced(!!v); onDirty?.(); }}
-                disabled={!scriptCode.trim()}
-              />
-              <span className="text-xs text-[#3a4a60]">استبدال الحقول الافتراضية بهذا السكريبت</span>
-            </label>
-          </div>
-        </div>
-        <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave({
-            inquiryOptions: [{ value: "", label: "اختر نوع الاستفسار" }, ...inquiryTypes],
-            successMessage,
-            formFields: fields,
-            thirdPartyFormScript: scriptCode,
-            formReplaced: scriptReplaced && !!scriptCode.trim(),
-          })}>
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-          </DashboardButton>
         </div>
       </ContentCard>
     </section>
   );
 }
 
-function ChannelsSection({ data, saving, onSave, onDirty }: { data: ContactSectionData; saving: boolean; onSave: (d: { channels: Channel[]; contactInfo: typeof CONTACT_PAGE_INFO }) => void; onDirty?: () => void }) {
-  const [channels, setChannels] = useState<Channel[]>(data.channels);
-  const [info, setInfo] = useState(data.contactInfo);
+function ContactInfoSection({ data: initial, onChange }: { data: typeof CONTACT_PAGE_INFO; onChange: (d: typeof CONTACT_PAGE_INFO) => void }) {
+  const [data, setData] = useState(initial);
+
+  useEffect(() => {
+    setData(initial);
+  }, [initial]);
+
+  const handleChange = useCallback((patch: Partial<typeof CONTACT_PAGE_INFO>) => {
+    const newData = { ...data, ...patch };
+    setData(newData);
+    onChange(newData);
+  }, [data, onChange]);
 
   return (
-    <section id="channels">
-      <ContentCard title="قنوات التواصل" subtitle="بيانات التواصل والقنوات المباشرة">
-        <div className="space-y-4">
-          {channels.map((ch, idx) => (
-            <div key={ch.id} className="rounded-lg border border-[#e8edf5] p-4 bg-[#fafbfc]">
-              <p className="text-sm font-bold text-[#0c2954] mb-3">{ch.name}</p>
-              <div className="form-grid-2">
-                <Input label="اسم القناة" value={ch.name} onChange={(e) => { const n = [...channels]; n[idx] = { ...n[idx], name: e.target.value }; setChannels(n); onDirty?.(); }} />
-                <Input label="القيمة" value={ch.value} onChange={(e) => { const n = [...channels]; n[idx] = { ...n[idx], value: e.target.value }; setChannels(n); onDirty?.(); }} />
-                <Input label="الرابط" value={ch.href} onChange={(e) => { const n = [...channels]; n[idx] = { ...n[idx], href: e.target.value }; setChannels(n); onDirty?.(); }} />
-                <Input label="نص الزر" value={ch.actionLabel} onChange={(e) => { const n = [...channels]; n[idx] = { ...n[idx], actionLabel: e.target.value }; setChannels(n); onDirty?.(); }} />
-              </div>
-            </div>
-          ))}
+    <section id="contact-info">
+      <ContentCard title="معلومات الاتصال" subtitle="تفاصيل الاتصال الأساسية">
+        <div className="form-grid-2">
+          <Input label="البريد الإلكتروني" value={data.email} onChange={(e) => handleChange({ email: e.target.value })} />
+          <Input label="رقم الهاتف" value={data.phone} onChange={(e) => handleChange({ phone: e.target.value })} />
+          <Input label="العنوان" value={data.address} onChange={(e) => handleChange({ address: e.target.value })} />
+          <Input label="رقم الواتساب" value={data.whatsapp} onChange={(e) => handleChange({ whatsapp: e.target.value })} />
         </div>
-        <div className="mt-6">
-          <ContentCard title="معلومات التواصل الأساسية" className="mt-0">
-            <div className="form-grid-2">
-              <Input label="الهاتف" value={info.phone} onChange={(e) => { setInfo({ ...info, phone: e.target.value }); onDirty?.(); }} />
-              <Input label="البريد الإلكتروني" value={info.email} onChange={(e) => { setInfo({ ...info, email: e.target.value }); onDirty?.(); }} />
-              <Input label="الموقع" value={info.location} onChange={(e) => { setInfo({ ...info, location: e.target.value }); onDirty?.(); }} />
-              <Input label="أيام العمل" value={info.hoursDays} onChange={(e) => { setInfo({ ...info, hoursDays: e.target.value }); onDirty?.(); }} />
-              <Input label="ساعات العمل" value={info.hoursTime} onChange={(e) => { setInfo({ ...info, hoursTime: e.target.value }); onDirty?.(); }} />
-            </div>
-          </ContentCard>
-        </div>
-        <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave({ channels, contactInfo: info })}>
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-          </DashboardButton>
+      </ContentCard>
+    </section>
+  );
+}
+
+function InquiryOptionsSection({ data: initial, onChange }: { data: typeof INQUIRY_OPTIONS; onChange: (d: typeof INQUIRY_OPTIONS) => void }) {
+  const [items, setItems] = useState(initial);
+  const dragIdx = useRef<number | null>(null);
+
+  useEffect(() => {
+    setItems(initial);
+  }, [initial]);
+
+  const notifyChange = (newItems: typeof INQUIRY_OPTIONS) => {
+    setItems(newItems);
+    onChange(newItems);
+  };
+
+  const updateItem = (idx: number, patch: Partial<typeof INQUIRY_OPTIONS[number]>) => {
+    const n = [...items];
+    n[idx] = { ...n[idx], ...patch };
+    notifyChange(n);
+  };
+
+  return (
+    <section id="inquiry-options">
+      <ContentCard title="خيارات الاستفسار" subtitle="خيارات نوع الاستفسار في نموذج التواصل">
+        <div className="space-y-3">
+          {items.map((item, idx) => (
+            <div key={idx} className="flex items-center gap-3 p-3 bg-[#fafbfc] rounded-lg border border-[#e8edf5]">
+              <GripVertical className="w-4 h-4 text-[#6b7a94] cursor-grab" />
+               <Input label="القيمة" value={item.value} onChange={(e) => updateItem(idx, { value: e.target.value as InquiryType | "" })} wrapperClassName="flex-1" />
+               <Input label="التسمية المعروضة" value={item.label} onChange={(e) => updateItem(idx, { label: e.target.value })} wrapperClassName="flex-1" />
+               <DashboardButton variant="danger" size="icon-sm" onClick={() => notifyChange(items.filter((_, i) => i !== idx))}>
+                 <Trash2 className="w-4 h-4" />
+               </DashboardButton>
+             </div>
+           ))}
+           <button type="button" onClick={() => notifyChange([...items, { value: `option-${items.length + 1}` as InquiryType, label: "خيار جديد" }])} className="w-full py-2 rounded-lg border-2 border-dashed border-[#e8edf5] text-sm text-[#6b7a94] hover:border-[#0c2954]/30 hover:text-[#0c2954] hover:bg-[#f5f6f9] transition-colors flex items-center justify-center gap-2">
+             <Plus className="w-4 h-4" /> إضافة خيار
+           </button>
         </div>
       </ContentCard>
     </section>

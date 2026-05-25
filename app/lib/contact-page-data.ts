@@ -16,6 +16,8 @@ export interface ContactPageResponse {
     badge: string;
     titleLine1: string;
     titleLine2: string;
+    line2Color?: string;
+    line2Opacity?: number;
     subtitle: string;
   };
   contactInfo: ContactInfoType;

@@ -14,6 +14,8 @@ export interface HomePageResponse {
     badge?: string | null;
     title: string;
     titleAccent?: string | null;
+    accentColor?: string | null;
+    accentOpacity?: number;
     subtitle: string;
     primaryCtaLabel?: string | null;
     primaryCtaHref?: string | null;

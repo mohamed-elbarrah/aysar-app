@@ -10,12 +10,13 @@ const SUCCESS_MESSAGE_DEFAULT = "تم إرسال رسالتك بنجاح! سنت
 
 const CONTACT_DEFAULTS = {
   hero: CONTACT_HERO,
-  contact_info: CONTACT_PAGE_INFO,
+  contactInfo: CONTACT_PAGE_INFO,
   channels: CHANNELS,
-  inquiry_options: INQUIRY_OPTIONS,
-  success_message: SUCCESS_MESSAGE_DEFAULT,
-  form_fields: FORM_FIELDS_DEFAULTS,
-  form_config: CONTACT_FORM_DEFAULTS,
+  inquiryOptions: INQUIRY_OPTIONS,
+  successMessage: SUCCESS_MESSAGE_DEFAULT,
+  formFields: FORM_FIELDS_DEFAULTS,
+  thirdPartyFormScript: CONTACT_FORM_DEFAULTS.thirdPartyFormScript,
+  formReplaced: CONTACT_FORM_DEFAULTS.formReplaced,
 };
 
 function toSnakeCase(data: Record<string, unknown>): Record<string, unknown> {
@@ -49,7 +50,18 @@ export async function GET() {
 
   return NextResponse.json({
     success: true,
-    data: { ...page, form_fields: migrateFormFields(page.form_fields) },
+    data: {
+      id: page.id,
+      hero: page.hero,
+      contactInfo: page.contact_info,
+      channels: page.channels,
+      inquiryOptions: page.inquiry_options,
+      successMessage: page.success_message,
+      formFields: migrateFormFields(page.form_fields),
+      thirdPartyFormScript: page.form_config?.thirdPartyFormScript ?? CONTACT_FORM_DEFAULTS.thirdPartyFormScript,
+      formReplaced: page.form_config?.formReplaced ?? CONTACT_FORM_DEFAULTS.formReplaced,
+      updatedAt: page.updated_at,
+    },
   });
 }
 
@@ -86,5 +98,19 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true, data: page });
+  return NextResponse.json({
+    success: true,
+    data: {
+      id: page.id,
+      hero: page.hero,
+      contactInfo: page.contact_info,
+      channels: page.channels,
+      inquiryOptions: page.inquiry_options,
+      successMessage: page.success_message,
+      formFields: migrateFormFields(page.form_fields),
+      thirdPartyFormScript: page.form_config?.thirdPartyFormScript ?? CONTACT_FORM_DEFAULTS.thirdPartyFormScript,
+      formReplaced: page.form_config?.formReplaced ?? CONTACT_FORM_DEFAULTS.formReplaced,
+      updatedAt: page.updated_at,
+    },
+  });
 }

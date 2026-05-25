@@ -7,6 +7,8 @@ const PLANS_HERO_DEFAULTS = {
   badge: "الأسعار والباقات",
   title: "اختر الباقة",
   titleAccent: "المناسبة لك",
+  accentColor: "#ffffff",
+  accentOpacity: 0.5,
   subtitle: "باقات مرنة تساعدك على إدارة مشاريعك العقارية بكفاءة عالية — ابدأ مجاناً وطوّر متى تريد.",
 };
 
@@ -16,6 +18,8 @@ export interface PlansPageResponse {
     badge: string;
     title: string;
     titleAccent: string;
+    accentColor?: string;
+    accentOpacity?: number;
     subtitle: string;
   };
   plans: Plan[];

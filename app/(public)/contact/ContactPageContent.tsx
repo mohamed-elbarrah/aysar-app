@@ -7,6 +7,7 @@ import { ContactInfoCard } from "@/app/components/ContactInfoCard";
 import { ContactForm } from "@/app/components/ContactForm";
 import { ChannelsGrid } from "@/app/components/ChannelsGrid";
 import CTASection from "@/app/sections/CTASection";
+import { CHANNELS } from "@/lib/contact-data";
 import type { ContactPageResponse } from "@/app/lib/contact-page-data";
 import type { ContactInfo as SettingsContactInfo, SocialLink, WorkHours, PlatformLinks } from "@/app/lib/settings-data";
 
@@ -29,7 +30,7 @@ function ContactHero({ data }: { data: ContactPageResponse }) {
         </div>
         <h1 className="text-[clamp(32px,5vw,52px)] font-bold text-white leading-[1.15] tracking-tight mb-4 anim-fade-in-up anim-delay-1">
           {hero.titleLine1}<br />
-          <span className="text-white/50">{hero.titleLine2}</span>
+          <span style={{ color: hero.line2Color || '#ffffff', opacity: hero.line2Opacity !== undefined ? hero.line2Opacity : 0.5 }}>{hero.titleLine2}</span>
         </h1>
         <p className="text-base text-white/50 leading-[1.78] anim-fade-in-up anim-delay-2">
           {hero.subtitle}
@@ -58,7 +59,7 @@ export default function ContactPageContent({ data, contactInfo, socialLinks, wor
       <ChannelsGrid
         title="قنوات التواصل المباشر"
         subtitle="تواصل معنا عبر قناتك المفضلة — نحن دائماً هنا"
-        channels={data.channels}
+        channels={CHANNELS}
         siteContactInfo={contactInfo}
         sitePlatformLinks={platformLinks}
       />

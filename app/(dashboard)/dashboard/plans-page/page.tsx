@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
+import { useDashboard } from "@/app/components/dashboard/DashboardContext";
 import { Input, Textarea } from "@/app/components/ui/Input";
 import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,7 @@ import { ContentCard } from "@/app/components/dashboard/ContentCard";
 import { PLANS, FAQ_ITEMS, COMPARE_ROWS } from "@/app/lib/dashboard/placeholders";
 import type { Plan, FAQItem, CompareTableData, CompareColumn, CompareRow } from "@/lib/plans-data";
 import { ScrollText, ChevronUp, Loader2, Plus, Trash2, GripVertical } from "lucide-react";
-import { SaveBar } from "@/app/components/dashboard/SaveBar";
+import { ColorPicker } from "@/app/components/dashboard/ColorPicker";
 
 const sections = [
   { id: "banner", label: "البانر" },
@@ -19,70 +20,30 @@ const sections = [
 ];
 
 interface PlansPageData {
-  hero: { badge: string; title: string; titleAccent: string; subtitle: string };
+  hero: { badge: string; title: string; titleAccent: string; accentColor?: string; accentOpacity?: number; subtitle: string };
   plans: Plan[];
   compareRows: CompareTableData;
   faqItems: FAQItem[];
 }
 
 const DEFAULTS: PlansPageData = {
-  hero: { badge: "الأسعار والباقات", title: "اختر الباقة", titleAccent: "المناسبة لك", subtitle: "باقات مرنة تساعدك على إدارة مشاريعك العقارية بكفاءة عالية — ابدأ مجاناً وطوّر متى تريد." },
+  hero: { 
+    badge: "الأسعار والباقات", 
+    title: "اختر الباقة", 
+    titleAccent: "المناسبة لك", 
+    accentColor: "#ffffff", 
+    accentOpacity: 0.5, 
+    subtitle: "باقات مرنة تساعدك على إدارة مشاريعك العقارية بكفاءة عالية — ابدأ مجاناً وطوّر متى تريد." 
+  },
   plans: PLANS,
   compareRows: COMPARE_ROWS,
   faqItems: FAQ_ITEMS,
 };
 
-async function saveSection(section: string, data: unknown): Promise<boolean> {
-  try {
-    const res = await fetch("/api/plans-page", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ [section]: data }),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
 export default function PlansPageEditor() {
-  const [data, setData] = useState<PlansPageData>(DEFAULTS);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState("");
-  const [saving, setSaving] = useState<string | null>(null);
-  const [lastSaved, setLastSaved] = useState<string>();
-  const [globalDirty, setGlobalDirty] = useState(false);
-  const markDirty = useCallback(() => setGlobalDirty(true), []);
+  const { plansData, loading, setPlansData } = useDashboard();
   const [activeSection, setActiveSection] = useState("banner");
   const pageRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/plans-page");
-        const json = await res.json();
-        if (json.success && json.data) {
-          const raw = json.data.compareRows;
-          const compareRows =
-            raw && typeof raw === "object" && !Array.isArray(raw) && "columns" in raw
-              ? raw
-              : DEFAULTS.compareRows;
-          setData({
-            hero: json.data.hero || DEFAULTS.hero,
-            plans: json.data.plans || DEFAULTS.plans,
-            compareRows,
-            faqItems: json.data.faqItems || DEFAULTS.faqItems,
-          });
-        }
-      } catch {
-        setFetchError("تعذر تحميل البيانات، تم استخدام القيم الافتراضية");
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -110,39 +71,7 @@ export default function PlansPageEditor() {
     }
   };
 
-  const handleSectionSave = useCallback(async (sectionKey: string, sectionData: unknown) => {
-    setSaving(sectionKey);
-    const ok = await saveSection(sectionKey, sectionData);
-    setSaving(null);
-    if (ok) {
-      setGlobalDirty(false);
-      setLastSaved(new Date().toLocaleTimeString("ar-SA"));
-      setTimeout(() => setLastSaved(undefined), 5000);
-    }
-  }, []);
-
-  const handleGlobalSave = useCallback(async () => {
-    setGlobalDirty(false);
-    setSaving("all");
-    const sectionsToSave = [
-      ["hero", data.hero],
-      ["plans", data.plans],
-      ["compareRows", data.compareRows],
-      ["faqItems", data.faqItems],
-    ] as const;
-    let allOk = true;
-    for (const [key, sectionData] of sectionsToSave) {
-      const ok = await saveSection(key, sectionData);
-      if (!ok) allOk = false;
-    }
-    setSaving(null);
-    if (allOk) {
-      setLastSaved(new Date().toLocaleTimeString("ar-SA"));
-      setTimeout(() => setLastSaved(undefined), 5000);
-    }
-  }, [data]);
-
-  if (loading) {
+  if (loading.plans || !plansData) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <div className="text-center">
@@ -159,20 +88,25 @@ export default function PlansPageEditor() {
         <div className="mb-6">
           <h1 className="text-xl font-bold text-[#0c2954] mb-1">صفحة الخطط والأسعار</h1>
           <p className="text-sm text-[#6b7a94]">تعديل الباقات، جدول المقارنة، والأسئلة الشائعة</p>
-          {fetchError && <p className="text-xs text-amber-600 mt-1">{fetchError}</p>}
         </div>
-        <div className="space-y-6 pb-24">
-          <BannerSection data={data.hero} saving={saving === "hero"} onSave={(d) => handleSectionSave("hero", d)} onDirty={markDirty} />
-          <PlansSection data={data.plans} saving={saving === "plans"} onSave={(d) => handleSectionSave("plans", d)} onDirty={markDirty} />
-          <CompareSection data={data.compareRows} saving={saving === "compareRows"} onSave={(d) => handleSectionSave("compareRows", d)} onDirty={markDirty} />
-          <FAQSection data={data.faqItems} saving={saving === "faqItems"} onSave={(d) => handleSectionSave("faqItems", d)} onDirty={markDirty} />
+        <div className="space-y-6 pb-8">
+          <BannerSection 
+            data={(plansData.hero as PlansPageData["hero"]) || DEFAULTS.hero} 
+            onChange={(data) => setPlansData({ hero: data }, "hero")} 
+          />
+          <PlansSection 
+            data={(plansData.plans as Plan[]) || DEFAULTS.plans} 
+            onChange={(data) => setPlansData({ plans: data }, "plans")} 
+          />
+          <CompareSection 
+            data={(plansData.compareRows as CompareTableData) || DEFAULTS.compareRows} 
+            onChange={(data) => setPlansData({ compareRows: data }, "compareRows")} 
+          />
+          <FAQSection 
+            data={(plansData.faqItems as FAQItem[]) || DEFAULTS.faqItems} 
+            onChange={(data) => setPlansData({ faqItems: data }, "faqItems")} 
+          />
         </div>
-        <SaveBar
-          isDirty={globalDirty}
-          isSubmitting={saving === "all"}
-          onSave={handleGlobalSave}
-          lastSaved={lastSaved ?? null}
-        />
       </div>
       <div className="hidden xl:block w-[200px] shrink-0">
         <div className="sticky top-0">
@@ -191,12 +125,22 @@ export default function PlansPageEditor() {
   );
 }
 
-function BannerSection({ data: initial, saving, onSave, onDirty }: { data: PlansPageData["hero"]; saving: boolean; onSave: (d: PlansPageData["hero"]) => void; onDirty?: () => void }) {
+function BannerSection({ data: initial, onChange }: { 
+  data: PlansPageData["hero"]; 
+  onChange: (d: PlansPageData["hero"]) => void;
+}) {
   const [data, setData] = useState(initial);
+  
+  useEffect(() => {
+    setData(initial);
+  }, [initial]);
+
   const handleChange = useCallback((patch: Partial<PlansPageData["hero"]>) => {
-    setData((prev) => ({ ...prev, ...patch }));
-    onDirty?.();
-  }, [onDirty]);
+    const newData = { ...data, ...patch };
+    setData(newData);
+    onChange(newData);
+  }, [data, onChange]);
+
   return (
     <section id="banner">
       <ContentCard title="البانر" subtitle="عنوان صفحة الخطط والأسعار">
@@ -204,20 +148,60 @@ function BannerSection({ data: initial, saving, onSave, onDirty }: { data: Plans
           <Input label="الشارة" value={data.badge} onChange={(e) => handleChange({ badge: e.target.value })} />
           <Input label="العنوان" value={data.title} onChange={(e) => handleChange({ title: e.target.value })} />
           <Input label="عنوان مميز" value={data.titleAccent} onChange={(e) => handleChange({ titleAccent: e.target.value })} />
+          <ColorPicker
+            label="لون عنوان مميز"
+            color={data.accentColor || "#ffffff"}
+            onChange={(color) => handleChange({ accentColor: color })}
+          />
+          <div className="form-group-contact">
+            <label>شفافية اللون (%) — {Math.round((data.accentOpacity || 0.5) * 100)}%</label>
+            <input type="range" min="0" max="1" step="0.01" value={data.accentOpacity || 0.5} onChange={(e) => handleChange({ accentOpacity: parseFloat(e.target.value) })} className="w-full h-2 bg-[#e8edf5] rounded-lg appearance-none cursor-pointer mt-2" />
+          </div>
           <Textarea label="الوصف" value={data.subtitle} onChange={(e) => handleChange({ subtitle: e.target.value })} rows={3} />
-        </div>
-        <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave(data)}>
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-          </DashboardButton>
         </div>
       </ContentCard>
     </section>
   );
 }
 
-function PlansSection({ data: initial, saving, onSave, onDirty }: { data: Plan[]; saving: boolean; onSave: (d: Plan[]) => void; onDirty?: () => void }) {
+function PlansSection({ data: initial, onChange }: { 
+  data: Plan[]; 
+  onChange: (d: Plan[]) => void;
+}) {
   const [plans, setPlans] = useState<Plan[]>(initial);
+
+  useEffect(() => {
+    setPlans(initial);
+  }, [initial]);
+
+  const updatePlan = (idx: number, patch: Partial<Plan>) => {
+    const newPlans = [...plans];
+    newPlans[idx] = { ...newPlans[idx], ...patch };
+    setPlans(newPlans);
+    onChange(newPlans);
+  };
+
+  const updateFeature = (pidx: number, fidx: number, patch: Partial<Plan["features"][number]>) => {
+    const newPlans = [...plans];
+    newPlans[pidx].features[fidx] = { ...newPlans[pidx].features[fidx], ...patch };
+    setPlans(newPlans);
+    onChange(newPlans);
+  };
+
+  const addFeature = (pidx: number) => {
+    const newPlans = [...plans];
+    newPlans[pidx].features = [...newPlans[pidx].features, { text: "ميزة جديدة", enabled: true }];
+    setPlans(newPlans);
+    onChange(newPlans);
+  };
+
+  const removeFeature = (pidx: number, fidx: number) => {
+    const newPlans = [...plans];
+    newPlans[pidx].features = newPlans[pidx].features.filter((_, i) => i !== fidx);
+    setPlans(newPlans);
+    onChange(newPlans);
+  };
+
   return (
     <section id="plans">
       <ContentCard title="الباقات" subtitle="3 باقات: المجانية، المتقدمة، المميزة">
@@ -230,18 +214,18 @@ function PlansSection({ data: initial, saving, onSave, onDirty }: { data: Plan[]
               </div>
               <div className="p-4 space-y-4">
                 <div className="form-grid-2">
-                  <Input label="الاسم" value={plan.name} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], name: e.target.value }; setPlans(n); onDirty?.(); }} />
-                  <Input label="السعر الشهري" type="number" value={plan.priceMonthly ?? ""} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], priceMonthly: e.target.value ? Number(e.target.value) : null }; setPlans(n); onDirty?.(); }} />
-                  <Input label="السعر السنوي" type="number" value={plan.priceYearly ?? ""} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], priceYearly: e.target.value ? Number(e.target.value) : null }; setPlans(n); onDirty?.(); }} />
+                  <Input label="الاسم" value={plan.name} onChange={(e) => updatePlan(idx, { name: e.target.value })} />
+                  <Input label="السعر الشهري" type="number" value={plan.priceMonthly ?? ""} onChange={(e) => updatePlan(idx, { priceMonthly: e.target.value ? Number(e.target.value) : null })} />
+                  <Input label="السعر السنوي" type="number" value={plan.priceYearly ?? ""} onChange={(e) => updatePlan(idx, { priceYearly: e.target.value ? Number(e.target.value) : null })} />
                 </div>
-                <Textarea label="الوصف" value={plan.description} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], description: e.target.value }; setPlans(n); onDirty?.(); }} rows={2} />
+                <Textarea label="الوصف" value={plan.description} onChange={(e) => updatePlan(idx, { description: e.target.value })} rows={2} />
                 <div className="flex items-center gap-6">
-                  <label className="flex items-center gap-2 text-sm"><Checkbox checked={plan.isFree} onCheckedChange={(v) => { const n = [...plans]; n[idx] = { ...n[idx], isFree: !!v }; setPlans(n); onDirty?.(); }} /> مجانية</label>
-                  <label className="flex items-center gap-2 text-sm"><Checkbox checked={plan.isFeatured} onCheckedChange={(v) => { const n = [...plans]; n[idx] = { ...n[idx], isFeatured: !!v }; setPlans(n); onDirty?.(); }} /> مميزة (موصى بها)</label>
+                  <label className="flex items-center gap-2 text-sm"><Checkbox checked={plan.isFree} onCheckedChange={(v) => updatePlan(idx, { isFree: !!v })} /> مجانية</label>
+                  <label className="flex items-center gap-2 text-sm"><Checkbox checked={plan.isFeatured} onCheckedChange={(v) => updatePlan(idx, { isFeatured: !!v })} /> مميزة (موصى بها)</label>
                 </div>
                 <div className="form-grid-2">
-                  <Input label="نص الزر" value={plan.ctaLabel} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], ctaLabel: e.target.value }; setPlans(n); onDirty?.(); }} />
-                  <Input label="رابط الزر" value={plan.ctaHref} onChange={(e) => { const n = [...plans]; n[idx] = { ...n[idx], ctaHref: e.target.value }; setPlans(n); onDirty?.(); }} />
+                  <Input label="نص الزر" value={plan.ctaLabel} onChange={(e) => updatePlan(idx, { ctaLabel: e.target.value })} />
+                  <Input label="رابط الزر" value={plan.ctaHref} onChange={(e) => updatePlan(idx, { ctaHref: e.target.value })} />
                 </div>
                 <div className="mt-2">
                   <p className="text-xs font-semibold text-[#3a4a60] mb-2">المميزات</p>
@@ -250,12 +234,7 @@ function PlansSection({ data: initial, saving, onSave, onDirty }: { data: Plan[]
                       <div key={fidx} className="flex items-center gap-2 group">
                         <button
                           type="button"
-                    onClick={() => {
-                      const n = [...plans];
-                      n[idx].features = n[idx].features.filter((_, i) => i !== fidx);
-                      setPlans(n);
-                      onDirty?.();
-                    }}
+                          onClick={() => removeFeature(idx, fidx)}
                           className="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 transition-colors shrink-0"
                           title="حذف الميزة"
                         >
@@ -263,40 +242,24 @@ function PlansSection({ data: initial, saving, onSave, onDirty }: { data: Plan[]
                         </button>
                         <Checkbox
                           checked={feat.enabled}
-                          onCheckedChange={(v) => {
-                            const n = [...plans];
-                            n[idx].features[fidx] = { ...n[idx].features[fidx], enabled: !!v };
-                            setPlans(n); onDirty?.();
-                          }}
+                          onCheckedChange={(v) => updateFeature(idx, fidx, { enabled: !!v })}
                         />
                         <input
                           className="form-control-contact flex-1"
                           value={feat.text}
-                          onChange={(e) => {
-                            const n = [...plans];
-                            n[idx].features[fidx] = { ...n[idx].features[fidx], text: e.target.value };
-                            setPlans(n); onDirty?.();
-                          }}
+                          onChange={(e) => updateFeature(idx, fidx, { text: e.target.value })}
                         />
                         <label className="flex items-center gap-1 text-xs shrink-0">
                           <Checkbox
                             checked={feat.soon || false}
-                            onCheckedChange={(v) => {
-                              const n = [...plans];
-                              n[idx].features[fidx] = { ...n[idx].features[fidx], soon: !!v };
-                              setPlans(n); onDirty?.();
-                            }}
+                            onCheckedChange={(v) => updateFeature(idx, fidx, { soon: !!v })}
                           /> قريباً
                         </label>
                       </div>
                     ))}
                     <button
                       type="button"
-                      onClick={() => {
-                        const n = [...plans];
-                        n[idx].features = [...n[idx].features, { text: "ميزة جديدة", enabled: true }];
-                        setPlans(n); onDirty?.();
-                      }}
+                      onClick={() => addFeature(idx)}
                       className="w-full py-1.5 rounded-md border border-dashed border-[#e8edf5] text-xs text-[#6b7a94] hover:border-[#0c2954]/30 hover:text-[#0c2954] hover:bg-[#f5f6f9] transition-colors flex items-center justify-center gap-1"
                     >
                       <Plus className="w-3 h-3" />
@@ -308,18 +271,25 @@ function PlansSection({ data: initial, saving, onSave, onDirty }: { data: Plan[]
             </div>
           ))}
         </div>
-        <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave(plans)}>
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-          </DashboardButton>
-        </div>
       </ContentCard>
     </section>
   );
 }
 
-function CompareSection({ data: initial, saving, onSave, onDirty }: { data: CompareTableData; saving: boolean; onSave: (d: CompareTableData) => void; onDirty?: () => void }) {
+function CompareSection({ data: initial, onChange }: { 
+  data: CompareTableData; 
+  onChange: (d: CompareTableData) => void;
+}) {
   const [compare, setCompare] = useState<CompareTableData>(initial);
+
+  useEffect(() => {
+    setCompare(initial);
+  }, [initial]);
+
+  const notifyChange = (newData: CompareTableData) => {
+    setCompare(newData);
+    onChange(newData);
+  };
 
   const addColumn = () => {
     const newId = `col_${compare.columns.length}`;
@@ -331,8 +301,7 @@ function CompareSection({ data: initial, saving, onSave, onDirty }: { data: Comp
       }
       return row;
     });
-    setCompare(n);
-    onDirty?.();
+    notifyChange(n);
   };
 
   const deleteColumn = (colId: string) => {
@@ -345,8 +314,7 @@ function CompareSection({ data: initial, saving, onSave, onDirty }: { data: Comp
       }
       return row;
     });
-    setCompare(n);
-    onDirty?.();
+    notifyChange(n);
   };
 
   const addFeatureAt = (afterIdx: number) => {
@@ -355,13 +323,44 @@ function CompareSection({ data: initial, saving, onSave, onDirty }: { data: Comp
     for (const col of n.columns) blankValues[col.id] = null;
     const newRow: CompareRow = { type: "feature" as const, label: "ميزة جديدة", values: blankValues };
     n.rows = [...n.rows.slice(0, afterIdx + 1), newRow, ...n.rows.slice(afterIdx + 1)];
-    setCompare(n);
-    onDirty?.();
+    notifyChange(n);
   };
 
   const addSection = () => {
-    setCompare({ ...compare, rows: [...compare.rows, { type: "section" as const, label: "قسم جديد" }] });
-    onDirty?.();
+    notifyChange({ ...compare, rows: [...compare.rows, { type: "section" as const, label: "قسم جديد" }] });
+  };
+
+  const updateRow = (idx: number, patch: Record<string, unknown>) => {
+    const n = { ...compare };
+    n.rows = n.rows.map((r, i) => i === idx ? { ...r, ...patch } as CompareRow : r);
+    notifyChange(n);
+  };
+
+  const updateFeatureValue = (ridx: number, colId: string, value: string | null) => {
+    const n = { ...compare };
+    n.rows = n.rows.map((r, i) =>
+      i === ridx && r.type === "feature"
+        ? { ...r, values: { ...r.values, [colId]: value } }
+        : r
+    );
+    notifyChange(n);
+  };
+
+  const deleteRow = (idx: number) => {
+    const n = { ...compare };
+    n.rows = n.rows.filter((_, i) => i !== idx);
+    notifyChange(n);
+  };
+
+  const updateColumn = (colId: string, label: string) => {
+    const n = { ...compare };
+    n.columns = n.columns.map((c) => (c.id === colId ? { ...c, label } : c));
+    notifyChange(n);
+  };
+
+  const updateFeatureLabel = (value: string) => {
+    const n = { ...compare, featureLabel: value };
+    notifyChange(n);
   };
 
   return (
@@ -372,7 +371,7 @@ function CompareSection({ data: initial, saving, onSave, onDirty }: { data: Comp
             <input
               className="form-control-contact text-xs font-bold"
               value={compare.featureLabel}
-              onChange={(e) => { setCompare({ ...compare, featureLabel: e.target.value }); onDirty?.(); }}
+              onChange={(e) => updateFeatureLabel(e.target.value)}
               placeholder="الميزة"
             />
             {compare.columns.map((col) => (
@@ -380,12 +379,7 @@ function CompareSection({ data: initial, saving, onSave, onDirty }: { data: Comp
                 <input
                   className="form-control-contact text-xs font-bold text-center"
                   value={col.label}
-                  onChange={(e) => {
-                    const n = { ...compare };
-                    n.columns = n.columns.map((c) => (c.id === col.id ? { ...c, label: e.target.value } : c));
-                    setCompare(n);
-                    onDirty?.();
-                  }}
+                  onChange={(e) => updateColumn(col.id, e.target.value)}
                   placeholder="اسم الباقة"
                 />
                 <button
@@ -417,16 +411,11 @@ function CompareSection({ data: initial, saving, onSave, onDirty }: { data: Comp
                     <input
                       className="form-control-contact font-bold bg-transparent border-0 text-sm flex-1"
                       value={row.label}
-                      onChange={(e) => {
-                        const n = { ...compare };
-                        n.rows = n.rows.map((r, i) => (i === ridx ? { ...r, label: e.target.value } : r));
-                        setCompare(n);
-                        onDirty?.();
-                      }}
+                      onChange={(e) => updateRow(ridx, { label: e.target.value })}
                     />
                     <button
                       type="button"
-                      onClick={() => { setCompare({ ...compare, rows: compare.rows.filter((_, i) => i !== ridx) }); onDirty?.(); }}
+                      onClick={() => deleteRow(ridx)}
                       className="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 shrink-0"
                       title="حذف القسم"
                     >
@@ -446,38 +435,22 @@ function CompareSection({ data: initial, saving, onSave, onDirty }: { data: Comp
                       <input
                         className="form-control-contact text-sm"
                         value={row.label}
-                      onChange={(e) => {
-                        const n = { ...compare };
-                        n.rows = n.rows.map((r, i) =>
-                          i === ridx && r.type === "feature" ? { ...r, label: e.target.value } : r
-                        );
-                        setCompare(n);
-                        onDirty?.();
-                      }}
-                      placeholder="الميزة"
+                        onChange={(e) => updateRow(ridx, { label: e.target.value })}
+                        placeholder="الميزة"
                       />
                       {compare.columns.map((col) => (
                         <input
                           key={col.id}
                           className="form-control-contact text-xs text-center"
                           value={row.values[col.id] ?? ""}
-                          onChange={(e) => {
-                            const n = { ...compare };
-                            n.rows = n.rows.map((r, i) =>
-                              i === ridx && r.type === "feature"
-                                ? { ...r, values: { ...r.values, [col.id]: e.target.value || null } }
-                                : r
-                            );
-                            setCompare(n);
-                            onDirty?.();
-                          }}
+                          onChange={(e) => updateFeatureValue(ridx, col.id, e.target.value || null)}
                           placeholder="—"
                         />
                       ))}
                     </div>
                     <button
                       type="button"
-                      onClick={() => { setCompare({ ...compare, rows: compare.rows.filter((_, i) => i !== ridx) }); onDirty?.(); }}
+                      onClick={() => deleteRow(ridx)}
                       className="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 shrink-0"
                       title="حذف الميزة"
                     >
@@ -497,19 +470,26 @@ function CompareSection({ data: initial, saving, onSave, onDirty }: { data: Comp
             <Plus className="w-3.5 h-3.5" /> إضافة قسم
           </button>
         </div>
-        <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave(compare)}>
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-          </DashboardButton>
-        </div>
       </ContentCard>
     </section>
   );
 }
 
-function FAQSection({ data: initial, saving, onSave, onDirty }: { data: FAQItem[]; saving: boolean; onSave: (d: FAQItem[]) => void; onDirty?: () => void }) {
+function FAQSection({ data: initial, onChange }: { 
+  data: FAQItem[]; 
+  onChange: (d: FAQItem[]) => void;
+}) {
   const [items, setItems] = useState<FAQItem[]>(initial);
   const dragIdx = useRef<number | null>(null);
+
+  useEffect(() => {
+    setItems(initial);
+  }, [initial]);
+
+  const notifyChange = (newItems: FAQItem[]) => {
+    setItems(newItems);
+    onChange(newItems);
+  };
 
   const handleDragStart = (idx: number) => {
     dragIdx.current = idx;
@@ -522,8 +502,7 @@ function FAQSection({ data: initial, saving, onSave, onDirty }: { data: FAQItem[
     const [moved] = n.splice(dragIdx.current, 1);
     n.splice(idx, 0, moved);
     dragIdx.current = idx;
-    setItems(n);
-    onDirty?.();
+    notifyChange(n);
   };
 
   const handleDragEnd = () => {
@@ -531,13 +510,17 @@ function FAQSection({ data: initial, saving, onSave, onDirty }: { data: FAQItem[
   };
 
   const handleAdd = () => {
-    setItems([...items, { question: "سؤال جديد", answer: "الإجابة هنا" }]);
-    onDirty?.();
+    notifyChange([...items, { question: "سؤال جديد", answer: "الإجابة هنا" }]);
   };
 
   const handleDelete = (idx: number) => {
-    setItems(items.filter((_, i) => i !== idx));
-    onDirty?.();
+    notifyChange(items.filter((_, i) => i !== idx));
+  };
+
+  const updateItem = (idx: number, patch: Partial<FAQItem>) => {
+    const n = [...items];
+    n[idx] = { ...n[idx], ...patch };
+    notifyChange(n);
   };
 
   return (
@@ -575,22 +558,12 @@ function FAQSection({ data: initial, saving, onSave, onDirty }: { data: FAQItem[
               <Input
                 label="السؤال"
                 value={item.question}
-                onChange={(e) => {
-                  const n = [...items];
-                  n[idx] = { ...n[idx], question: e.target.value };
-                  setItems(n);
-                  onDirty?.();
-                }}
+                onChange={(e) => updateItem(idx, { question: e.target.value })}
               />
               <Textarea
                 label="الإجابة"
                 value={item.answer}
-                onChange={(e) => {
-                  const n = [...items];
-                  n[idx] = { ...n[idx], answer: e.target.value };
-                  setItems(n);
-                  onDirty?.();
-                }}
+                onChange={(e) => updateItem(idx, { answer: e.target.value })}
                 rows={4}
               />
             </div>
@@ -605,12 +578,6 @@ function FAQSection({ data: initial, saving, onSave, onDirty }: { data: FAQItem[
           <Plus className="w-4 h-4" />
           إضافة سؤال جديد
         </button>
-
-        <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave(items)}>
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-          </DashboardButton>
-        </div>
       </ContentCard>
     </section>
   );

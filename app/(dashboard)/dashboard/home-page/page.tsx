@@ -1,25 +1,26 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
+import { useDashboard } from "@/app/components/dashboard/DashboardContext";
 import { Input, Textarea } from "@/app/components/ui/Input";
 import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
-import { Badge } from "@/components/ui/badge";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
-import { SaveBar } from "@/app/components/dashboard/SaveBar";
 import { DynamicList } from "@/app/components/dashboard/DynamicList";
+import { IconPicker } from "@/app/components/dashboard/IconPicker";
+import { IconPreview } from "@/app/components/dashboard/IconPreview";
+import { ImageUploadWithPreview } from "@/app/components/ImageUploadWithPreview";
+import { ColorPicker } from "@/app/components/dashboard/ColorPicker";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Trash2, Loader2, ScrollText, ChevronUp } from "lucide-react";
 import {
   HOME_HERO,
   FEATURE_SECTIONS,
   BENTO_FEATURES,
-  BentoFeature,
   PROJECT_OVERVIEW,
   APP_SECTION,
   CTA_SECTION,
+  type BentoFeature,
 } from "@/app/lib/dashboard/placeholders";
-import { ScrollText, ChevronUp, Loader2, Plus, Trash2 } from "lucide-react";
-import { IconPicker } from "@/app/components/dashboard/IconPicker";
-import { IconPreview } from "@/app/components/dashboard/IconPreview";
-import { ImageUploadWithPreview } from "@/app/components/ImageUploadWithPreview";
 
 const sections = [
   { id: "banner", label: "البانر الرئيسي" },
@@ -30,72 +31,19 @@ const sections = [
   { id: "cta", label: "دعوة للعمل" },
 ];
 
-interface HomePageData {
-  hero: typeof HOME_HERO;
-  featureSections: typeof FEATURE_SECTIONS;
-  bentoFeatures: typeof BENTO_FEATURES;
-  projectOverview: typeof PROJECT_OVERVIEW;
-  appSection: typeof APP_SECTION;
-  ctaSection: typeof CTA_SECTION;
-}
-
-const DEFAULTS: HomePageData = {
-  hero: HOME_HERO,
-  featureSections: FEATURE_SECTIONS,
-  bentoFeatures: BENTO_FEATURES,
-  projectOverview: PROJECT_OVERVIEW,
-  appSection: APP_SECTION,
-  ctaSection: CTA_SECTION,
+const NEW_CARD_TEMPLATE: BentoFeature = {
+  iconName: "HelpCircle",
+  iconUrl: null,
+  title: "بطاقة جديدة",
+  description: "وصف البطاقة",
+  iconBg: "#f5f6f9",
+  iconColor: "#0c2954",
 };
 
-async function saveSection(section: string, data: unknown): Promise<boolean> {
-  try {
-    const res = await fetch("/api/home-page", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ [section]: data }),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
 export default function HomePageEditor() {
-  const [data, setData] = useState<HomePageData>(DEFAULTS);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState("");
-  const [saving, setSaving] = useState<string | null>(null);
-  const [lastSaved, setLastSaved] = useState<string>();
-  const [globalDirty, setGlobalDirty] = useState(false);
+  const { homeData, loading, setHomeData } = useDashboard();
   const [activeSection, setActiveSection] = useState("banner");
   const pageRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/home-page");
-        const json = await res.json();
-        if (json.success && json.data) {
-          const d = json.data;
-          setData({
-            hero: d.hero || DEFAULTS.hero,
-            featureSections: d.feature_sections || d.featureSections || DEFAULTS.featureSections,
-            bentoFeatures: d.bento_features || d.bentoFeatures || DEFAULTS.bentoFeatures,
-            projectOverview: d.project_overview || d.projectOverview || DEFAULTS.projectOverview,
-            appSection: d.app_section || d.appSection || DEFAULTS.appSection,
-            ctaSection: d.cta_section || d.ctaSection || DEFAULTS.ctaSection,
-          });
-        }
-      } catch {
-        setFetchError("تعذر تحميل البيانات، تم استخدام القيم الافتراضية");
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -123,43 +71,7 @@ export default function HomePageEditor() {
     }
   };
 
-  const markDirty = useCallback(() => setGlobalDirty(true), []);
-
-  const handleSectionSave = useCallback(async (sectionKey: string, sectionData: unknown) => {
-    setSaving(sectionKey);
-    const ok = await saveSection(sectionKey, sectionData);
-    setSaving(null);
-    if (ok) {
-      setGlobalDirty(false);
-      setLastSaved(new Date().toLocaleTimeString("ar-SA"));
-      setTimeout(() => setLastSaved(undefined), 5000);
-    }
-  }, []);
-
-  const handleGlobalSave = useCallback(async () => {
-    setGlobalDirty(false);
-    setSaving("all");
-    const sectionsToSave = [
-      ["hero", data.hero],
-      ["featureSections", data.featureSections],
-      ["bentoFeatures", data.bentoFeatures],
-      ["projectOverview", data.projectOverview],
-      ["appSection", data.appSection],
-      ["ctaSection", data.ctaSection],
-    ] as const;
-    let allOk = true;
-    for (const [key, sectionData] of sectionsToSave) {
-      const ok = await saveSection(key, sectionData);
-      if (!ok) allOk = false;
-    }
-    setSaving(null);
-    if (allOk) {
-      setLastSaved(new Date().toLocaleTimeString("ar-SA"));
-      setTimeout(() => setLastSaved(undefined), 5000);
-    }
-  }, [data]);
-
-  if (loading) {
+  if (loading.home || !homeData) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <div className="text-center">
@@ -176,23 +88,35 @@ export default function HomePageEditor() {
         <div className="mb-6">
           <h1 className="text-xl font-bold text-[#0c2954] mb-1">الصفحة الرئيسية</h1>
           <p className="text-sm text-[#6b7a94]">تعديل محتوى الصفحة الرئيسية — البانر، المميزات، شبكة المميزات، وغيرها</p>
-          {fetchError && <p className="text-xs text-amber-600 mt-1">{fetchError}</p>}
         </div>
-        <div className="space-y-6 pb-24">
-          <BannerSection data={data.hero} saving={saving === "hero"} onDirty={markDirty} onSave={(d) => handleSectionSave("hero", d)} />
-          <FeaturesSection data={data.featureSections} saving={saving === "featureSections"} onDirty={markDirty} onSave={(d) => handleSectionSave("featureSections", d)} />
-          <BentoSection data={data.bentoFeatures} saving={saving === "bentoFeatures"} onDirty={markDirty} onSave={(d) => handleSectionSave("bentoFeatures", d)} />
-          <OverviewSection data={data.projectOverview} saving={saving === "projectOverview"} onDirty={markDirty} onSave={(d) => handleSectionSave("projectOverview", d)} />
-          <AppSectionEditor data={data.appSection} saving={saving === "appSection"} onDirty={markDirty} onSave={(d) => handleSectionSave("appSection", d)} />
-          <CTASectionEditor data={data.ctaSection} saving={saving === "ctaSection"} onDirty={markDirty} onSave={(d) => handleSectionSave("ctaSection", d)} />
+        <div className="space-y-6 pb-8">
+          <BannerSection 
+            data={(homeData.hero as typeof HOME_HERO) || HOME_HERO} 
+            onChange={(data) => setHomeData({ hero: data }, "hero")} 
+          />
+          <FeaturesSection 
+            data={(homeData.featureSections as typeof FEATURE_SECTIONS) || FEATURE_SECTIONS} 
+            onChange={(data) => setHomeData({ featureSections: data }, "featureSections")} 
+          />
+          <BentoSection 
+            data={(homeData.bentoFeatures as typeof BENTO_FEATURES) || BENTO_FEATURES} 
+            onChange={(data) => setHomeData({ bentoFeatures: data }, "bentoFeatures")} 
+          />
+          <OverviewSection 
+            data={(homeData.projectOverview as typeof PROJECT_OVERVIEW) || PROJECT_OVERVIEW} 
+            onChange={(data) => setHomeData({ projectOverview: data }, "projectOverview")} 
+          />
+          <AppSectionEditor 
+            data={(homeData.appSection as typeof APP_SECTION) || APP_SECTION} 
+            onChange={(data) => setHomeData({ appSection: data }, "appSection")} 
+          />
+          <CTASectionEditor 
+            data={(homeData.ctaSection as typeof CTA_SECTION) || CTA_SECTION} 
+            onChange={(data) => setHomeData({ ctaSection: data }, "ctaSection")} 
+          />
         </div>
-        <SaveBar
-          isDirty={globalDirty}
-          isSubmitting={saving === "all"}
-          onSave={handleGlobalSave}
-          lastSaved={lastSaved ?? null}
-        />
       </div>
+      
       <div className="hidden xl:block w-[200px] shrink-0">
         <div className="sticky top-0">
           <div className="bg-white rounded-xl border border-[#e8edf5] p-4">
@@ -201,14 +125,25 @@ export default function HomePageEditor() {
             </p>
             <nav className="space-y-1">
               {sections.map((s) => (
-                <button key={s.id} onClick={() => scrollTo(s.id)}
-                  className={`w-full text-right text-xs py-1.5 px-2 rounded-md transition-colors ${activeSection === s.id ? "bg-[#0c2954]/5 text-[#0c2954] font-medium" : "text-[#6b7a94] hover:text-[#0c2954] hover:bg-[#f5f6f9]"}`}
-                >{s.label}</button>
+                <button 
+                  key={s.id} 
+                  onClick={() => scrollTo(s.id)}
+                  className={`w-full text-right text-xs py-1.5 px-2 rounded-md transition-colors ${
+                    activeSection === s.id 
+                      ? "bg-[#0c2954]/5 text-[#0c2954] font-medium" 
+                      : "text-[#6b7a94] hover:text-[#0c2954] hover:bg-[#f5f6f9]"
+                  }`}
+                >
+                  {s.label}
+                </button>
               ))}
             </nav>
-            <button onClick={() => pageRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+            <button 
+              onClick={() => pageRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
               className="mt-3 w-full flex items-center justify-center gap-1 text-[10px] text-[#6b7a94] hover:text-[#0c2954] py-1.5 rounded-md hover:bg-[#f5f6f9] transition-colors"
-            ><ChevronUp className="w-3 h-3" /> العودة للأعلى</button>
+            >
+              <ChevronUp className="w-3 h-3" /> العودة للأعلى
+            </button>
           </div>
         </div>
       </div>
@@ -216,45 +151,76 @@ export default function HomePageEditor() {
   );
 }
 
-function BannerSection({ data: initial, saving, onSave, onDirty }: { data: typeof HOME_HERO; saving: boolean; onSave: (d: typeof HOME_HERO) => void; onDirty?: () => void }) {
+// Banner Section Component
+function BannerSection({ data: initial, onChange }: { 
+  data: typeof HOME_HERO; 
+  onChange: (data: typeof HOME_HERO) => void;
+}) {
   const [data, setData] = useState(initial);
+  
+  useEffect(() => {
+    setData(initial);
+  }, [initial]);
+
   const handleChange = useCallback((patch: Partial<typeof HOME_HERO>) => {
-    setData((prev) => ({ ...prev, ...patch }));
-    onDirty?.();
-  }, [onDirty]);
+    const newData = { ...data, ...patch };
+    setData(newData);
+    onChange(newData);
+  }, [data, onChange]);
+
   return (
     <section id="banner">
       <ContentCard title="البانر الرئيسي" subtitle="عنوان الصفحة الرئيسية والوصف والأزرار">
         <div className="form-grid-2">
           <Input label="الشارة (Badge)" value={data.badge || ""} onChange={(e) => handleChange({ badge: e.target.value })} />
           <Input label="العنوان الرئيسي" value={data.title} onChange={(e) => handleChange({ title: e.target.value })} />
-          <Input label="عنوان مميز" value={data.titleAccent || ""} onChange={(e) => handleChange({ titleAccent: e.target.value })} />
+          <Input label="العنوان مميز" value={data.titleAccent || ""} onChange={(e) => handleChange({ titleAccent: e.target.value })} />
+          <ColorPicker
+            label="لون عنوان مميز"
+            color={data.accentColor || "#ffffff"}
+            onChange={(color) => handleChange({ accentColor: color })}
+          />
+          <div className="form-group-contact">
+            <label>شفافية اللون (%) — {Math.round((data.accentOpacity || 0.55) * 100)}%</label>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={data.accentOpacity || 0.55}
+              onChange={(e) => handleChange({ accentOpacity: parseFloat(e.target.value) })}
+              className="w-full h-2 bg-[#e8edf5] rounded-lg appearance-none cursor-pointer mt-2"
+            />
+          </div>
           <Textarea label="الوصف" value={data.subtitle} onChange={(e) => handleChange({ subtitle: e.target.value })} rows={3} />
           <Input label="زر رئيسي — النص" value={data.primaryCtaLabel || ""} onChange={(e) => handleChange({ primaryCtaLabel: e.target.value })} />
           <Input label="زر رئيسي — الرابط" value={data.primaryCtaHref || ""} onChange={(e) => handleChange({ primaryCtaHref: e.target.value })} />
           <Input label="زر ثانوي — النص" value={data.secondaryCtaLabel || ""} onChange={(e) => handleChange({ secondaryCtaLabel: e.target.value })} />
           <Input label="زر ثانوي — الرابط" value={data.secondaryCtaHref || ""} onChange={(e) => handleChange({ secondaryCtaHref: e.target.value })} />
         </div>
-        <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave(data)}>
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-          </DashboardButton>
-        </div>
       </ContentCard>
     </section>
   );
 }
 
-function FeaturesSection({ data: initial, saving, onSave, onDirty }: { data: typeof FEATURE_SECTIONS; saving: boolean; onSave: (d: typeof FEATURE_SECTIONS) => void; onDirty?: () => void }) {
+// Features Section Component
+function FeaturesSection({ data: initial, onChange }: { 
+  data: typeof FEATURE_SECTIONS; 
+  onChange: (data: typeof FEATURE_SECTIONS) => void;
+}) {
   const [sectionsData, setSectionsData] = useState(initial);
+
+  useEffect(() => {
+    setSectionsData(initial);
+  }, [initial]);
+
   const updateSection = useCallback((idx: number, patch: Partial<(typeof FEATURE_SECTIONS)[number]>) => {
-    setSectionsData((prev) => {
-      const n = [...prev];
-      n[idx] = { ...n[idx], ...patch };
-      return n;
-    });
-    onDirty?.();
-  }, [onDirty]);
+    const newData = [...sectionsData];
+    newData[idx] = { ...newData[idx], ...patch };
+    setSectionsData(newData);
+    onChange(newData);
+  }, [sectionsData, onChange]);
+
   return (
     <section id="features">
       <ContentCard title="المميزات الرئيسية" subtitle="4 أقسام مميزات رئيسية للمنصة">
@@ -269,13 +235,7 @@ function FeaturesSection({ data: initial, saving, onSave, onDirty }: { data: typ
                 <Input label="العنوان الفرعي" value={sec.eyebrow} onChange={(e) => updateSection(idx, { eyebrow: e.target.value })} />
                 <Input label="العنوان" value={sec.title} onChange={(e) => updateSection(idx, { title: e.target.value })} />
                 <Input label="عنوان مميز" value={sec.titleAccent || ""} onChange={(e) => updateSection(idx, { titleAccent: e.target.value })} />
-                <div className="form-group-contact">
-                  <label>لون التمييز</label>
-                  <div className="flex items-center gap-2">
-                    <input className="form-control-contact" value={sec.accentColor} onChange={(e) => updateSection(idx, { accentColor: e.target.value })} />
-                    <div className="w-6 h-6 rounded border border-[#e8edf5] shrink-0" style={{ backgroundColor: sec.accentColor }} />
-                  </div>
-                </div>
+                <ColorPicker label="لون التمييز" color={sec.accentColor} onChange={(color) => updateSection(idx, { accentColor: color })} />
                 <Textarea label="الوصف" value={sec.description} onChange={(e) => updateSection(idx, { description: e.target.value })} rows={2} />
               </div>
               <div className="mt-3">
@@ -288,62 +248,46 @@ function FeaturesSection({ data: initial, saving, onSave, onDirty }: { data: typ
             </div>
           ))}
         </div>
-        <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave(sectionsData)}>
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-          </DashboardButton>
-        </div>
       </ContentCard>
     </section>
   );
 }
 
-const NEW_CARD_TEMPLATE: BentoFeature = {
-  iconName: "HelpCircle",
-  iconUrl: null,
-  title: "بطاقة جديدة",
-  description: "وصف البطاقة",
-  iconBg: "#f5f6f9",
-  iconColor: "#0c2954",
-};
-
-function BentoSection({ data: initial, saving, onSave, onDirty }: { data: typeof BENTO_FEATURES; saving: boolean; onSave: (d: typeof BENTO_FEATURES) => void; onDirty?: () => void }) {
+// Bento Section Component
+function BentoSection({ data: initial, onChange }: { 
+  data: typeof BENTO_FEATURES; 
+  onChange: (data: typeof BENTO_FEATURES) => void;
+}) {
   const [features, setFeatures] = useState(initial);
 
-  const existingUploads: string[] = [];
-  for (const f of features) {
-    if (f.iconUrl) existingUploads.push(f.iconUrl);
-  }
+  useEffect(() => {
+    setFeatures(initial);
+  }, [initial]);
 
   const handleChange = useCallback((idx: number, patch: Partial<BentoFeature>) => {
-    setFeatures((prev) => {
-      const n = [...prev];
-      n[idx] = { ...n[idx], ...patch };
-      return n;
-    });
-    onDirty?.();
-  }, [onDirty]);
-
-  const handleIconChange = (idx: number, name: string, url?: string | null) => {
-    handleChange(idx, { iconName: name, iconUrl: url ?? null });
-  };
+    const newData = [...features];
+    newData[idx] = { ...newData[idx], ...patch };
+    setFeatures(newData);
+    onChange(newData);
+  }, [features, onChange]);
 
   const handleAdd = () => {
-    setFeatures((prev) => [...prev, { ...NEW_CARD_TEMPLATE, iconUrl: null }]);
-    onDirty?.();
+    const newData = [...features, { ...NEW_CARD_TEMPLATE, iconUrl: null }];
+    setFeatures(newData);
+    onChange(newData);
   };
 
   const handleDelete = (idx: number) => {
-    setFeatures((prev) => prev.filter((_, i) => i !== idx));
-    onDirty?.();
+    const newData = features.filter((_, i) => i !== idx);
+    setFeatures(newData);
+    onChange(newData);
   };
+
+  const existingUploads = features.filter(f => f.iconUrl).map(f => f.iconUrl as string);
 
   return (
     <section id="bento">
-      <ContentCard
-        title="شبكة المميزات (Bento)"
-        subtitle={`${features.length} بطاقة مميزة في الشبكة`}
-      >
+      <ContentCard title="شبكة المميزات (Bento)" subtitle={`${features.length} بطاقة مميزة في الشبكة`}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {features.map((feat, idx) => (
             <div key={idx} className="relative rounded-lg border border-[#e8edf5] p-4 bg-[#fafbfc] group">
@@ -360,12 +304,7 @@ function BentoSection({ data: initial, saving, onSave, onDirty }: { data: typeof
                   className="w-7 h-7 rounded-md flex items-center justify-center shrink-0"
                   style={{ backgroundColor: feat.iconColor }}
                 >
-                  <IconPreview
-                    iconName={feat.iconName}
-                    iconUrl={feat.iconUrl}
-                    iconColor="#ffffff"
-                    size={14}
-                  />
+                  <IconPreview iconName={feat.iconName} iconUrl={feat.iconUrl} iconColor="#ffffff" size={14} />
                 </div>
                 <span className="text-sm font-bold text-[#0c2954] truncate">{feat.title}</span>
               </div>
@@ -377,7 +316,7 @@ function BentoSection({ data: initial, saving, onSave, onDirty }: { data: typeof
                     iconUrl={feat.iconUrl}
                     iconColor={feat.iconColor}
                     iconBg={feat.iconBg}
-                    onChange={(iconName, iconUrl) => handleIconChange(idx, iconName, iconUrl)}
+                    onChange={(iconName, iconUrl) => handleChange(idx, { iconName, iconUrl: iconUrl ?? null })}
                     existingUploads={existingUploads}
                   />
                 </div>
@@ -386,14 +325,22 @@ function BentoSection({ data: initial, saving, onSave, onDirty }: { data: typeof
                 <div className="form-group-contact">
                   <label>لون الخلفية</label>
                   <div className="flex items-center gap-2">
-                    <input className="form-control-contact" value={feat.iconBg} onChange={(e) => handleChange(idx, { iconBg: e.target.value })} />
+                    <input 
+                      className="form-control-contact" 
+                      value={feat.iconBg} 
+                      onChange={(e) => handleChange(idx, { iconBg: e.target.value })} 
+                    />
                     <div className="w-6 h-6 rounded border border-[#e8edf5] shrink-0" style={{ backgroundColor: feat.iconBg }} />
                   </div>
                 </div>
                 <div className="form-group-contact">
                   <label>لون الأيقونة</label>
                   <div className="flex items-center gap-2">
-                    <input className="form-control-contact" value={feat.iconColor} onChange={(e) => handleChange(idx, { iconColor: e.target.value })} />
+                    <input 
+                      className="form-control-contact" 
+                      value={feat.iconColor} 
+                      onChange={(e) => handleChange(idx, { iconColor: e.target.value })} 
+                    />
                     <div className="w-6 h-6 rounded border border-[#e8edf5] shrink-0" style={{ backgroundColor: feat.iconColor }} />
                   </div>
                 </div>
@@ -410,23 +357,28 @@ function BentoSection({ data: initial, saving, onSave, onDirty }: { data: typeof
           <Plus className="w-4 h-4" />
           إضافة بطاقة جديدة
         </button>
-
-        <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave(features)}>
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-          </DashboardButton>
-        </div>
       </ContentCard>
     </section>
   );
 }
 
-function OverviewSection({ data: initial, saving, onSave, onDirty }: { data: typeof PROJECT_OVERVIEW; saving: boolean; onSave: (d: typeof PROJECT_OVERVIEW) => void; onDirty?: () => void }) {
+// Overview Section Component
+function OverviewSection({ data: initial, onChange }: { 
+  data: typeof PROJECT_OVERVIEW; 
+  onChange: (data: typeof PROJECT_OVERVIEW) => void;
+}) {
   const [data, setData] = useState(initial);
+
+  useEffect(() => {
+    setData(initial);
+  }, [initial]);
+
   const handleChange = useCallback((patch: Partial<typeof PROJECT_OVERVIEW>) => {
-    setData((prev) => ({ ...prev, ...patch }));
-    onDirty?.();
-  }, [onDirty]);
+    const newData = { ...data, ...patch };
+    setData(newData);
+    onChange(newData);
+  }, [data, onChange]);
+
   return (
     <section id="overview">
       <ContentCard title="نظرة على المشروع" subtitle="قسم النظرة العامة مع إحصائيات المشاريع">
@@ -451,26 +403,32 @@ function OverviewSection({ data: initial, saving, onSave, onDirty }: { data: typ
             }}
           />
         </div>
-        <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave(data)}>
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-          </DashboardButton>
-        </div>
       </ContentCard>
     </section>
   );
 }
 
-function AppSectionEditor({ data: initial, saving, onSave, onDirty }: { data: typeof APP_SECTION; saving: boolean; onSave: (d: typeof APP_SECTION) => void; onDirty?: () => void }) {
+// App Section Component
+function AppSectionEditor({ data: initial, onChange }: { 
+  data: typeof APP_SECTION; 
+  onChange: (data: typeof APP_SECTION) => void;
+}) {
   const [data, setData] = useState(initial);
   const [leftPhoneImage, setLeftPhoneImage] = useState<string | null>(initial.app_images?.left_phone || null);
   const [rightPhoneImage, setRightPhoneImage] = useState<string | null>(initial.app_images?.right_phone || null);
   const [uploading, setUploading] = useState(false);
 
+  useEffect(() => {
+    setData(initial);
+    setLeftPhoneImage(initial.app_images?.left_phone || null);
+    setRightPhoneImage(initial.app_images?.right_phone || null);
+  }, [initial]);
+
   const handleChange = useCallback((patch: Partial<typeof APP_SECTION>) => {
-    setData((prev) => ({ ...prev, ...patch }));
-    onDirty?.();
-  }, [onDirty]);
+    const newData = { ...data, ...patch };
+    setData(newData);
+    onChange(newData);
+  }, [data, onChange]);
 
   const handleLeftPhoneUpload = async (file: File) => {
     setUploading(true);
@@ -486,9 +444,7 @@ function AppSectionEditor({ data: initial, saving, onSave, onDirty }: { data: ty
       const result = await res.json();
       if (result.success) {
         setLeftPhoneImage(result.imageUrl);
-        onDirty?.();
-      } else {
-        throw new Error(result.error);
+        onChange({ ...data, app_images: { ...data.app_images, left_phone: result.imageUrl } });
       }
     } catch (error) {
       console.error("Upload failed:", error);
@@ -511,25 +467,13 @@ function AppSectionEditor({ data: initial, saving, onSave, onDirty }: { data: ty
       const result = await res.json();
       if (result.success) {
         setRightPhoneImage(result.imageUrl);
-        onDirty?.();
-      } else {
-        throw new Error(result.error);
+        onChange({ ...data, app_images: { ...data.app_images, right_phone: result.imageUrl } });
       }
     } catch (error) {
       console.error("Upload failed:", error);
     } finally {
       setUploading(false);
     }
-  };
-
-  const handleSave = () => {
-    onSave({
-      ...data,
-      app_images: {
-        left_phone: leftPhoneImage,
-        right_phone: rightPhoneImage,
-      },
-    });
   };
 
   return (
@@ -544,7 +488,6 @@ function AppSectionEditor({ data: initial, saving, onSave, onDirty }: { data: ty
           <Input label="Google Play" value={data.googlePlayUrl} onChange={(e) => handleChange({ googlePlayUrl: e.target.value })} />
         </div>
 
-        {/* Phone Images */}
         <div className="mt-6">
           <h4 className="text-sm font-medium text-navy mb-4">صور الهواتف</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -553,7 +496,10 @@ function AppSectionEditor({ data: initial, saving, onSave, onDirty }: { data: ty
               currentImage={leftPhoneImage}
               defaultImage="/app-screenshot.jpg"
               onUpload={handleLeftPhoneUpload}
-              onRemove={() => { setLeftPhoneImage(null); onDirty?.(); }}
+              onRemove={() => { 
+                setLeftPhoneImage(null); 
+                onChange({ ...data, app_images: { ...data.app_images, left_phone: null } });
+              }}
               aspectRatio={{ width: 9, height: 19.5 }}
             />
             <ImageUploadWithPreview
@@ -561,28 +507,36 @@ function AppSectionEditor({ data: initial, saving, onSave, onDirty }: { data: ty
               currentImage={rightPhoneImage}
               defaultImage="/app-screenshot.jpg"
               onUpload={handleRightPhoneUpload}
-              onRemove={() => { setRightPhoneImage(null); onDirty?.(); }}
+              onRemove={() => { 
+                setRightPhoneImage(null); 
+                onChange({ ...data, app_images: { ...data.app_images, right_phone: null } });
+              }}
               aspectRatio={{ width: 9, height: 19.5 }}
             />
           </div>
-        </div>
-
-        <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving || uploading} onClick={handleSave}>
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-          </DashboardButton>
         </div>
       </ContentCard>
     </section>
   );
 }
 
-function CTASectionEditor({ data: initial, saving, onSave, onDirty }: { data: typeof CTA_SECTION; saving: boolean; onSave: (d: typeof CTA_SECTION) => void; onDirty?: () => void }) {
+// CTA Section Component
+function CTASectionEditor({ data: initial, onChange }: { 
+  data: typeof CTA_SECTION; 
+  onChange: (data: typeof CTA_SECTION) => void;
+}) {
   const [data, setData] = useState(initial);
+
+  useEffect(() => {
+    setData(initial);
+  }, [initial]);
+
   const handleChange = useCallback((patch: Partial<typeof CTA_SECTION>) => {
-    setData((prev) => ({ ...prev, ...patch }));
-    onDirty?.();
-  }, [onDirty]);
+    const newData = { ...data, ...patch };
+    setData(newData);
+    onChange(newData);
+  }, [data, onChange]);
+
   return (
     <section id="cta">
       <ContentCard title="دعوة للعمل (CTA)" subtitle="القسم الأخير في الصفحة الرئيسية">
@@ -594,11 +548,6 @@ function CTASectionEditor({ data: initial, saving, onSave, onDirty }: { data: ty
           <Input label="زر ثانوي — النص" value={data.secondaryCtaLabel} onChange={(e) => handleChange({ secondaryCtaLabel: e.target.value })} />
           <Input label="زر ثانوي — الرابط" value={data.secondaryCtaHref} onChange={(e) => handleChange({ secondaryCtaHref: e.target.value })} />
           <Input label="ملاحظة" value={data.note || ""} onChange={(e) => handleChange({ note: e.target.value })} />
-        </div>
-        <div className="mt-5 flex justify-end">
-          <DashboardButton disabled={saving} onClick={() => onSave(data)}>
-            {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-          </DashboardButton>
         </div>
       </ContentCard>
     </section>
