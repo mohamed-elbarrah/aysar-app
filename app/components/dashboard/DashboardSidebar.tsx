@@ -16,11 +16,9 @@ import {
   LogOut,
   ChevronLeft,
   ChevronDown,
-  Menu,
   type LucideIcon,
 } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -191,9 +189,14 @@ function NavItemComponent({
   );
 }
 
-export function DashboardSidebar() {
+export function DashboardSidebar({
+  mobileOpen,
+  setMobileOpen,
+}: {
+  mobileOpen: boolean;
+  setMobileOpen: (open: boolean) => void;
+}) {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(() => {
     // Auto-expand the current page's section
     const s = new Set<string>();
@@ -309,17 +312,6 @@ export function DashboardSidebar() {
       {/* Mobile sidebar */}
       <div className="lg:hidden">
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger
-            render={
-              <DashboardButton
-                variant="ghost"
-                size="icon"
-                className="fixed top-4 right-4 z-30 bg-[#0c2954] text-white hover:bg-[#1a3a6a] shadow-lg"
-              >
-                <Menu className="w-5 h-5" />
-              </DashboardButton>
-            }
-          />
           <SheetContent
             side="right"
             className="w-[260px] bg-[#0c2954] p-0 border-none"
