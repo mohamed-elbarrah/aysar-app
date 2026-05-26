@@ -6,6 +6,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: boolean;
   required?: boolean;
   wrapperClassName?: string;
+  icon?: React.ReactNode;
 }
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
@@ -21,7 +22,7 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   wrapperClassName?: string;
 }
 
-export function Input({ label, error, required, className, wrapperClassName, ...rest }: InputProps) {
+export function Input({ label, error, required, className, wrapperClassName, icon, ...rest }: InputProps) {
   return (
     <div className={cn("form-group-contact", wrapperClassName)}>
       {label && (
@@ -30,10 +31,13 @@ export function Input({ label, error, required, className, wrapperClassName, ...
           {required && <span className="text-red-500 mr-0.5">*</span>}
         </label>
       )}
-      <input
-        className={cn("form-control-contact", error && "error", className)}
-        {...rest}
-      />
+      <div className="relative">
+        {icon && <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">{icon}</div>}
+        <input
+          className={cn("form-control-contact", error && "error", icon && "pr-10", className)}
+          {...rest}
+        />
+      </div>
     </div>
   );
 }

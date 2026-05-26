@@ -365,13 +365,14 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
         for (const [section, data] of sectionsToSave) {
           try {
+            const sectionKey = String(section);
             const res = await fetch("/api/home-page", {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
               credentials: "include",
-              body: JSON.stringify({ [section]: data }),
+              body: JSON.stringify({ [sectionKey]: data }),
             });
-            results.push({ page: "home", section: section as string, success: res.ok });
+            results.push({ page: "home", section: sectionKey, success: res.ok });
             if (!res.ok) allSuccess = false;
           } catch (e) {
             results.push({ page: "home", section: section as string, success: false, error: String(e) });
@@ -388,17 +389,18 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         if (dirty.plans.faqItems) sectionsToSave.push(["faqItems", plansData.faqItems]);
 
         for (const [section, data] of sectionsToSave) {
+          const sectionKey = String(section);
           try {
             const res = await fetch("/api/plans-page", {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
               credentials: "include",
-              body: JSON.stringify({ [section]: data }),
+              body: JSON.stringify({ [sectionKey]: data }),
             });
-            results.push({ page: "plans", section: section as string, success: res.ok });
+            results.push({ page: "plans", section: sectionKey, success: res.ok });
             if (!res.ok) allSuccess = false;
           } catch (e) {
-            results.push({ page: "plans", section: section as string, success: false, error: String(e) });
+            results.push({ page: "plans", section: sectionKey, success: false, error: String(e) });
             allSuccess = false;
           }
         }
@@ -417,17 +419,18 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         }
 
         for (const [section, data] of sectionsToSave) {
+          const sectionKey = String(section);
           try {
             const res = await fetch("/api/contact-page", {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
               credentials: "include",
-              body: JSON.stringify({ [section]: data }),
+              body: JSON.stringify({ [sectionKey]: data }),
             });
-            results.push({ page: "contact", section: section as string, success: res.ok });
+            results.push({ page: "contact", section: sectionKey, success: res.ok });
             if (!res.ok) allSuccess = false;
           } catch (e) {
-            results.push({ page: "contact", section: section as string, success: false, error: String(e) });
+            results.push({ page: "contact", section: sectionKey, success: false, error: String(e) });
             allSuccess = false;
           }
         }
