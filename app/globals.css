@@ -1608,7 +1608,7 @@
   }
 
   /* Mobile overrides */
-  @media (max-width: 900px) {
+  @media (max-width: 1023px) {
     .section-aysar {
       padding: 64px 24px;
     }

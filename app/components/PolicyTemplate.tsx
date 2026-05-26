@@ -17,6 +17,7 @@ function TocSidebar({ tocItems, sidebarCard }: {
   sidebarCard?: PolicyData["sidebarCard"];
 }) {
   const [activeId, setActiveId] = useState(tocItems[0]?.id ?? "");
+  const [progress, setProgress] = useState(0);
   const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
@@ -37,15 +38,24 @@ function TocSidebar({ tocItems, sidebarCard }: {
     return () => observer.disconnect();
   }, [tocItems]);
 
+  useEffect(() => {
+    function updateProgress() {
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollTop = window.scrollY;
+      const newProgress = docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0;
+      setProgress(newProgress);
+    }
+
+    updateProgress();
+    window.addEventListener("scroll", updateProgress, { passive: true });
+    return () => window.removeEventListener("scroll", updateProgress);
+  }, []);
+
   function handleClick(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
     e.preventDefault();
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }
-
-  const docHeight = typeof document !== "undefined" ? document.documentElement.scrollHeight - window.innerHeight : 1;
-  const scrollTop = typeof window !== "undefined" ? window.scrollY : 0;
-  const progress = docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0;
 
   return (
     <aside className="toc">
