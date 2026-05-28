@@ -27,9 +27,9 @@ export default function Footer({ columns, socialLinks, contactInfo, appLinks }: 
                     <Image
                       src="/logo.png"
                       alt="أيسَر"
-                      width={100}
-                      height={34}
-                      className="h-[34px] w-auto object-contain brightness-[5]"
+                      width={110}
+                      height={32}
+                      className="h-8 w-auto object-contain"
                       priority
                     />
                   </Link>

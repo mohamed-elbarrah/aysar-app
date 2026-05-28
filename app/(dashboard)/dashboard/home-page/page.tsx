@@ -489,7 +489,12 @@ function AppSectionEditor({ data: initial, onChange }: {
         </div>
 
         <div className="mt-6">
-          <h4 className="text-sm font-medium text-navy mb-4">صور الهواتف</h4>
+          <h4 className="text-sm font-medium text-navy mb-2">صور الهواتف</h4>
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-xs text-blue-700">
+              <span className="font-semibold">ملاحظة:</span> يُفضل رفع صور بأبعاد <strong>450 × 975 بكسل</strong> (أو أي أبعاد تحافظ على نسبة 9:19.5) لعرض أفضل في الهواتف الظاهرة في الموقع.
+            </p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ImageUploadWithPreview
               label="صورة الهاتف الأيسر"

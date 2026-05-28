@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 
 interface NavLinkItem {
   label: string;
@@ -20,6 +20,9 @@ export default function Navbar({ navLinks, platformLinks }: { navLinks: NavLinkI
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [underlineStyle, setUnderlineStyle] = useState({ width: 0, left: 0 });
+  const navRef = useRef<HTMLUListElement>(null);
+  const activeIndex = navLinks.findIndex((link) => link.href === pathname);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -32,6 +35,21 @@ export default function Navbar({ navLinks, platformLinks }: { navLinks: NavLinkI
     const t = setTimeout(() => setMobileOpen(false), 0);
     return () => clearTimeout(t);
   }, [pathname]);
+
+  useLayoutEffect(() => {
+    if (navRef.current && activeIndex !== -1) {
+      const activeLink = navRef.current.children[activeIndex] as HTMLElement;
+      if (activeLink) {
+        const linkElement = activeLink.querySelector("a") as HTMLElement;
+        if (linkElement) {
+          setUnderlineStyle({
+            width: linkElement.offsetWidth - 28,
+            left: linkElement.offsetLeft + 14,
+          });
+        }
+      }
+    }
+  }, [activeIndex, pathname]);
 
   const navBg = scrolled
     ? "bg-[rgba(8,16,36,0.85)] border-b border-[rgba(255,255,255,0.08)] backdrop-blur-xl"
@@ -53,25 +71,31 @@ export default function Navbar({ navLinks, platformLinks }: { navLinks: NavLinkI
           />
         </Link>
 
-        <ul className="max-md:hidden md:flex items-center gap-1 mr-auto">
+        <ul ref={navRef} className="max-md:hidden md:flex items-center gap-1 mr-auto relative">
           {navLinks.map((link) => {
             const active = pathname === link.href;
             return (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`relative px-3.5 py-1.5 rounded-lg text-sm font-normal transition-all duration-150 text-white/70 hover:text-white ${
-                    active ? "font-semibold" : ""
+                  className={`relative px-3.5 py-1.5 rounded-lg text-sm transition-colors duration-200 ${
+                    active ? "text-white font-bold" : "text-white/70 hover:text-white"
                   }`}
                 >
                   {link.label}
-                  {active && (
-                    <span className="absolute bottom-0 right-4 left-4 h-0.5 bg-indigo rounded-full" />
-                  )}
                 </Link>
               </li>
             );
           })}
+          {/* Animated underline */}
+          <span
+            className="absolute -bottom-1 h-0.5 bg-white rounded-full transition-all duration-300 ease-out"
+            style={{
+              width: underlineStyle.width,
+              left: underlineStyle.left,
+              opacity: activeIndex !== -1 ? 1 : 0,
+            }}
+          />
         </ul>
 
         <div className="max-md:hidden md:flex items-center gap-2">

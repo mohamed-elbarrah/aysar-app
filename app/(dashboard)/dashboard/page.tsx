@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { StatCard } from "@/app/components/dashboard/StatCard";
-import { LayoutGrid, MessageCircle, Layers, Clock, CreditCard } from "lucide-react";
+import { LayoutGrid, MessageCircle, Layers, CreditCard, Home, FileText, Phone, Settings, BookOpen } from "lucide-react";
 
 export default function DashboardPage() {
   const [unreadCount, setUnreadCount] = useState<number | null>(null);
@@ -24,11 +24,10 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="إجمالي الصفحات" value={6} icon={LayoutGrid} color="#0c2954" />
         <StatCard label="رسائل جديدة" value={unreadCount ?? "..."} icon={MessageCircle} color="#1a9a5a" />
         <StatCard label="أقسام المحتوى" value={24} icon={Layers} color="#f97316" />
-        <StatCard label="آخر تحديث" value="20/05/2026" icon={Clock} color="#2d2e83" />
         <StatCard label="الباقات النشطة" value={3} icon={CreditCard} color="#5ddfb8" />
       </div>
 
@@ -39,6 +38,44 @@ export default function DashboardPage() {
         <QuickAccessCard title="رسائل التواصل" href="/dashboard/messages" description={unreadCount !== null ? `${unreadCount} رسالة جديدة` : "لا توجد رسائل جديدة"} />
         <QuickAccessCard title="الإعدادات العامة" href="/dashboard/settings" description="تعديل الموقع والروابط" />
       </div>
+
+      <div className="bg-[#f8f9fc] rounded-xl border border-[#e8edf5] p-6">
+        <h2 className="text-lg font-bold text-[#0c2954] mb-4 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#1a9a5a]"></span>
+          إرشادات إدارة المحتوى
+        </h2>
+        <ul className="space-y-3 text-sm text-[#6b7a94]">
+          <li className="flex items-start gap-2">
+            <span className="text-[#1a9a5a] font-bold mt-0.5">1.</span>
+            <span>أضغط على زر "حفظ التغييرات" الموجود في الزاوية السفلية بعد إتمام أي تعديل</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-[#1a9a5a] font-bold mt-0.5">2.</span>
+            <span>الصفحة الرئيسية تحتوي على: البانر، المميزات، شبكة Bento، نظرة على المشروع، قسم التطبيق، ودعوة العمل</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-[#1a9a5a] font-bold mt-0.5">3.</span>
+            <span>الخطط والأسعار: تعديل الباقات، جدول المقارنة، والأسئلة الشائعة</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-[#1a9a5a] font-bold mt-0.5">4.</span>
+            <span>صفحة التواصل: تعديل معلومات التواصل، القنوات، ونموذج الاتصال</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-[#1a9a5a] font-bold mt-0.5">5.</span>
+            <span>الصفحات القانونية: تعديل سياسة الخصوصية، شروط الاستخدام، وسياسة الإرجاع</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-[#1a9a5a] font-bold mt-0.5">6.</span>
+            <span>الإعدادات العامة: تعديل معلومات الموقع، شريط التنقل، التذييل، وروابط التواصل الاجتماعي</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-[#1a9a5a] font-bold mt-0.5">7.</span>
+            <span>جميع التغييرات تظهر فوراً على الموقع بعد الحفظ</span>
+          </li>
+        </ul>
+      </div>
+
     </div>
   );
 }
@@ -52,5 +89,34 @@ function QuickAccessCard({ title, href, description }: { title: string; href: st
       <h3 className="font-bold text-[#0c2954] mb-1">{title}</h3>
       <p className="text-sm text-[#6b7a94]">{description}</p>
     </a>
+  );
+}
+
+function InstructionCard({
+  title,
+  description,
+  icon: Icon,
+  color,
+}: {
+  title: string;
+  description: string;
+  icon: typeof Home;
+  color: string;
+}) {
+  return (
+    <div className="bg-[#f8f9fc] rounded-xl border border-[#e8edf5] p-5">
+      <div className="flex items-start gap-3">
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+          style={{ backgroundColor: `${color}15` }}
+        >
+          <Icon className="w-5 h-5" style={{ color }} />
+        </div>
+        <div>
+          <h3 className="font-bold text-[#0c2954] mb-1">{title}</h3>
+          <p className="text-sm text-[#6b7a94] leading-relaxed">{description}</p>
+        </div>
+      </div>
+    </div>
   );
 }

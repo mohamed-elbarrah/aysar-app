@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useDashboard } from "@/app/components/dashboard/DashboardContext";
 import { Input, Textarea } from "@/app/components/ui/Input";
 import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
@@ -67,121 +67,67 @@ export default function PoliciesEditor() {
 
       <PolicyEditor 
         data={current as PolicyData} 
-        type={activeType} 
         onChange={(data) => setPoliciesData(activeType, data)} 
       />
     </div>
   );
 }
 
-function PolicyEditor({ data: initial, type, onChange }: {
+function PolicyEditor({ data: current, onChange }: {
   data: PolicyData; 
-  type: PolicyType; 
   onChange: (d: PolicyData) => void;
 }) {
-  const [data, setData] = useState<PolicyData>(initial);
-
-  useEffect(() => { 
-    setData(initial); 
-  }, [initial, type]);
-
   const updateParts = (parts: PolicyPart[]) => {
-    const newData = { ...data, parts };
-    setData(newData);
-    onChange(newData);
+    onChange({ ...current, parts });
   };
 
   const updateHero = (hero: Partial<PolicyData>) => {
-    const newData = { ...data, ...hero };
-    setData(newData);
-    onChange(newData);
+    onChange({ ...current, ...hero });
   };
 
   const updateVersion = (version: Partial<PolicyData>) => {
-    const newData = { ...data, ...version };
-    setData(newData);
-    onChange(newData);
+    onChange({ ...current, ...version });
   };
 
   const updateSidebar = (sidebarCard: PolicyData["sidebarCard"]) => {
-    const newData = { ...data, sidebarCard };
-    setData(newData);
-    onChange(newData);
+    onChange({ ...current, sidebarCard });
   };
 
   const updateFooter = (footer: { footerText: string; footerActions: PolicyData["footerActions"] }) => {
-    const newData = { ...data, footerText: footer.footerText, footerActions: footer.footerActions };
-    setData(newData);
-    onChange(newData);
+    onChange({ ...current, footerText: footer.footerText, footerActions: footer.footerActions });
   };
 
   return (
     <div className="space-y-6">
-      <HeroSection data={data} onChange={updateHero} />
-      <VersionSection data={data} onChange={updateVersion} />
-      <PartsSection parts={data.parts} onChange={updateParts} />
-      <SidebarSection data={data} onChange={updateSidebar} />
-      <FooterSection data={data} onChange={updateFooter} />
+      <HeroSection data={current} onChange={updateHero} />
+      <VersionSection data={current} onChange={updateVersion} />
+      <PartsSection parts={current.parts} onChange={updateParts} />
+      <SidebarSection data={current} onChange={updateSidebar} />
+      <FooterSection data={current} onChange={updateFooter} />
     </div>
   );
 }
 
 function HeroSection({ data, onChange }: { data: PolicyData; onChange: (hero: Partial<PolicyData>) => void }) {
-  const [badge, setBadge] = useState(data.badge);
-  const [breadcrumb, setBreadcrumb] = useState(data.breadcrumb);
-  const [title, setTitle] = useState(data.title);
-  const [description, setDescription] = useState(data.description);
-
-  useEffect(() => { 
-    setBadge(data.badge); 
-    setBreadcrumb(data.breadcrumb); 
-    setTitle(data.title); 
-    setDescription(data.description); 
-  }, [data]);
-
-  const handleApply = () => {
-    onChange({ badge, breadcrumb, title, description });
-  };
-
   return (
     <ContentCard title="البانر الرئيسي" subtitle="الشارة، العنوان، والوصف">
       <div className="form-grid-2">
-        <Input label="الشارة (Badge)" value={badge} onChange={(e) => { setBadge(e.target.value); }} />
-        <Input label="مسار التنقل (Breadcrumb)" value={breadcrumb} onChange={(e) => { setBreadcrumb(e.target.value); }} />
-        <Input label="العنوان" value={title} onChange={(e) => { setTitle(e.target.value); }} />
-        <Textarea label="الوصف" value={description} onChange={(e) => { setDescription(e.target.value); }} rows={2} />
-      </div>
-      <div className="mt-3 flex justify-end">
-        <DashboardButton variant="secondary" size="sm" onClick={handleApply}>تطبيق</DashboardButton>
+        <Input label="الشارة (Badge)" value={data.badge} onChange={(e) => { onChange({ ...data, badge: e.target.value }); }} />
+        <Input label="مسار التنقل (Breadcrumb)" value={data.breadcrumb} onChange={(e) => { onChange({ ...data, breadcrumb: e.target.value }); }} />
+        <Input label="العنوان" value={data.title} onChange={(e) => { onChange({ ...data, title: e.target.value }); }} />
+        <Textarea label="الوصف" value={data.description} onChange={(e) => { onChange({ ...data, description: e.target.value }); }} rows={2} />
       </div>
     </ContentCard>
   );
 }
 
 function VersionSection({ data, onChange }: { data: PolicyData; onChange: (v: Partial<PolicyData>) => void }) {
-  const [version, setVersion] = useState(data.version || "2.1");
-  const [effectiveDate, setEffectiveDate] = useState(data.effectiveDate || "1 مايو 2025");
-  const [entity, setEntity] = useState(data.entity || "شركة أيسَر للبرمجيات");
-
-  useEffect(() => { 
-    setVersion(data.version || "2.1"); 
-    setEffectiveDate(data.effectiveDate || "1 مايو 2025"); 
-    setEntity(data.entity || "شركة أيسَر للبرمجيات"); 
-  }, [data]);
-
-  const handleApply = () => {
-    onChange({ version, effectiveDate, entity });
-  };
-
   return (
     <ContentCard title="الإصدار والتاريخ" subtitle="رقم الإصدار وتاريخ السريان">
       <div className="form-grid-2">
-        <Input label="رقم الإصدار" value={version} onChange={(e) => { setVersion(e.target.value); }} />
-        <Input label="تاريخ السريان" value={effectiveDate} onChange={(e) => { setEffectiveDate(e.target.value); }} />
-        <Input label="اسم الجهة" value={entity} onChange={(e) => { setEntity(e.target.value); }} />
-      </div>
-      <div className="mt-3 flex justify-end">
-        <DashboardButton variant="secondary" size="sm" onClick={handleApply}>تطبيق</DashboardButton>
+        <Input label="رقم الإصدار" value={data.version || ""} onChange={(e) => { onChange({ ...data, version: e.target.value }); }} />
+        <Input label="تاريخ السريان" value={data.effectiveDate || ""} onChange={(e) => { onChange({ ...data, effectiveDate: e.target.value }); }} />
+        <Input label="اسم الجهة" value={data.entity || ""} onChange={(e) => { onChange({ ...data, entity: e.target.value }); }} />
       </div>
     </ContentCard>
   );
@@ -249,81 +195,51 @@ function PartsSection({ parts, onChange }: { parts: PolicyPart[]; onChange: (par
 }
 
 function SidebarSection({ data, onChange }: { data: PolicyData; onChange: (sidebarCard: PolicyData["sidebarCard"]) => void }) {
-  const [card, setCard] = useState(data.sidebarCard || { 
-    title: "هل تحتاج مساعدة؟", 
-    desc: "فريق الدعم متاح للإجابة عن استفساراتك", 
-    linkLabel: "تواصل معنا", 
-    href: "/contact" 
-  });
-
-  useEffect(() => { 
-    setCard(data.sidebarCard || { 
-      title: "هل تحتاج مساعدة؟", 
-      desc: "فريق الدعم متاح للإجابة عن استفساراتك", 
-      linkLabel: "تواصل معنا", 
-      href: "/contact" 
-    }); 
-  }, [data]);
-
-  const handleApply = () => {
-    onChange(card);
+  const card = data.sidebarCard || {
+    title: "هل تحتاج مساعدة؟",
+    desc: "فريق الدعم متاح للإجابة عن استفساراتك",
+    linkLabel: "تواصل معنا",
+    href: "/contact"
   };
 
   return (
     <ContentCard title="بطاقة الشريط الجانبي" subtitle="بطاقة المساعدة في TocSidebar">
       <div className="form-grid-2">
-        <Input label="العنوان" value={card.title} onChange={(e) => { setCard({ ...card, title: e.target.value }); }} />
-        <Input label="الوصف" value={card.desc} onChange={(e) => { setCard({ ...card, desc: e.target.value }); }} />
-        <Input label="نص الرابط" value={card.linkLabel} onChange={(e) => { setCard({ ...card, linkLabel: e.target.value }); }} />
-        <Input label="الرابط" value={card.href} onChange={(e) => { setCard({ ...card, href: e.target.value }); }} />
-      </div>
-      <div className="mt-3 flex justify-end">
-        <DashboardButton variant="secondary" size="sm" onClick={handleApply}>تطبيق</DashboardButton>
+        <Input label="العنوان" value={card.title} onChange={(e) => { onChange({ ...card, title: e.target.value }); }} />
+        <Input label="الوصف" value={card.desc} onChange={(e) => { onChange({ ...card, desc: e.target.value }); }} />
+        <Input label="نص الرابط" value={card.linkLabel} onChange={(e) => { onChange({ ...card, linkLabel: e.target.value }); }} />
+        <Input label="الرابط" value={card.href} onChange={(e) => { onChange({ ...card, href: e.target.value }); }} />
       </div>
     </ContentCard>
   );
 }
 
 function FooterSection({ data, onChange }: { data: PolicyData; onChange: (f: { footerText: string; footerActions: PolicyData["footerActions"] }) => void }) {
-  const [footerText, setFooterText] = useState(data.footerText);
-  const [actions, setActions] = useState(data.footerActions);
+  const handleTextChange = (val: string) => {
+    onChange({ footerText: val, footerActions: data.footerActions });
+  };
 
-  useEffect(() => { 
-    setFooterText(data.footerText); 
-    setActions(data.footerActions); 
-  }, [data]);
-
-  const handleApply = () => {
-    onChange({ footerText, footerActions: actions });
+  const handleActionChange = (idx: number, patch: Partial<(typeof data.footerActions)[number]>) => {
+    const na = [...data.footerActions];
+    na[idx] = { ...na[idx], ...patch };
+    onChange({ footerText: data.footerText, footerActions: na });
   };
 
   return (
     <ContentCard title="شريط التذييل" subtitle="نص الحقوق وأزرار الإجراءات">
-      <Textarea label="نص الحقوق" value={footerText} onChange={(e) => { setFooterText(e.target.value); }} rows={2} />
+      <Textarea label="نص الحقوق" value={data.footerText} onChange={(e) => { handleTextChange(e.target.value); }} rows={2} />
       <div className="mt-4">
         <p className="text-xs font-semibold text-[#3a4a60] mb-2">أزرار الإجراءات</p>
-        {actions.map((action, idx) => (
+        {data.footerActions.map((action, idx) => (
           <div key={idx} className="grid grid-cols-3 gap-2 mb-2">
-            <Input label="النص" value={action.label} onChange={(e) => { 
-              const na = [...actions]; 
-              na[idx] = { ...na[idx], label: e.target.value }; 
-              setActions(na); 
-            }} />
-            <Input label="الرابط" value={action.href} onChange={(e) => { 
-              const na = [...actions]; 
-              na[idx] = { ...na[idx], href: e.target.value }; 
-              setActions(na); 
-            }} />
+            <Input label="النص" value={action.label} onChange={(e) => { handleActionChange(idx, { label: e.target.value }); }} />
+            <Input label="الرابط" value={action.href} onChange={(e) => { handleActionChange(idx, { href: e.target.value }); }} />
             <div className="form-group-contact">
               <label>النوع</label>
               <select 
                 className="form-control-contact" 
                 value={action.variant} 
-                onChange={(e) => { 
-                  const na = [...actions]; 
-                  na[idx] = { ...na[idx], variant: e.target.value as "primary" | "ghost" }; 
-                  setActions(na); 
-                }}
+                onChange={(e) => { handleActionChange(idx, { variant: e.target.value as "primary" | "ghost" }); }}
               >
                 <option value="primary">أساسي</option>
                 <option value="ghost">شفاف</option>
@@ -331,9 +247,6 @@ function FooterSection({ data, onChange }: { data: PolicyData; onChange: (f: { f
             </div>
           </div>
         ))}
-      </div>
-      <div className="mt-3 flex justify-end">
-        <DashboardButton variant="secondary" size="sm" onClick={handleApply}>تطبيق</DashboardButton>
       </div>
     </ContentCard>
   );

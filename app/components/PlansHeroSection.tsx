@@ -25,7 +25,7 @@ export function PlansHeroSection({
     <section className="relative gradient-hero pt-[130px] pb-20 px-6 lg:px-10 text-center overflow-hidden noise-overlay">
       <div className="glow-orb glow-orb-indigo w-[600px] h-[400px] -top-[100px] left-1/2 -translate-x-1/2" />
       <Container className="relative z-[1] max-w-[680px] mx-auto">
-        <div className="anim-fade-in-up">
+        <div className="anim-fade-in-up mb-2">
           <Badge>{badge}</Badge>
         </div>
         <h1 className="text-[clamp(32px,5vw,56px)] font-bold text-white leading-[1.12] tracking-tight mb-4 anim-fade-in-up anim-delay-1">

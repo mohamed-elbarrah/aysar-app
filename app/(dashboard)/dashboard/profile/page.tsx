@@ -263,7 +263,7 @@ export default function ProfilePage() {
                 <span className="text-[#6b7a94]">تاريخ الإنشاء:</span>{" "}
                 <span className="text-[#0c2954] font-medium">
                   {user?.createdAt
-                    ? new Date(user.createdAt).toLocaleDateString("ar-SA")
+                    ? new Date(user.createdAt).toLocaleDateString("ar-SA-u-nu-latn")
                     : "—"}
                 </span>
               </div>
@@ -271,7 +271,7 @@ export default function ProfilePage() {
                 <span className="text-[#6b7a94]">آخر تحديث:</span>{" "}
                 <span className="text-[#0c2954] font-medium">
                   {user?.updatedAt
-                    ? new Date(user.updatedAt).toLocaleDateString("ar-SA")
+                    ? new Date(user.updatedAt).toLocaleDateString("ar-SA-u-nu-latn")
                     : "—"}
                 </span>
               </div>
