@@ -88,7 +88,6 @@ const navItems: NavItem[] = [
     href: "/dashboard/messages",
     label: "رسائل التواصل",
     icon: MessageCircle,
-    badge: 3,
   },
   {
     href: "/dashboard/settings",
@@ -236,6 +235,25 @@ export function DashboardSidebar({
     loadUser();
   }, []);
 
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    async function loadCount() {
+      try {
+        const res = await fetch("/api/contact-messages", { credentials: "include" });
+        const json = await res.json();
+        if (json.success && typeof json.unreadCount === "number") {
+          setUnreadCount(json.unreadCount);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    loadCount();
+    const interval = setInterval(loadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const toggleExpand = useCallback((href: string) => {
     setExpandedItems((prev) => {
       const next = new Set(prev);
@@ -269,6 +287,10 @@ export function DashboardSidebar({
       {/* Nav Items */}
       <nav className="flex-1 py-2 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
+          const isMessages = item.href === "/dashboard/messages";
+          const itemWithBadge = isMessages && unreadCount > 0
+            ? { ...item, badge: unreadCount }
+            : item;
           const isActive =
             pathname === item.href ||
             (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -276,7 +298,7 @@ export function DashboardSidebar({
           return (
             <NavItemComponent
               key={item.href}
-              item={item}
+              item={itemWithBadge}
               isActive={isActive}
               isExpanded={isExpanded}
               onToggle={() => toggleExpand(item.href)}

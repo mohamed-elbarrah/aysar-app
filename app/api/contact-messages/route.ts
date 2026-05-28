@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
     const { error } = await supabase
       .from("contact_messages")
       .insert({
+        id: crypto.randomUUID(),
         full_name: fullName,
         email: email || "",
         phone,
@@ -76,5 +77,7 @@ export async function GET(request: NextRequest) {
     status: m.is_read ? ("read" as const) : ("new" as const),
   }));
 
-  return NextResponse.json({ success: true, data: mapped });
+  const unreadCount = (messages || []).filter((m) => !m.is_read).length;
+
+  return NextResponse.json({ success: true, data: mapped, unreadCount });
 }

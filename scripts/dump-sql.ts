@@ -90,8 +90,8 @@ async function main() {
   lines.push("");
 
   for (const s of settings) {
-    lines.push(`INSERT INTO site_settings (id, site_title, site_description, favicon_url, seo_keywords, nav_links, social_links, app_links, footer_columns, contact_info, platform_links, work_hours, updated_at)
-  VALUES (${escape(s.id)}, ${escape(s.site_title)}, ${escape(s.site_description)}, ${escape(s.favicon_url)}, ${escape(s.seo_keywords)}, ${jsonb(s.nav_links)}, ${jsonb(s.social_link)}, ${jsonb(s.app_links)}, ${jsonb(s.footer_columns)}, ${jsonb(s.contact_info)}, ${jsonb(s.platform_links)}, ${jsonb(s.work_hours)}, ${escape(s.updated_at)});`);
+    lines.push(`INSERT INTO site_settings (id, site_title, site_description, favicon_url, seo_keywords, nav_links, social_links, app_links, footer_columns, contact_info, platform_links, work_hours, scripts, updated_at)
+  VALUES (${escape(s.id)}, ${escape(s.site_title)}, ${escape(s.site_description)}, ${escape(s.favicon_url)}, ${escape(s.seo_keywords)}, ${jsonb(s.nav_links)}, ${jsonb(s.social_links)}, ${jsonb(s.app_links)}, ${jsonb(s.footer_columns)}, ${jsonb(s.contact_info)}, ${jsonb(s.platform_links)}, ${jsonb(s.work_hours)}, ${jsonb(s.scripts)}, ${escape(s.updated_at)});`);
   }
 
   lines.push("");

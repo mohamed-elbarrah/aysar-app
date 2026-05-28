@@ -94,6 +94,7 @@ async function main() {
       contact_info: settings.contactInfo,
       platform_links: settings.platformLinks,
       work_hours: settings.workHours,
+      scripts: [],
     }, { onConflict: "id" });
   }
 

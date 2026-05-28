@@ -1,14 +1,76 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Script from "next/script";
+import DOMPurify from "isomorphic-dompurify";
 
-function createScriptElement(oldScript: HTMLScriptElement): HTMLScriptElement {
-  const el = document.createElement("script");
-  for (const attr of oldScript.attributes) {
-    el.setAttribute(attr.name, attr.value);
+interface ParsedNode {
+  id: string;
+  type: "external" | "inline" | "html";
+  src?: string;
+  code?: string;
+  html?: string;
+}
+
+const SANITIZE_CONFIG = {
+  ALLOWED_TAGS: ["script", "link", "div", "span", "form", "input", "button", "textarea", "select", "option", "label", "style", "iframe"],
+  ALLOWED_ATTR: [
+    "src", "href", "rel", "type", "async", "defer", "id", "class",
+    "name", "value", "placeholder", "action", "method", "target",
+    "style", "width", "height", "frameborder", "loading",
+    "sandbox", "referrerpolicy", "data-", "aria-",
+    "onsubmit", "onclick", "onload",
+  ],
+  ALLOW_DATA_ATTR: true,
+};
+
+let nodeIdCounter = 0;
+function nextNodeId(): string {
+  return `tpf_${++nodeIdCounter}_${Date.now().toString(36)}`;
+}
+
+function parseFormScript(scriptHtml: string): ParsedNode[] {
+  if (!scriptHtml || !scriptHtml.trim()) return [];
+
+  const nodes: ParsedNode[] = [];
+  const doc = DOMPurify.sanitize(scriptHtml, SANITIZE_CONFIG);
+
+  const parser = typeof DOMParser !== "undefined" ? new DOMParser() : null;
+  if (!parser) return [];
+
+  const parsed = parser.parseFromString(`<div>${doc}</div>`, "text/html");
+  const container = parsed.body.firstElementChild;
+  if (!container) return [];
+
+  for (let i = 0; i < container.children.length; i++) {
+    const el = container.children[i] as HTMLElement;
+    const tag = el.tagName.toLowerCase();
+
+    if (tag === "script") {
+      const src = el.getAttribute("src");
+      if (src) {
+        nodes.push({
+          id: nextNodeId(),
+          type: "external",
+          src,
+        });
+      } else {
+        nodes.push({
+          id: nextNodeId(),
+          type: "inline",
+          code: el.textContent || "",
+        });
+      }
+    } else {
+      nodes.push({
+        id: nextNodeId(),
+        type: "html",
+        html: el.outerHTML,
+      });
+    }
   }
-  el.textContent = oldScript.textContent;
-  return el;
+
+  return nodes;
 }
 
 function LoadingSkeleton() {
@@ -24,79 +86,72 @@ function LoadingSkeleton() {
 }
 
 export function ThirdPartyForm({ scriptHtml }: { scriptHtml: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [nodes, setNodes] = useState<ParsedNode[]>([]);
   const [loaded, setLoaded] = useState(false);
   const prevScriptRef = useRef(scriptHtml);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-
+    if (prevScriptRef.current === scriptHtml && nodes.length > 0) return;
     prevScriptRef.current = scriptHtml;
 
-    if (!scriptHtml) return;
-
-    const container = containerRef.current;
-    container.innerHTML = "";
-    requestAnimationFrame(() => {
-      if (prevScriptRef.current !== scriptHtml) return;
-      setLoaded(false);
-    });
-
-    const temp = document.createElement("div");
-    temp.innerHTML = scriptHtml;
-    while (temp.firstChild) {
-      container.appendChild(temp.firstChild);
+    if (!scriptHtml) {
+      setNodes([]);
+      setLoaded(true);
+      return;
     }
 
-    const scripts = Array.from(container.querySelectorAll("script"));
-    for (const oldScript of scripts) {
-      try {
-        const newScript = createScriptElement(oldScript);
-        oldScript.parentNode?.replaceChild(newScript, oldScript);
-      } catch {
-        // skip failing scripts
-      }
-    }
+    const parsed = parseFormScript(scriptHtml);
+    setNodes(parsed);
+    setLoaded(parsed.filter((n) => n.type === "html").length > 0 || parsed.length === 0);
+  }, [scriptHtml, nodes.length]);
 
-    const observer = new MutationObserver(() => {
-      if (container.children.length > 0 || (container.textContent?.trim() ?? "").length > 0) {
-        observer.disconnect();
-        requestAnimationFrame(() => {
-          if (prevScriptRef.current !== scriptHtml) return;
-          setLoaded(true);
-        });
-      }
-    });
+  function handleScriptLoad() {
+    setLoaded(true);
+  }
 
-    observer.observe(container, { childList: true, subtree: true, characterData: true });
-
-    const fallbackTimeout = setTimeout(() => {
-      observer.disconnect();
-      requestAnimationFrame(() => {
-        if (prevScriptRef.current !== scriptHtml) return;
-        setLoaded(true);
-      });
-    }, 10000);
-
-    return () => {
-      observer.disconnect();
-      clearTimeout(fallbackTimeout);
-      container.innerHTML = "";
-    };
-  }, [scriptHtml]);
+  const htmlNodes = nodes.filter((n) => n.type === "html");
 
   return (
     <div className="relative">
       {!loaded && <LoadingSkeleton />}
       <div
-        ref={containerRef}
         className="transition-opacity duration-300"
         style={{
           opacity: loaded ? 1 : 0,
           height: loaded ? "auto" : 0,
           overflow: loaded ? "visible" : "hidden",
         }}
-      />
+      >
+        {htmlNodes.map((node) => (
+          <div key={node.id} dangerouslySetInnerHTML={{ __html: node.html || "" }} />
+        ))}
+      </div>
+      {nodes.map((node) => {
+        if (node.type === "external" && node.src) {
+          return (
+            <Script
+              key={node.id}
+              src={node.src}
+              strategy="lazyOnload"
+              onLoad={handleScriptLoad}
+              onError={handleScriptLoad}
+            />
+          );
+        }
+        if (node.type === "inline" && node.code) {
+          return (
+            <Script
+              key={node.id}
+              strategy="lazyOnload"
+              onLoad={handleScriptLoad}
+              onError={handleScriptLoad}
+            >
+              {node.code}
+            </Script>
+          );
+        }
+        return null;
+      })}
     </div>
   );
 }

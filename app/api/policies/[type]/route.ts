@@ -74,9 +74,10 @@ export async function PATCH(
 
   const createData: Record<string, unknown> = {
     id: "POLICIES",
-    privacy: dbKey === "privacy" ? merged : FALLBACKS.privacy,
-    terms: dbKey === "terms" ? merged : FALLBACKS.terms,
-    returns: dbKey === "returns" ? merged : FALLBACKS.returns,
+    updated_at: new Date().toISOString(),
+    privacy: dbKey === "privacy" ? merged : (existing?.["privacy"] ?? FALLBACKS.privacy),
+    terms: dbKey === "terms" ? merged : (existing?.["terms"] ?? FALLBACKS.terms),
+    returns: dbKey === "returns" ? merged : (existing?.["returns"] ?? FALLBACKS.returns),
   };
 
   const { error } = await supabase
@@ -85,17 +86,6 @@ export async function PATCH(
 
   if (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-  }
-
-  if (dbKey !== Object.keys(TYPE_MAP)[0] || existing) {
-    const { error: updateError } = await supabase
-      .from("policies")
-      .update({ [dbKey]: merged })
-      .eq("id", "POLICIES");
-
-    if (updateError) {
-      return NextResponse.json({ success: false, error: updateError.message }, { status: 500 });
-    }
   }
 
   return NextResponse.json({ success: true, data: merged });

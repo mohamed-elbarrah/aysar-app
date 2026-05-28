@@ -1,5 +1,6 @@
 import { supabase } from "@/app/lib/db";
 import { SITE_SETTINGS, NAV_LINKS, SOCIAL_LINKS, APP_LINKS_DEFAULTS, DEFAULT_FOOTER_COLUMNS, SITE_CONTACT_INFO, PLATFORM_LINKS, WORK_HOURS } from "@/app/lib/dashboard/placeholders";
+import { type ScriptRecord, type ExtractedMeta, parseJsonScripts, extractMetaFromScripts } from "@/app/lib/scripts";
 
 export interface NavLink { label: string; href: string }
 export interface SocialLink { key: string; label: string; url: string; iconUrl?: string }
@@ -45,8 +46,8 @@ export interface SiteSettingsResponse {
   contactInfo: ContactInfo;
   platformLinks: PlatformLinks;
   workHours: WorkHours;
-  headScripts: string;
-  bodyScripts: string;
+  scripts: ScriptRecord[];
+  extractedMeta: ExtractedMeta;
   updatedAt: string;
 }
 
@@ -93,29 +94,32 @@ export async function getSiteSettings(): Promise<SiteSettingsResponse> {
       contactInfo: { ...SITE_CONTACT_INFO },
       platformLinks: { ...PLATFORM_LINKS },
       workHours: { ...WORK_HOURS },
-      headScripts: "",
-      bodyScripts: "",
+      scripts: [],
+      extractedMeta: {},
       updatedAt: new Date().toISOString(),
     };
   }
 
-  return {
-    id: row.id,
-    siteTitle: row.site_title,
-    siteDescription: row.site_description,
-    faviconUrl: row.favicon_url,
-    seoKeywords: row.seo_keywords,
-    navLinks: safeJsonArray<NavLink>(row.nav_links, NAV_LINKS),
-    socialLinks: normalizeSocialLinks(row.social_links),
-    appLinks: (row.app_links && typeof row.app_links === "object" && !Array.isArray(row.app_links)
-      ? row.app_links
-      : APP_LINKS_DEFAULTS) as unknown as AppLinkInfo,
-    footerColumns: safeJsonArray<FooterColumn>(row.footer_columns, DEFAULT_FOOTER_COLUMNS),
-    contactInfo: safeJsonField<ContactInfo>(row.contact_info, SITE_CONTACT_INFO),
-    platformLinks: safeJsonField<PlatformLinks>(row.platform_links, PLATFORM_LINKS),
-    workHours: safeJsonField<WorkHours>(row.work_hours, WORK_HOURS),
-    headScripts: row.head_scripts || "",
-    bodyScripts: row.body_scripts || "",
-    updatedAt: row.updated_at,
-  };
+    const scripts = parseJsonScripts(row.scripts);
+    const extractedMeta = extractMetaFromScripts(scripts);
+
+    return {
+      id: row.id,
+      siteTitle: row.site_title,
+      siteDescription: row.site_description,
+      faviconUrl: row.favicon_url,
+      seoKeywords: row.seo_keywords,
+      navLinks: safeJsonArray<NavLink>(row.nav_links, NAV_LINKS),
+      socialLinks: normalizeSocialLinks(row.social_links),
+      appLinks: (row.app_links && typeof row.app_links === "object" && !Array.isArray(row.app_links)
+        ? row.app_links
+        : APP_LINKS_DEFAULTS) as unknown as AppLinkInfo,
+      footerColumns: safeJsonArray<FooterColumn>(row.footer_columns, DEFAULT_FOOTER_COLUMNS),
+      contactInfo: safeJsonField<ContactInfo>(row.contact_info, SITE_CONTACT_INFO),
+      platformLinks: safeJsonField<PlatformLinks>(row.platform_links, PLATFORM_LINKS),
+      workHours: safeJsonField<WorkHours>(row.work_hours, WORK_HOURS),
+      scripts,
+      extractedMeta,
+      updatedAt: row.updated_at,
+    };
 }

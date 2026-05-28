@@ -16,9 +16,12 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   return {
     title: settings.siteTitle,
-    description: settings.siteDescription,
-    keywords: settings.seoKeywords,
+    description: settings.extractedMeta.description || settings.siteDescription,
+    keywords: settings.extractedMeta.keywords || settings.seoKeywords,
     icons: settings.faviconUrl ? { icon: settings.faviconUrl } : undefined,
+    ...(settings.extractedMeta.openGraph && {
+      openGraph: settings.extractedMeta.openGraph as Metadata["openGraph"],
+    }),
   };
 }
 

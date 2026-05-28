@@ -1,12 +1,32 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { StatCard } from "@/app/components/dashboard/StatCard";
-import { LayoutGrid, MessageCircle, Layers, Clock, CreditCard, Home, Settings } from "lucide-react";
+import { LayoutGrid, MessageCircle, Layers, Clock, CreditCard } from "lucide-react";
 
 export default function DashboardPage() {
+  const [unreadCount, setUnreadCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function loadCount() {
+      try {
+        const res = await fetch("/api/contact-messages", { credentials: "include" });
+        const json = await res.json();
+        if (json.success && typeof json.unreadCount === "number") {
+          setUnreadCount(json.unreadCount);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    loadCount();
+  }, []);
+
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard label="إجمالي الصفحات" value={6} icon={LayoutGrid} color="#0c2954" />
-        <StatCard label="رسائل جديدة" value={3} icon={MessageCircle} color="#1a9a5a" />
+        <StatCard label="رسائل جديدة" value={unreadCount ?? "..."} icon={MessageCircle} color="#1a9a5a" />
         <StatCard label="أقسام المحتوى" value={24} icon={Layers} color="#f97316" />
         <StatCard label="آخر تحديث" value="20/05/2026" icon={Clock} color="#2d2e83" />
         <StatCard label="الباقات النشطة" value={3} icon={CreditCard} color="#5ddfb8" />
@@ -16,7 +36,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <QuickAccessCard title="الصفحة الرئيسية" href="/dashboard/home-page" description="تعديل البانر والمميزات" />
         <QuickAccessCard title="الخطط والأسعار" href="/dashboard/plans-page" description="تعديل الباقات والأسئلة" />
-        <QuickAccessCard title="رسائل التواصل" href="/dashboard/messages" description="3 رسائل جديدة" />
+        <QuickAccessCard title="رسائل التواصل" href="/dashboard/messages" description={unreadCount !== null ? `${unreadCount} رسالة جديدة` : "لا توجد رسائل جديدة"} />
         <QuickAccessCard title="الإعدادات العامة" href="/dashboard/settings" description="تعديل الموقع والروابط" />
       </div>
     </div>
