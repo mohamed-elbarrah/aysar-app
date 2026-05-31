@@ -1,15 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { X, Phone, Mail, MapPin, Clock, Globe } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Globe } from "lucide-react";
 import { WhatsAppIcon } from "@/app/components/icons/WhatsAppIcon";
 import { InstagramIcon } from "@/app/components/icons/InstagramIcon";
 import { TikTokIcon } from "@/app/components/icons/TikTokIcon";
+import { XIcon } from "@/app/components/icons/XIcon";
 
 type IconComponent = React.FC<{ className?: string }>;
 
 export const BUILT_IN_SOCIAL_ICONS: Record<string, IconComponent> = {
-  x: X,
+  x: XIcon,
   instagram: InstagramIcon,
   tiktok: TikTokIcon,
 };

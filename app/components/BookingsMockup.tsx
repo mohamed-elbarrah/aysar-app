@@ -92,7 +92,7 @@ export function BookingsMockup() {
               >
                 {row.status}
               </span>
-              <span className="bg-[#f0f4ff] text-[#2d2e83] rounded px-1 py-0.5 text-[6px] sm:text-[8px] lg:text-xs font-semibold text-center">
+              <span className="bg-[#f0f4ff] text-[#28C928] rounded px-1 py-0.5 text-[6px] sm:text-[8px] lg:text-xs font-semibold text-center">
                 إجراءات ▾
               </span>
             </motion.div>

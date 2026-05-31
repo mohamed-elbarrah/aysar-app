@@ -416,7 +416,6 @@ function AppSectionEditor({ data: initial, onChange }: {
   const [data, setData] = useState(initial);
   const [leftPhoneImage, setLeftPhoneImage] = useState<string | null>(initial.app_images?.left_phone || null);
   const [rightPhoneImage, setRightPhoneImage] = useState<string | null>(initial.app_images?.right_phone || null);
-  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     setData(initial);
@@ -431,49 +430,47 @@ function AppSectionEditor({ data: initial, onChange }: {
   }, [data, onChange]);
 
   const handleLeftPhoneUpload = async (file: File) => {
-    setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
     formData.append("position", "left");
-
-    try {
-      const res = await fetch("/api/upload-app-image", {
-        method: "POST",
-        body: formData,
-      });
-      const result = await res.json();
-      if (result.success) {
-        setLeftPhoneImage(result.imageUrl);
-        onChange({ ...data, app_images: { ...data.app_images, left_phone: result.imageUrl } });
-      }
-    } catch (error) {
-      console.error("Upload failed:", error);
-    } finally {
-      setUploading(false);
+    if (leftPhoneImage) {
+      formData.append("previousUrl", leftPhoneImage);
     }
+
+    const res = await fetch("/api/upload-app-image", {
+      method: "POST",
+      body: formData,
+    });
+    const result = await res.json();
+
+    if (!result.success) {
+      throw new Error(result.error || "Upload failed");
+    }
+
+    setLeftPhoneImage(result.imageUrl);
+    onChange({ ...data, app_images: { ...data.app_images, left_phone: result.imageUrl } });
   };
 
   const handleRightPhoneUpload = async (file: File) => {
-    setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
     formData.append("position", "right");
-
-    try {
-      const res = await fetch("/api/upload-app-image", {
-        method: "POST",
-        body: formData,
-      });
-      const result = await res.json();
-      if (result.success) {
-        setRightPhoneImage(result.imageUrl);
-        onChange({ ...data, app_images: { ...data.app_images, right_phone: result.imageUrl } });
-      }
-    } catch (error) {
-      console.error("Upload failed:", error);
-    } finally {
-      setUploading(false);
+    if (rightPhoneImage) {
+      formData.append("previousUrl", rightPhoneImage);
     }
+
+    const res = await fetch("/api/upload-app-image", {
+      method: "POST",
+      body: formData,
+    });
+    const result = await res.json();
+
+    if (!result.success) {
+      throw new Error(result.error || "Upload failed");
+    }
+
+    setRightPhoneImage(result.imageUrl);
+    onChange({ ...data, app_images: { ...data.app_images, right_phone: result.imageUrl } });
   };
 
   return (
@@ -501,8 +498,19 @@ function AppSectionEditor({ data: initial, onChange }: {
               currentImage={leftPhoneImage}
               defaultImage="/app-screenshot.jpg"
               onUpload={handleLeftPhoneUpload}
-              onRemove={() => { 
-                setLeftPhoneImage(null); 
+              onRemove={async () => {
+                if (leftPhoneImage) {
+                  try {
+                    await fetch("/api/delete-app-image", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ imageUrl: leftPhoneImage }),
+                    });
+                  } catch (err) {
+                    console.error("Failed to delete left image from storage:", err);
+                  }
+                }
+                setLeftPhoneImage(null);
                 onChange({ ...data, app_images: { ...data.app_images, left_phone: null } });
               }}
               aspectRatio={{ width: 9, height: 19.5 }}
@@ -512,8 +520,19 @@ function AppSectionEditor({ data: initial, onChange }: {
               currentImage={rightPhoneImage}
               defaultImage="/app-screenshot.jpg"
               onUpload={handleRightPhoneUpload}
-              onRemove={() => { 
-                setRightPhoneImage(null); 
+              onRemove={async () => {
+                if (rightPhoneImage) {
+                  try {
+                    await fetch("/api/delete-app-image", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ imageUrl: rightPhoneImage }),
+                    });
+                  } catch (err) {
+                    console.error("Failed to delete right image from storage:", err);
+                  }
+                }
+                setRightPhoneImage(null);
                 onChange({ ...data, app_images: { ...data.app_images, right_phone: null } });
               }}
               aspectRatio={{ width: 9, height: 19.5 }}

@@ -28,9 +28,9 @@ interface GridFeature {
 }
 
 const DEFAULT_FEATURES: GridFeature[] = [
-  { icon: Bell, iconName: "Bell", iconUrl: null, title: "إشعارات لحظية", description: "عند كل تحديث للمراحل", iconBg: "#e9f9f0", iconColor: "#1a9a5a" },
+  { icon: Bell, iconName: "Bell", iconUrl: null, title: "إشعارات لحظية", description: "عند كل تحديث للمراحل", iconBg: "#e9f9f0", iconColor: "#28C928" },
   { icon: Globe, iconName: "Globe", iconUrl: null, title: "صفحات هبوط", description: "برابط خاص لكل مشروع", iconBg: "#eef2ff", iconColor: "#4f46e5" },
-  { icon: Users, iconName: "Users", iconUrl: null, title: "نظام CRM", description: "إدارة العملاء والمبيعات", iconBg: "#f0f4ff", iconColor: "#2d2e83" },
+  { icon: Users, iconName: "Users", iconUrl: null, title: "نظام CRM", description: "إدارة العملاء والمبيعات", iconBg: "#f0f4ff", iconColor: "#28C928" },
   { icon: Smartphone, iconName: "Smartphone", iconUrl: null, title: "تطبيق مخصص", description: "iOS و Android للعملاء", iconBg: "#fff7ed", iconColor: "#f97316" },
   { icon: ImageIcon, iconName: "ImageIcon", iconUrl: null, title: "صور وفيديو", description: "توثيق المراحل من الموقع", iconBg: "#fdf2f8", iconColor: "#ec4899" },
   { icon: Cloud, iconName: "Cloud", iconUrl: null, title: "سحابي 100%", description: "بدون تثبيت أو خوادم", iconBg: "#e7fafd", iconColor: "#06b6d4" },

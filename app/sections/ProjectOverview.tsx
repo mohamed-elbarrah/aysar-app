@@ -35,8 +35,8 @@ const projects: ProjectCardData[] = [
     location: "الدمام",
     delivery: "تسليم مايو 2025",
     progress: 92,
-    progressColor: "#1a9a5a",
-    initialBg: "#1a9a5a",
+    progressColor: "#28C928",
+    initialBg: "#28C928",
     clients: "14 عميل نشط",
     remaining: "6 وحدات متبقية",
   },
@@ -48,7 +48,7 @@ const projects: ProjectCardData[] = [
     delivery: "تسليم يونيو 2026",
     progress: 45,
     progressColor: "#f59e0b",
-    initialBg: "#2d2e83",
+    initialBg: "#28C928",
     clients: "18 عميل نشط",
     remaining: "24 وحدة متبقية",
   },
@@ -59,14 +59,22 @@ const projects: ProjectCardData[] = [
     location: "الرياض",
     delivery: "تسليم مارس 2026",
     progress: 78,
-    progressColor: "#2d2e83",
-    initialBg: "#0c2954",
+    progressColor: "#28C928",
+    initialBg: "#08335D",
     clients: "31 عميل نشط",
     remaining: "12 وحدة متبقية",
   },
 ];
 
-function AnimatedProgress({ targetPercentage, color, delay = 0 }: { targetPercentage: number; color: string; delay?: number }) {
+function AnimatedProgress({
+  targetPercentage,
+  color,
+  delay = 0,
+}: {
+  targetPercentage: number;
+  color: string;
+  delay?: number;
+}) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   const [width, setWidth] = useState(0);
@@ -87,7 +95,10 @@ function AnimatedProgress({ targetPercentage, color, delay = 0 }: { targetPercen
   }, [isInView, targetPercentage, delay]);
 
   return (
-    <div ref={ref} className="flex-1 h-[5px] bg-[#e8edf5] rounded-full overflow-hidden">
+    <div
+      ref={ref}
+      className="flex-1 h-[5px] bg-[#e8ebf3] rounded-full overflow-hidden"
+    >
       <div
         className="h-full rounded-full transition-none"
         style={{ width: `${width}%`, backgroundColor: color }}
@@ -102,7 +113,10 @@ export function ProjectOverview({
   titleAccent = "في نظرة واحدة",
   description = "لوحة تحكم احترافية تعطيك صورة كاملة عن جميع مشاريعك، وحداتك، وعملاءك — محدّثة لحظياً.",
   checkItems = [
-    { bold: "إدارة مشاريع متعددة", detail: " — فيلات، شقق، تجاري من لوحة واحدة" },
+    {
+      bold: "إدارة مشاريع متعددة",
+      detail: " — فيلات، شقق، تجاري من لوحة واحدة",
+    },
     { bold: "تتبع نسبة الإنجاز", detail: " لكل مشروع ولكل مرحلة بدقة" },
     { bold: "توثيق بالصور والفيديو", detail: " — يراها العميل فور رفعها" },
     { bold: "سحابي 100%", detail: " — من أي جهاز وأي مكان بدون تثبيت" },
@@ -176,7 +190,7 @@ export function ProjectOverview({
                       height="11"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="#0c2954"
+                      stroke="#08335D"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -203,7 +217,7 @@ export function ProjectOverview({
                 target="_blank"
                 className="inline-flex items-center gap-1.5 text-sm font-bold text-navy border-b-2 border-navy pb-1 hover:text-indigo hover:border-indigo transition-colors duration-150"
               >
-                {linkLabel} ←
+                {linkLabel}
               </Link>
             </motion.div>
           </div>
@@ -235,7 +249,9 @@ export function ProjectOverview({
                     key={idx}
                     className="bg-white border border-[#e8ecf4] rounded-[14px] p-4 flex items-center gap-3.5"
                     initial={{ opacity: 0, x: 20 }}
-                    animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
+                    animate={
+                      isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }
+                    }
                     transition={{
                       delay: 0.4 + idx * 0.15,
                       duration: 0.5,

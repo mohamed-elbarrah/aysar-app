@@ -84,7 +84,7 @@ export function TocMobileAccordion({ data }: { data: PolicyData }) {
             <div className="toc-mobile-chevron-wrap">
               <div className={cn("toc-mobile-chevron", open && "open")}>
                 <svg width="10" height="10" viewBox="0 0 12 8" fill="none">
-                  <path d="M1 1l5 5 5-5" stroke="#6b7a94" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M1 1l5 5 5-5" stroke="#7C8794" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
             </div>

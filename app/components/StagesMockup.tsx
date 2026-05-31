@@ -10,11 +10,11 @@ const kpiCards = [
 ];
 
 const progressRows = [
-  { label: "الحفر والأساسات", progress: 100, color: "#1a9a5a" },
-  { label: "الهيكل الخرساني", progress: 100, color: "#1a9a5a" },
-  { label: "التشطيبات الخارجية", progress: 80, color: "#2d2e83" },
+  { label: "الحفر والأساسات", progress: 100, color: "#28C928" },
+  { label: "الهيكل الخرساني", progress: 100, color: "#28C928" },
+  { label: "التشطيبات الخارجية", progress: 80, color: "#28C928" },
   { label: "التشطيبات الداخلية", progress: 35, color: "#f59e0b" },
-  { label: "+ مراحل مخصصة", progress: 0, color: "#e8edf5", muted: true },
+  { label: "+ مراحل مخصصة", progress: 0, color: "#e8ebf3", muted: true },
 ];
 
 export function StagesMockup() {
@@ -85,7 +85,7 @@ export function StagesMockup() {
                   <span className={`text-[8px] sm:text-[9px] lg:text-xs min-w-[70px] sm:min-w-[90px] lg:min-w-[110px] ${row.muted ? "text-[#b0b8c8]" : "text-[#718096]"}`}>
                     {row.label}
                   </span>
-                  <div className="flex-1 h-1 sm:h-1.5 lg:h-2 bg-[#e8edf5] rounded-full overflow-hidden">
+                  <div className="flex-1 h-1 sm:h-1.5 lg:h-2 bg-[#e8ebf3] rounded-full overflow-hidden">
                     {row.progress > 0 ? (
                       <motion.div
                         className="h-full rounded-full"
@@ -95,7 +95,7 @@ export function StagesMockup() {
                         transition={{ delay: 0.5 + idx * 0.1, duration: 0.8, ease: "easeOut" }}
                       />
                     ) : (
-                      <div className="h-full bg-[#e8edf5] rounded-full" />
+                      <div className="h-full bg-[#e8ebf3] rounded-full" />
                     )}
                   </div>
                   <span

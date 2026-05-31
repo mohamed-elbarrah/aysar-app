@@ -4,7 +4,7 @@ function CheckIcon() {
   return (
     <div className="check-icon-plan">
       <svg viewBox="0 0 12 12" fill="none" className="w-[10px] h-[10px]">
-        <path d="M2 6l3 3 5-5" stroke="#1a9a5a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2 6l3 3 5-5" stroke="#28C928" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </div>
   );
@@ -69,7 +69,7 @@ export function PricingCard({ plan, billing }: PricingCardProps) {
         className={`block text-center font-bold text-[15px] py-[13px] px-7 rounded-[11px] no-underline mx-7 mb-6 transition-all duration-200 ${
           plan.isFeatured
             ? "bg-gradient-to-br from-navy to-indigo text-white shadow-[0_4px_16px_rgba(45,46,131,0.3)] hover:opacity-92 hover:-translate-y-px"
-            : "bg-[#f7f8fa] text-navy border-2 border-border hover:bg-[#e8edf5]"
+            : "bg-[#F4F7FA] text-navy border-2 border-border hover:bg-[#e8ebf3]"
         }`}
       >
         {plan.ctaLabel}

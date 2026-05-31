@@ -12,11 +12,13 @@ export default function MetadataSettingsPage() {
     siteTitle: SITE_SETTINGS.siteTitle,
     siteDescription: SITE_SETTINGS.siteDescription,
     faviconUrl: SITE_SETTINGS.faviconUrl || "",
+    logoUrl: SITE_SETTINGS.logoUrl || "",
     seoKeywords: SITE_SETTINGS.seoKeywords,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [savedData, setSavedData] = useState(data);
 
@@ -30,6 +32,7 @@ export default function MetadataSettingsPage() {
             siteTitle: json.data.siteTitle || "",
             siteDescription: json.data.siteDescription || "",
             faviconUrl: json.data.faviconUrl || "",
+            logoUrl: json.data.logoUrl || "",
             seoKeywords: json.data.seoKeywords || "",
           };
           setData(loaded);
@@ -47,11 +50,22 @@ export default function MetadataSettingsPage() {
   );
 
   useEffect(() => {
-    const href = data.faviconUrl || "/favicon.ico";
-    document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]').forEach(el => el.remove());
+    const href = data.faviconUrl || "/logo.png";
+    const cleanUrl = href.split("?")[0].toLowerCase();
+    let type: string | undefined;
+    let sizes: string | undefined;
+    if (cleanUrl.endsWith(".svg")) { type = "image/svg+xml"; sizes = "any"; }
+    else if (cleanUrl.endsWith(".png")) { type = "image/png"; sizes = "32x32"; }
+    else if (cleanUrl.endsWith(".jpg") || cleanUrl.endsWith(".jpeg")) { type = "image/jpeg"; sizes = "32x32"; }
+    else if (cleanUrl.endsWith(".webp")) { type = "image/webp"; sizes = "32x32"; }
+    else if (cleanUrl.endsWith(".ico")) { type = "image/x-icon"; }
+
+    document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]').forEach(el => el.remove());
     const link = document.createElement("link");
     link.rel = "icon";
     link.href = href;
+    if (type) link.type = type;
+    if (sizes) link.sizes = sizes;
     document.head.appendChild(link);
   }, [data.faviconUrl]);
 
@@ -66,6 +80,7 @@ export default function MetadataSettingsPage() {
           siteTitle: data.siteTitle,
           siteDescription: data.siteDescription,
           faviconUrl: data.faviconUrl,
+          logoUrl: data.logoUrl,
           seoKeywords: data.seoKeywords,
         }),
       });
@@ -88,6 +103,7 @@ export default function MetadataSettingsPage() {
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("previousUrl", data.faviconUrl || "");
     try {
       const res = await fetch("/api/settings/upload-favicon", {
         method: "POST",
@@ -101,7 +117,29 @@ export default function MetadataSettingsPage() {
     } catch { /* silent */ }
     setUploading(false);
     e.target.value = "";
-  }, []);
+  }, [data.faviconUrl]);
+
+  const handleLogoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("previousUrl", data.logoUrl || "");
+    try {
+      const res = await fetch("/api/settings/upload-logo", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      if (res.ok) {
+        const json = await res.json();
+        setData(prev => ({ ...prev, logoUrl: json.logoUrl }));
+      }
+    } catch { /* silent */ }
+    setUploadingLogo(false);
+    e.target.value = "";
+  }, [data.logoUrl]);
 
   if (loading) return (
     <div className="flex items-center justify-center h-[40vh]">
@@ -116,6 +154,58 @@ export default function MetadataSettingsPage() {
         <div />
 
         <div className="form-group-contact full">
+          <label>شعار الموقع (Logo)</label>
+          <div className="flex items-center gap-4">
+            <div
+              className="relative w-40 h-16 rounded-xl border-2 border-dashed border-[#e8edf5] flex items-center justify-center overflow-hidden bg-white cursor-pointer hover:border-[#2d2e83] transition-colors group shrink-0"
+              onClick={() => (document.getElementById("logo-upload") as HTMLInputElement)?.click()}
+            >
+              {uploadingLogo ? (
+                <Loader2 className="w-6 h-6 animate-spin text-[#6b7a94]" />
+              ) : (
+                <>
+                  <img
+                    src={data.logoUrl || "/logo.png"}
+                    alt="Logo"
+                    className="max-w-[140px] max-h-[48px] object-contain"
+                    onError={(e) => {
+                      const img = e.target as HTMLImageElement;
+                      img.style.display = "none";
+                      (img.nextElementSibling as HTMLElement)?.classList.remove("hidden");
+                    }}
+                  />
+                  <ImageIcon className="w-8 h-8 text-[#6b7a94] hidden" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
+                    <Upload className="w-5 h-5 text-white" />
+                  </div>
+                </>
+              )}
+              <input
+                id="logo-upload"
+                type="file"
+                accept=".svg,.png,.jpg,.jpeg,.webp"
+                className="hidden"
+                onChange={handleLogoUpload}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-[#6b7a94]">انقر لرفع شعار الموقع</span>
+              <span className="text-[10px] text-[#6b7a94]">SVG, PNG, JPG, WEBP — حد أقصى 2MB</span>
+              {data.logoUrl && data.logoUrl !== "/logo.png" && (
+                <button
+                  type="button"
+                  className="text-xs text-red-500 hover:text-red-700 transition-colors text-right mt-1"
+                  onClick={() => setData(prev => ({ ...prev, logoUrl: "" }))}
+                >
+                  <X className="w-3 h-3 inline ml-1" />
+                  إزالة المخصص
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="form-group-contact full">
           <label>أيقونة الموقع (Favicon)</label>
           <div className="flex items-center gap-4">
             <div
@@ -127,7 +217,7 @@ export default function MetadataSettingsPage() {
               ) : (
                 <>
                   <img
-                    src={data.faviconUrl || "/favicon.ico"}
+                    src={data.faviconUrl || "/logo.png"}
                     alt="Favicon"
                     className="w-10 h-10 object-contain"
                     onError={(e) => {

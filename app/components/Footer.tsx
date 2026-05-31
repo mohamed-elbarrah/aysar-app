@@ -14,9 +14,9 @@ interface FooterProps {
   appLinks: AppLinkInfo;
 }
 
-export default function Footer({ columns, socialLinks, contactInfo, appLinks }: FooterProps) {
+export default function Footer({ columns, socialLinks, contactInfo, appLinks, logoUrl }: FooterProps & { logoUrl?: string }) {
   return (
-    <footer className="bg-[#0c2954] pt-14 pb-0">
+    <footer className="bg-[#08335D] pt-14 pb-0">
       <div className="container-aysar">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 pb-10 border-b border-white/[0.08]">
           {columns.map((col, idx) => {
@@ -25,11 +25,12 @@ export default function Footer({ columns, socialLinks, contactInfo, appLinks }: 
                 <div key={idx}>
                   <Link href="/" className="inline-block mb-4">
                     <Image
-                      src="/logo.png"
+                      src={logoUrl || "/logo.png"}
                       alt="أيسَر"
                       width={110}
-                      height={32}
-                      className="h-8 w-auto object-contain"
+                      height={44}
+                      className="h-12 w-auto object-contain"
+                      style={{ width: 'auto' }}
                       priority
                     />
                   </Link>
@@ -72,14 +73,14 @@ export default function Footer({ columns, socialLinks, contactInfo, appLinks }: 
 
             return (
               <div key={idx}>
-                <h4 className="text-[11px] font-bold text-white/35 tracking-wide uppercase mb-4">{col.title}</h4>
+                <h4 className="text-[16px] font-bold text-white/50 tracking-wide uppercase mb-4">{col.title}</h4>
                 {isAppColumn ? (
-                  <div className="flex flex-row flex-wrap gap-3">
+                  <div className="flex flex-col gap-3 w-fit">
                     <a
                       href={appLinks.appStoreUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2.5 bg-white hover:bg-[#f5f6f9] transition-colors duration-150 rounded-xl px-4 py-2.5 border border-[#e8edf5] shadow-sm"
+                      className="flex items-center gap-2.5 bg-white hover:bg-[#F4F7FA] transition-colors duration-150 rounded-xl px-4 py-2.5 border border-[#e8ebf3] shadow-sm"
                     >
                       <Image
                         src="/apple-logo-svgrepo.svg"
@@ -103,7 +104,7 @@ export default function Footer({ columns, socialLinks, contactInfo, appLinks }: 
                       href={appLinks.googlePlayUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2.5 bg-white hover:bg-[#f5f6f9] transition-colors duration-150 rounded-xl px-4 py-2.5 border border-[#e8edf5] shadow-sm"
+                      className="flex items-center gap-2.5 bg-white hover:bg-[#F4F7FA] transition-colors duration-150 rounded-xl px-4 py-2.5 border border-[#e8ebf3] shadow-sm"
                     >
                       <Image
                         src="/google-play.svg"
@@ -147,18 +148,10 @@ export default function Footer({ columns, socialLinks, contactInfo, appLinks }: 
           })}
         </div>
 
-        <div className="py-5 flex items-center justify-between flex-wrap gap-4">
+        <div className="py-5 flex items-center justify-center">
           <span className="text-[12px] text-white/28">
             {columns.find((c) => c.type === "brand")?.copyright || ""}
           </span>
-          <div className="flex items-center gap-4">
-            <Link href="/privacy-policy" className="text-[12px] text-white/40 hover:text-white/70 transition-colors">
-              الخصوصية
-            </Link>
-            <Link href="/terms-of-use" className="text-[12px] text-white/40 hover:text-white/70 transition-colors">
-              الشروط
-            </Link>
-          </div>
         </div>
       </div>
     </footer>

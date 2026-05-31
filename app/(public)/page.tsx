@@ -10,6 +10,7 @@ import { FeaturesGrid } from "../sections/FeaturesGrid";
 import { ProjectOverview } from "../sections/ProjectOverview";
 import { AppSection } from "../sections/AppSection";
 import { getHomePageData } from "../lib/home-page-data";
+import { getSiteSettings } from "../lib/settings-data";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,7 @@ const FEATURE_BADGE_BG_COLORS = ["#f0f4ff", "#feeeee", "#fff7ed", "#fff7ed"];
 
 export default async function Home() {
   const data = await getHomePageData();
+  const settings = await getSiteSettings();
   const { hero, featureSections, bentoFeatures, projectOverview, appSection, ctaSection } = data;
 
   return (
@@ -47,7 +49,7 @@ export default async function Home() {
             : undefined
         }
       >
-        <DashboardMockup />
+        <DashboardMockup logoUrl={settings.logoUrl || undefined} />
       </HeroSection>
 
       <div id="features">
@@ -94,7 +96,6 @@ export default async function Home() {
       />
 
       <CTASection
-        variant={(ctaSection.variant as "dark" | "light") || "dark"}
         title={ctaSection.title}
         subtitle={ctaSection.subtitle}
         primaryCta={

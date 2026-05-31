@@ -42,9 +42,9 @@ export function Button({
     ghost:
       "bg-transparent text-white/70 hover:text-white hover:bg-white/[0.08] border border-white/[0.18]",
     solid:
-      "bg-white text-navy font-bold hover:opacity-[0.92]",
+      "bg-[#28C928] text-white font-bold hover:opacity-[0.92]",
     cta:
-      "bg-navy text-white hover:bg-indigo hover:-translate-y-px active:translate-y-0",
+      "bg-navy text-white hover:bg-[#28C928] hover:-translate-y-px active:translate-y-0",
     whatsapp:
       "bg-[rgba(37,211,102,0.08)] text-[#1a7a3a] border border-[rgba(37,211,102,0.2)] hover:bg-[rgba(37,211,102,0.14)]",
   };

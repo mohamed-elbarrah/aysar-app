@@ -42,6 +42,7 @@ interface SettingsData {
     siteTitle: string;
     siteDescription: string;
     faviconUrl: string;
+    logoUrl: string;
     seoKeywords: string;
   };
   navLinks: unknown;
@@ -270,6 +271,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
               siteTitle: d.siteTitle || d.site_title || "",
               siteDescription: d.siteDescription || d.site_description || "",
               faviconUrl: d.faviconUrl || d.favicon_url || "",
+              logoUrl: d.logoUrl || d.logo_url || "",
               seoKeywords: d.seoKeywords || d.seo_keywords || "",
             },
             navLinks: d.navLinks || d.nav_links,
@@ -470,6 +472,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         if (dirty.settings.metadata) sectionsToSave.push(["siteTitle", settingsData.metadata.siteTitle]);
         if (dirty.settings.metadata) sectionsToSave.push(["siteDescription", settingsData.metadata.siteDescription]);
         if (dirty.settings.metadata) sectionsToSave.push(["faviconUrl", settingsData.metadata.faviconUrl]);
+        if (dirty.settings.metadata) sectionsToSave.push(["logoUrl", settingsData.metadata.logoUrl]);
         if (dirty.settings.metadata) sectionsToSave.push(["seoKeywords", settingsData.metadata.seoKeywords]);
         if (dirty.settings.navLinks) sectionsToSave.push(["navLinks", settingsData.navLinks]);
         if (dirty.settings.footer) sectionsToSave.push(["footerColumns", settingsData.footer]);

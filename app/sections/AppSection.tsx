@@ -33,10 +33,10 @@ const floatingCards = [
   {
     icon: LayoutGrid,
     iconBg: "#eef2ff",
-    iconColor: "#2d2e83",
+    iconColor: "#28C928",
     title: "مشروع الحمراء E-8",
     progress: 75,
-    progressColor: "#2d2e83",
+    progressColor: "#28C928",
     position: "top-14 left-1/2 -translate-x-1/2",
     delay: 1.3,
   },
@@ -55,6 +55,8 @@ const floatingCards = [
 
 function PhoneFrame({ className, customImage }: { className?: string; customImage?: string | null }) {
   const imageSrc = customImage || "/app-screenshot.jpg";
+  const isExternal = isExternalUrl(imageSrc);
+
   return (
     <div
       className={`relative w-[240px] sm:w-[280px] lg:w-[300px] rounded-[44px] p-[10px] pb-4 shadow-2xl flex-shrink-0 ${className}`}
@@ -92,11 +94,19 @@ function PhoneFrame({ className, customImage }: { className?: string; customImag
           height={600}
           className="w-full h-full object-cover"
           priority
+          unoptimized={isExternal}
         />
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[110px] h-[5px] rounded-full bg-black/30 z-10" />
       </div>
     </div>
   );
+}
+
+function isExternalUrl(url: string): boolean {
+  if (!url) return false;
+  if (url.startsWith("/")) return false;
+  if (url.startsWith("blob:")) return false;
+  return true;
 }
 
 export function AppSection({
@@ -165,7 +175,7 @@ export function AppSection({
                 href={appStoreUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 bg-white hover:bg-[#f5f6f9] transition-colors duration-150 rounded-xl px-4 py-2.5 border border-[#e8edf5] shadow-sm"
+                className="inline-flex items-center gap-2.5 bg-white hover:bg-[#F4F7FA] transition-colors duration-150 rounded-xl px-4 py-2.5 border border-[#e8ebf3] shadow-sm"
               >
                 <Image
                   src="/apple-logo-svgrepo.svg"
@@ -189,7 +199,7 @@ export function AppSection({
                 href={googlePlayUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 bg-white hover:bg-[#f5f6f9] transition-colors duration-150 rounded-xl px-4 py-2.5 border border-[#e8edf5] shadow-sm"
+                className="inline-flex items-center gap-2.5 bg-white hover:bg-[#F4F7FA] transition-colors duration-150 rounded-xl px-4 py-2.5 border border-[#e8ebf3] shadow-sm"
               >
                 <Image
                   src="/google-play.svg"

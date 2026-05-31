@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "platform.aysar.sa" },
+      // Allow all Supabase Storage public buckets for user-uploaded images
+      { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
   turbopack: {},

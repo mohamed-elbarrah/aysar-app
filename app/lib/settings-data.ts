@@ -38,6 +38,7 @@ export interface SiteSettingsResponse {
   siteTitle: string;
   siteDescription: string;
   faviconUrl: string | null;
+  logoUrl: string | null;
   seoKeywords: string;
   navLinks: NavLink[];
   socialLinks: SocialLink[];
@@ -86,6 +87,7 @@ export async function getSiteSettings(): Promise<SiteSettingsResponse> {
       siteTitle: SITE_SETTINGS.siteTitle,
       siteDescription: SITE_SETTINGS.siteDescription,
       faviconUrl: SITE_SETTINGS.faviconUrl,
+      logoUrl: SITE_SETTINGS.logoUrl,
       seoKeywords: SITE_SETTINGS.seoKeywords,
       navLinks: [...NAV_LINKS],
       socialLinks: [...SOCIAL_LINKS],
@@ -108,6 +110,7 @@ export async function getSiteSettings(): Promise<SiteSettingsResponse> {
       siteTitle: row.site_title,
       siteDescription: row.site_description,
       faviconUrl: row.favicon_url,
+      logoUrl: row.logo_url || SITE_SETTINGS.logoUrl,
       seoKeywords: row.seo_keywords,
       navLinks: safeJsonArray<NavLink>(row.nav_links, NAV_LINKS),
       socialLinks: normalizeSocialLinks(row.social_links),

@@ -34,7 +34,7 @@ export default function PlansPageContent({ data, platformLinks, contactInfo }: P
         toggle={<PricingToggle billing={billing} onChange={setBilling} yearlyDiscountPercent={data.yearlyDiscountPercent ?? 15} />}
       />
 
-      <Section className="bg-[#f7f8fa] !pt-16 !pb-24">
+      <Section className="bg-[#F4F7FA] !pt-16 !pb-24">
         <div className="plans-grid max-w-[1140px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
           {plans.map((plan) => (
             <PricingCard key={plan.id} plan={plan} billing={billing} />
@@ -55,11 +55,10 @@ export default function PlansPageContent({ data, platformLinks, contactInfo }: P
       />
 
       <CTASection
-        variant="dark"
         title="جاهز تبدأ مع أيسَر؟"
         subtitle="انضم لمطورين عقاريين يستخدمون أيسَر لتوفير الوقت ورفع مستوى تجربة عملائهم."
         primaryCta={{
-          label: "ابدأ مجاناً الآن",
+          label: "ابدأ الأن مجانا",
           href: platformLinks.registerUrl,
         }}
         secondaryCta={{

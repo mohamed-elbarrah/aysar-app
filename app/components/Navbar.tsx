@@ -16,7 +16,7 @@ interface PlatformLinks {
   supportCenterUrl: string;
 }
 
-export default function Navbar({ navLinks, platformLinks }: { navLinks: NavLinkItem[]; platformLinks: PlatformLinks }) {
+export default function Navbar({ navLinks, platformLinks, logoUrl }: { navLinks: NavLinkItem[]; platformLinks: PlatformLinks; logoUrl?: string }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -62,23 +62,24 @@ export default function Navbar({ navLinks, platformLinks }: { navLinks: NavLinkI
       <div className="container-aysar flex items-center gap-6 w-full">
         <Link href="/" className="flex-shrink-0">
           <Image
-            src="/logo.png"
+            src={logoUrl || "/logo.png"}
             alt="أيسَر"
-            width={110}
-            height={32}
-            className="h-8 w-auto object-contain"
+            width={130}
+            height={44}
+            className="h-12 w-auto object-contain"
+            style={{ width: 'auto' }}
             priority
           />
         </Link>
 
-        <ul ref={navRef} className="max-md:hidden md:flex items-center gap-1 mr-auto relative">
+        <ul ref={navRef} className="max-md:hidden md:flex items-center gap-2 me-auto relative">
           {navLinks.map((link) => {
             const active = pathname === link.href;
             return (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`relative px-3.5 py-1.5 rounded-lg text-sm transition-colors duration-200 ${
+                  className={`relative text-lg px-3.5 py-1.5 rounded-lg  transition-colors duration-200 ${
                     active ? "text-white font-bold" : "text-white/70 hover:text-white"
                   }`}
                 >
@@ -98,12 +99,12 @@ export default function Navbar({ navLinks, platformLinks }: { navLinks: NavLinkI
           />
         </ul>
 
-        <div className="max-md:hidden md:flex items-center gap-2">
+        <div className="max-md:hidden md:flex  items-center gap-2">
           <a
             href={platformLinks.loginUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-ghost-nav text-white/70 border border-white/18 hover:bg-white/10 hover:text-white"
+            className="btn-ghost-nav text-lg text-white/70 border border-white/18 hover:bg-white/10 hover:text-white"
           >
             تسجيل دخول
           </a>
@@ -111,7 +112,7 @@ export default function Navbar({ navLinks, platformLinks }: { navLinks: NavLinkI
             href={platformLinks.registerUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-solid-nav bg-white text-[#0c2954] hover:opacity-90"
+            className="btn-solid-nav text-lg bg-[#28C928] text-white hover:opacity-90"
           >
             ابدأ مجاناً
           </a>
@@ -137,7 +138,7 @@ export default function Navbar({ navLinks, platformLinks }: { navLinks: NavLinkI
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden absolute top-[62px] left-0 right-0 bg-white border border-[#e8edf5] shadow-lg flex flex-col p-4 gap-2">
+        <div className="md:hidden absolute top-[62px] left-0 right-0 bg-white border border-[#e8ebf3] shadow-lg flex flex-col p-4 gap-2">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -146,7 +147,7 @@ export default function Navbar({ navLinks, platformLinks }: { navLinks: NavLinkI
               className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                 pathname === link.href
                   ? "bg-[rgba(45,46,131,0.06)] text-indigo font-semibold"
-                  : "text-[#6b7a94] hover:text-[#0c2954] hover:bg-[#f7f8fa]"
+                  : "text-[#7C8794] hover:text-[#08335D] hover:bg-[#F4F7FA]"
               }`}
             >
               {link.label}
@@ -156,7 +157,7 @@ export default function Navbar({ navLinks, platformLinks }: { navLinks: NavLinkI
             href={platformLinks.loginUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-ghost-nav text-[#0c2954] border border-[#e8edf5] hover:bg-[#f7f8fa] justify-center mt-2"
+            className="btn-ghost-nav text-[#08335D] border border-[#e8ebf3] hover:bg-[#F4F7FA] justify-center mt-2"
           >
             تسجيل دخول
           </a>
@@ -164,7 +165,7 @@ export default function Navbar({ navLinks, platformLinks }: { navLinks: NavLinkI
             href={platformLinks.registerUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-solid-nav bg-[#0c2954] text-white hover:opacity-88 justify-center"
+            className="btn-solid-nav bg-[#28C928] text-white hover:opacity-88 justify-center"
           >
             ابدأ مجاناً
           </a>

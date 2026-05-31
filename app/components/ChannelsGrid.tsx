@@ -70,7 +70,7 @@ export function ChannelsGrid({ title, subtitle, channels, siteContactInfo, siteP
                 rel="noopener noreferrer"
                 className="channel-card"
               >
-                <div className="channel-icon-box" style={{ background: channel.iconBg || "#f5f6f9" }}>
+                <div className="channel-icon-box" style={{ background: channel.iconBg || "#F4F7FA" }}>
                   <ChannelIcon channel={channel} />
                 </div>
                 <div className="channel-name">{channel.label}</div>

@@ -159,7 +159,7 @@ function AnimatedProgressBar({
   );
 }
 
-export function DashboardMockup() {
+export function DashboardMockup({ logoUrl }: { logoUrl?: string }) {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
 
@@ -257,7 +257,7 @@ export function DashboardMockup() {
           <div className="flex items-center gap-3">
             <Bell className="w-[18px] h-[18px] text-[#7e8299]" />
             <div className="relative w-6 h-6 rounded-full overflow-hidden">
-              <Image src="/logo.png" alt="User" fill className="object-cover" />
+               <Image src={logoUrl || "/logo.png"} alt="User" fill className="object-cover" />
             </div>
             <div className="flex items-center gap-1.5 cursor-pointer">
               <span className="text-xs font-semibold text-[#1a202c]">أيسر</span>

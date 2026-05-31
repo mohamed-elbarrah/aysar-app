@@ -190,7 +190,7 @@ function FeatureContent({
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
-            <span className="text-[15px] text-[#3a4a60]">
+            <span className="text-[15px] text-[#7C8794]">
               <strong className="text-navy">
                 {feature.text.split(" — ")[0]}
               </strong>

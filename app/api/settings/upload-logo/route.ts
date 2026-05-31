@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/app/lib/api-utils";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, unlink } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
+import sharp from "sharp";
 
-const BUCKET_NAME = "app-section-images";
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+const BUCKET_NAME = "site-assets";
+const ALLOWED_TYPES = ["image/svg+xml", "image/png", "image/jpeg", "image/webp"];
+const MAX_SIZE = 2 * 1024 * 1024;
+const LOGO_MAX_WIDTH = 400;
 
 function getServiceSupabase() {
   const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -20,10 +22,6 @@ function getServiceSupabase() {
   return createClient(url, key);
 }
 
-/**
- * Ensures the Supabase Storage bucket exists.
- * If it doesn't exist, creates it as a public bucket.
- */
 async function ensureBucketExists(supabase: ReturnType<typeof getServiceSupabase>): Promise<void> {
   const { data: buckets } = await supabase.storage.listBuckets();
   const exists = buckets?.some((b) => b.name === BUCKET_NAME);
@@ -36,7 +34,6 @@ async function ensureBucketExists(supabase: ReturnType<typeof getServiceSupabase
     });
 
     if (error) {
-      // If bucket already exists (race condition), ignore
       if (!error.message?.includes("already exists")) {
         throw new Error(`Failed to create bucket: ${error.message}`);
       }
@@ -44,13 +41,41 @@ async function ensureBucketExists(supabase: ReturnType<typeof getServiceSupabase
   }
 }
 
-/**
- * POST /api/upload-app-image
- * Uploads a phone screenshot to Supabase Storage.
- * Auto-creates the bucket if missing.
- * Falls back to local filesystem if Supabase is unavailable.
- * Requires admin authentication.
- */
+function extractStoragePath(url: string): string | null {
+  try {
+    const pathMatch = url.match(/\/object\/public\/[^/]+\/(.+?)(?:\?|$)/);
+    return pathMatch?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function resizeLogo(buffer: Buffer, mimeType: string): Promise<{ buffer: Buffer; ext: string }> {
+  if (mimeType === "image/svg+xml") {
+    return { buffer, ext: "svg" };
+  }
+
+  const ext = mimeType === "image/webp" ? "webp" : "png";
+  const outputFormat = mimeType === "image/webp" ? "webp" : "png";
+
+  const metadata = await sharp(buffer).metadata();
+  const width = metadata.width || LOGO_MAX_WIDTH;
+
+  if (width <= LOGO_MAX_WIDTH) {
+    const resized = await sharp(buffer)
+      [outputFormat]({ quality: 90 })
+      .toBuffer();
+    return { buffer: resized, ext };
+  }
+
+  const resized = await sharp(buffer)
+    .resize(LOGO_MAX_WIDTH, null, { fit: "inside", withoutEnlargement: true })
+    [outputFormat]({ quality: 90 })
+    .toBuffer();
+
+  return { buffer: resized, ext };
+}
+
 export async function POST(request: NextRequest) {
   const authResult = requireAdmin(request);
   if (authResult instanceof NextResponse) return authResult;
@@ -58,40 +83,39 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    const position = formData.get("position") as "left" | "right" | null;
     const previousUrl = (formData.get("previousUrl") as string | null) || null;
 
-    if (!file || !position) {
+    if (!file) {
       return NextResponse.json(
-        { success: false, error: "Missing file or position" },
+        { success: false, error: "الملف مطلوب" },
         { status: 400 }
       );
     }
 
-    // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { success: false, error: "Only JPG, PNG, WEBP allowed" },
+        { success: false, error: "نوع الملف غير مدعوم. الأنواع المدعومة: SVG, PNG, JPG, WEBP" },
         { status: 400 }
       );
     }
 
-    // Validate size
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
-        { success: false, error: "File too large (max 2MB)" },
+        { success: false, error: "حجم الملف كبير جدًا (الحد الأقصى 2MB)" },
         { status: 400 }
       );
     }
 
-    // Try Supabase Storage first
+    const originalBuffer = Buffer.from(await file.arrayBuffer());
+    const { buffer: processedBuffer, ext } = await resizeLogo(originalBuffer, file.type);
+    const timestamp = Date.now();
+    const storagePath = `logo-${timestamp}.${ext}`;
+    const contentType = ext === "svg" ? "image/svg+xml" : ext === "webp" ? "image/webp" : "image/png";
+
     try {
       const supabase = getServiceSupabase();
-
-      // Auto-create bucket if it doesn't exist
       await ensureBucketExists(supabase);
 
-      // 1. Clean up previous image if one exists
       if (previousUrl) {
         const previousPath = extractStoragePath(previousUrl);
         if (previousPath) {
@@ -100,91 +124,69 @@ export async function POST(request: NextRequest) {
             .remove([previousPath]);
 
           if (deleteError) {
-            console.warn(
-              "[upload-app-image] Failed to delete previous image:",
-              deleteError.message
-            );
-            // Non-fatal: continue with upload even if cleanup fails
+            console.warn("[upload-logo] Failed to delete previous logo:", deleteError.message);
           }
         }
       }
 
-      // 2. Build a deterministic path so the same position always has one file
-      const ext =
-        file.type === "image/png"
-          ? "png"
-          : file.type === "image/webp"
-            ? "webp"
-            : "jpg";
-
-      const storagePath = `phone-${position}.${ext}`;
-
-      // 3. Upload (upsert = true overwrites existing file at this path)
       const { error: uploadError } = await supabase.storage
         .from(BUCKET_NAME)
-        .upload(storagePath, file, {
-          contentType: file.type,
+        .upload(storagePath, processedBuffer, {
+          contentType,
           upsert: true,
         });
 
       if (uploadError) {
-        console.error("[upload-app-image] Supabase upload error:", uploadError);
+        console.error("[upload-logo] Supabase upload error:", uploadError);
         throw new Error(`Supabase upload failed: ${uploadError.message}`);
       }
 
-      // 4. Get public URL
       const {
         data: { publicUrl },
       } = supabase.storage.from(BUCKET_NAME).getPublicUrl(storagePath);
 
-      // Append cache-busting query param
-      const imageUrl = `${publicUrl}?v=${Date.now()}`;
+      const logoUrl = `${publicUrl}?v=${timestamp}`;
 
       return NextResponse.json({
         success: true,
-        imageUrl,
+        logoUrl,
       });
     } catch (supabaseError) {
       console.warn(
-        "[upload-app-image] Supabase failed, falling back to local filesystem:",
+        "[upload-logo] Supabase failed, falling back to local filesystem:",
         supabaseError
       );
 
-      // FALLBACK: Local filesystem (for development or if Supabase is down)
-      return await handleLocalUpload(file, position, previousUrl);
+      return await handleLocalUpload(processedBuffer, ext, previousUrl, timestamp);
     }
   } catch (error) {
-    console.error("[upload-app-image] Unexpected error:", error);
+    console.error("[upload-logo] Unexpected error:", error);
     return NextResponse.json(
-      { success: false, error: "Upload failed" },
+      { success: false, error: "فشل رفع الملف" },
       { status: 500 }
     );
   }
 }
 
-/**
- * Fallback handler: saves file to local filesystem.
- * Used when Supabase Storage is unavailable.
- */
 async function handleLocalUpload(
-  file: File,
-  position: "left" | "right",
-  previousUrl: string | null
+  buffer: Buffer,
+  ext: string,
+  previousUrl: string | null,
+  timestamp: number
 ): Promise<NextResponse> {
   try {
-    const uploadDir = join(process.cwd(), "public", "uploads", "app-section");
+    const uploadDir = join(process.cwd(), "public", "uploads", "logo");
+
     if (!existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
     }
 
-    // Delete previous local file if it exists
-    if (previousUrl && previousUrl.startsWith("/uploads/app-section/")) {
+    if (previousUrl && previousUrl.startsWith("/uploads/logo/")) {
       const previousFilename = previousUrl.split("/").pop()?.split("?")[0];
       if (previousFilename) {
         const previousPath = join(uploadDir, previousFilename);
         if (existsSync(previousPath)) {
           try {
-            const { unlink } = await import("fs/promises");
             await unlink(previousPath);
           } catch {
             // Ignore deletion errors
@@ -193,34 +195,18 @@ async function handleLocalUpload(
       }
     }
 
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const filename = `phone-${position}-${Date.now()}.${ext}`;
+    const filename = `logo-${timestamp}.${ext}`;
     const filepath = join(uploadDir, filename);
-
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
     await writeFile(filepath, buffer);
 
-    const imageUrl = `/uploads/app-section/${filename}`;
+    const logoUrl = `/uploads/logo/${filename}?v=${timestamp}`;
 
     return NextResponse.json({
       success: true,
-      imageUrl,
+      logoUrl,
     });
   } catch (error) {
-    console.error("[upload-app-image] Local fallback failed:", error);
+    console.error("[upload-logo] Local fallback failed:", error);
     throw error;
-  }
-}
-
-/**
- * Extracts the storage path from a Supabase public URL.
- */
-function extractStoragePath(url: string): string | null {
-  try {
-    const pathMatch = url.match(/\/object\/public\/[^/]+\/(.+?)(?:\?|$)/);
-    return pathMatch?.[1] ?? null;
-  } catch {
-    return null;
   }
 }

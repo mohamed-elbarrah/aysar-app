@@ -22,6 +22,7 @@ import {
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useDashboard } from "./DashboardContext";
 
 interface UserData {
   id: string;
@@ -205,6 +206,8 @@ export function DashboardSidebar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { settingsData } = useDashboard();
+  const logoUrl = settingsData?.metadata?.logoUrl;
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(() => {
@@ -266,11 +269,11 @@ export function DashboardSidebar({
   const NavContent = (
     <div className="flex flex-col w-full justify-center h-full">
       {/* Logo */}
-      <div className="w-full px-5 py-5">
+        <div className="w-full px-5 py-5">
         <Link href="/" className="flex items-center gap-3">
           <div className="w-full flex justify-center">
             <Image
-              src="/logo.png"
+              src={logoUrl || "/logo.png"}
               alt="أيسَر"
               width={100}
               height={100}

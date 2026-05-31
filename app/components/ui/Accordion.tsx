@@ -16,7 +16,7 @@ export function Accordion({ title, subtitle, items, className }: AccordionProps)
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <Section className={cn("bg-[#f7f8fa]", className)}>
+    <Section className={cn("bg-[#F4F7FA]", className)}>
       <div className="max-w-[720px] mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-[clamp(24px,3.5vw,38px)] font-bold text-text leading-tight mb-3">

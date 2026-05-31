@@ -129,7 +129,7 @@ export const APP_SECTION = {
 export const CTA_SECTION = {
   title: "جاهز تبدأ مع أيسَر؟",
   subtitle: "انضم لمطورين عقاريين يستخدمون أيسَر لتوفير الوقت ورفع مستوى تجربة عملائهم.",
-  primaryCtaLabel: "ابدأ مجاناً الآن",
+  primaryCtaLabel: "ابدأ الأن مجانا",
   primaryCtaHref: "https://platform.aysar.sa/ar/company/dashboard/register",
   secondaryCtaLabel: "تواصل على واتساب",
   secondaryCtaHref: "http://wa.me/966125101107",
@@ -164,7 +164,8 @@ export const CONTACT_HERO = {
 export const SITE_SETTINGS = {
   siteTitle: "أيسَر — منصة إدارة التطوير العقاري",
   siteDescription: "أيسَر تمنحك لوحة تحكم احترافية لإدارة مشاريعك وعملاءك — من تتبع مراحل الإنشاء وإشعارات فورية، حتى صفحات هبوط واستقبال حجوزات ونظام CRM متكامل.",
-  faviconUrl: "/favicon.ico",
+  faviconUrl: "",
+  logoUrl: "/logo.png",
   seoKeywords: "تطوير عقاري, إدارة مشاريع, CRM عقاري, تطبيق عقارات, منصة سحابية",
 };
 

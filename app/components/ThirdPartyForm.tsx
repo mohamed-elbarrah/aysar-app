@@ -76,11 +76,11 @@ function parseFormScript(scriptHtml: string): ParsedNode[] {
 function LoadingSkeleton() {
   return (
     <div className="animate-pulse space-y-5">
-      <div className="h-10 bg-[#e8edf5] rounded-lg w-full" />
-      <div className="h-10 bg-[#e8edf5] rounded-lg w-full" />
-      <div className="h-10 bg-[#e8edf5] rounded-lg w-3/4" />
-      <div className="h-24 bg-[#e8edf5] rounded-lg w-full" />
-      <div className="h-12 bg-gradient-to-r from-[#0c2954] to-[#2d2e83] rounded-lg w-full opacity-30" />
+      <div className="h-10 bg-[#e8ebf3] rounded-lg w-full" />
+      <div className="h-10 bg-[#e8ebf3] rounded-lg w-full" />
+      <div className="h-10 bg-[#e8ebf3] rounded-lg w-3/4" />
+      <div className="h-24 bg-[#e8ebf3] rounded-lg w-full" />
+      <div className="h-12 bg-gradient-to-r from-[#08335D] to-[#28C928] rounded-lg w-full opacity-30" />
     </div>
   );
 }

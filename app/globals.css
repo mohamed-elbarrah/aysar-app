@@ -2,24 +2,24 @@
 
 @theme inline {
   /* Colors */
-  --color-navy: #0c2954;
-  --color-navy-deep: #0f1e3d;
-  --color-indigo: #2d2e83;
-  --color-mint: #5ddfb8;
-  --color-green: #1a9a5a;
-  --color-green-light: #e9f9f0;
-  --color-bg: #f5f6f9;
-  --color-bg-alt: #f7f8fa;
+  --color-navy: #08335D;
+  --color-navy-deep: #08335D;
+  --color-indigo: #28C928;
+  --color-mint: #28C928;
+  --color-green: #28C928;
+  --color-green-light: rgba(40, 201, 40, 0.08);
+  --color-bg: #F4F7FA;
+  --color-bg-alt: #F4F7FA;
   --color-surface: #ffffff;
-  --color-text: #0c1829;
-  --color-text-secondary: #3a4a60;
-  --color-muted: #6b7a94;
-  --color-border: #e8edf5;
+  --color-text: #08335D;
+  --color-text-secondary: #7C8794;
+  --color-muted: #7C8794;
+  --color-border: #e8ebf3;
   --color-border-light: rgba(0, 0, 0, 0.06);
-  --color-hero-glow: rgba(45, 46, 131, 0.25);
+  --color-hero-glow: rgba(40, 201, 40, 0.25);
 
   /* Font */
-  --font-sans: var(--font-noto-kufi);
+  --font-sans: var(--font-ibm-plex-arabic);
   --font-mono: var(--font-geist-mono);
 
   /* Layout */
@@ -51,11 +51,7 @@
     text-align: right;
   }
 
-  /* Selection */
-  ::selection {
-    background: rgba(45, 46, 131, 0.15);
-    color: var(--color-navy);
-  }
+
 }
 
 @layer components {
@@ -100,15 +96,15 @@
   }
 
   .gradient-hero {
-    background: linear-gradient(160deg, #0c2954 0%, #0f1e3d 40%, #1a1f4e 100%);
+    background: linear-gradient(160deg, #08335D 0%, #08335D 40%, #08335D 100%);
   }
 
   .gradient-hero-light {
-    background: linear-gradient(135deg, #f0f4ff 0%, #e8ecfa 40%, #ede8f8 100%);
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 40%, #e8f0ff 100%);
   }
 
   .glass-nav {
-    background: rgba(8, 16, 36, 0.85);
+    background: rgba(8, 51, 93, 0.9);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -141,7 +137,7 @@
   .glow-orb-indigo {
     background: radial-gradient(
       ellipse,
-      rgba(45, 46, 131, 0.25) 0%,
+      rgba(40, 201, 40, 0.22) 0%,
       transparent 70%
     );
   }
@@ -157,7 +153,7 @@
   .glow-orb-mint {
     background: radial-gradient(
       ellipse,
-      rgba(93, 223, 184, 0.07) 0%,
+      rgba(40, 201, 40, 0.07) 0%,
       transparent 70%
     );
   }
@@ -312,8 +308,8 @@
 
   .card-aysar:hover {
     transform: translateY(-3px);
-    box-shadow: 0 20px 50px rgba(12, 41, 84, 0.08);
-    border-color: rgba(45, 46, 131, 0.2);
+    box-shadow: 0 20px 50px rgba(8, 51, 93, 0.08);
+    border-color: rgba(40, 201, 40, 0.2);
   }
 
   /* Check list */
@@ -544,7 +540,7 @@
 
   /* Featured badge */
   .featured-badge-label {
-    background: linear-gradient(135deg, var(--color-navy), var(--color-indigo));
+    background: linear-gradient(135deg, var(--color-navy), var(--color-green));
     color: #fff;
     text-align: center;
     padding: 10px;
@@ -950,16 +946,12 @@
   }
 
   select.form-control-contact {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7a94' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: left 14px center;
     cursor: pointer;
   }
 
   .btn-submit-contact {
     width: 100%;
-    background: linear-gradient(135deg, var(--color-navy), var(--color-indigo));
+    background: linear-gradient(135deg, var(--color-navy), var(--color-green));
     color: #fff;
     font-size: 15px;
     font-weight: 700;

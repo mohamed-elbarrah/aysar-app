@@ -18,13 +18,14 @@ export default async function PublicLayout({
       <ScriptErrorBoundary>
         <ScriptRenderer scripts={settings.scripts} location="head" />
       </ScriptErrorBoundary>
-      <Navbar navLinks={settings.navLinks} platformLinks={settings.platformLinks} />
+      <Navbar navLinks={settings.navLinks} platformLinks={settings.platformLinks} logoUrl={settings.logoUrl || undefined} />
       <main className="flex-1 flex flex-col">{children}</main>
       <Footer
         columns={settings.footerColumns}
         socialLinks={settings.socialLinks}
         contactInfo={settings.contactInfo}
         appLinks={settings.appLinks}
+        logoUrl={settings.logoUrl || undefined}
       />
       <ScriptErrorBoundary>
         <ScriptRenderer scripts={settings.scripts} location="body" />

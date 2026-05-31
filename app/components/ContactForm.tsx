@@ -27,7 +27,7 @@ function SuccessState({ message }: { message: string }) {
     <div className="form-success-state">
       <div className="success-icon-circle">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-          <path d="M20 6L9 17l-5-5" stroke="#1a9a5a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M20 6L9 17l-5-5" stroke="#28C928" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
       <h3 className="text-[20px] font-bold text-navy mb-2">تم إرسال رسالتك بنجاح!</h3>

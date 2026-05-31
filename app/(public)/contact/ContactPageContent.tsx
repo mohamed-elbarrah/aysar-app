@@ -42,7 +42,7 @@ function ContactHero({ data }: { data: ContactPageResponse }) {
 
 function ContactMain({ data, contactInfo, socialLinks, workHours }: { data: ContactPageResponse; contactInfo: SettingsContactInfo; socialLinks: SocialLink[]; workHours?: WorkHours }) {
   return (
-    <Section className="bg-[#f7f8fa]">
+    <Section className="bg-[#F4F7FA]">
       <div className="contact-inner max-w-[1100px] mx-auto">
         <ContactInfoCard contactInfo={contactInfo} socialLinks={socialLinks} workHours={workHours} />
         <ContactForm inquiryOptions={data.inquiryOptions} successMessage={data.successMessage} formFields={data.formFields} thirdPartyFormScript={data.thirdPartyFormScript} formReplaced={data.formReplaced} />
@@ -64,11 +64,10 @@ export default function ContactPageContent({ data, contactInfo, socialLinks, wor
         sitePlatformLinks={platformLinks}
       />
       <CTASection
-        variant="dark"
         title="جاهز تبدأ مع أيسَر؟"
         subtitle="انضم لمطورين عقاريين يستخدمون أيسَر لتوفير الوقت ورفع مستوى تجربة عملائهم."
         primaryCta={{
-          label: "ابدأ مجاناً الآن",
+          label: "ابدأ الأن مجانا",
           href: platformLinks.registerUrl,
         }}
         secondaryCta={{
