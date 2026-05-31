@@ -6,8 +6,6 @@ interface PlansHeroSectionProps {
   badge: string;
   title: string;
   titleAccent: string;
-  accentColor?: string;
-  accentOpacity?: number;
   subtitle: string;
   toggle?: ReactNode;
 }
@@ -16,8 +14,6 @@ export function PlansHeroSection({
   badge,
   title,
   titleAccent,
-  accentColor,
-  accentOpacity,
   subtitle,
   toggle,
 }: PlansHeroSectionProps) {
@@ -30,7 +26,7 @@ export function PlansHeroSection({
         </div>
         <h1 className="text-[clamp(32px,5vw,56px)] font-bold text-white leading-[1.12] tracking-tight mb-4 anim-fade-in-up anim-delay-1">
           {title}<br />
-          <span className="font-bold leading-[1.12] tracking-tight" style={{ color: accentColor || '#ffffff', opacity: accentOpacity !== undefined ? accentOpacity : 0.5 }}>{titleAccent}</span>
+          <span className="font-bold leading-[1.12] tracking-tight text-[#8b9cb7]">{titleAccent}</span>
         </h1>
         <p className="text-[17px] text-white/50 leading-[1.75] mb-9 max-w-[580px] mx-auto anim-fade-in-up anim-delay-2">
           {subtitle}

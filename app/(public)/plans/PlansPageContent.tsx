@@ -28,8 +28,6 @@ export default function PlansPageContent({ data, platformLinks, contactInfo }: P
         badge={hero.badge}
         title={hero.title}
         titleAccent={hero.titleAccent}
-        accentColor={hero.accentColor}
-        accentOpacity={hero.accentOpacity}
         subtitle={hero.subtitle}
         toggle={<PricingToggle billing={billing} onChange={setBilling} yearlyDiscountPercent={data.yearlyDiscountPercent ?? 15} />}
       />

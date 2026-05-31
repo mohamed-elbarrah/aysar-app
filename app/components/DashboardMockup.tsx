@@ -238,14 +238,7 @@ export function DashboardMockup({ logoUrl }: { logoUrl?: string }) {
           transition={{ delay: 0.2, duration: 0.5 }}
         >
           <div className="flex items-center gap-2.5">
-            <div className="relative w-16 h-16">
-              <Image
-                src="https://platform.aysar.sa/file/_image1766570179658205617.webp"
-                alt="أيسر"
-                fill
-                className="object-contain"
-              />
-            </div>
+            
             <div className="w-px h-5 bg-[#e8ecf0]" />
             <div>
               <div className="text-[11px] font-bold text-[#1a202c]">
@@ -256,9 +249,7 @@ export function DashboardMockup({ logoUrl }: { logoUrl?: string }) {
           </div>
           <div className="flex items-center gap-3">
             <Bell className="w-[18px] h-[18px] text-[#7e8299]" />
-            <div className="relative w-6 h-6 rounded-full overflow-hidden">
-               <Image src={logoUrl || "/logo.png"} alt="User" fill className="object-cover" />
-            </div>
+            
             <div className="flex items-center gap-1.5 cursor-pointer">
               <span className="text-xs font-semibold text-[#1a202c]">أيسر</span>
               <ChevronDown className="w-2 h-2 text-[#484e56]" />
@@ -282,7 +273,7 @@ export function DashboardMockup({ logoUrl }: { logoUrl?: string }) {
                   href="#"
                   className={`flex items-center gap-2 px-3.5 py-2 text-xs transition-colors ${
                     item.active
-                      ? "bg-[#2d5be3] text-white mx-2 rounded-lg px-2.5"
+                      ? "bg-[#28c92888] text-white mx-2 rounded-lg px-2.5"
                       : "text-white/55 hover:bg-white/[0.06] hover:text-white/85 rounded-none mx-0 px-3.5"
                   }`}
                   initial={{ opacity: 0, x: -10 }}
