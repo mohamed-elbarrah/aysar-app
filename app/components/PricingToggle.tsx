@@ -5,9 +5,10 @@ import { BillingPeriod } from "@/lib/plans-data";
 interface PricingToggleProps {
   billing: BillingPeriod;
   onChange: (period: BillingPeriod) => void;
+  yearlyDiscountPercent: number;
 }
 
-export function PricingToggle({ billing, onChange }: PricingToggleProps) {
+export function PricingToggle({ billing, onChange, yearlyDiscountPercent }: PricingToggleProps) {
   return (
     <div className="billing-toggle fade-up anim-delay-3">
       <button
@@ -21,7 +22,9 @@ export function PricingToggle({ billing, onChange }: PricingToggleProps) {
         onClick={() => onChange("yearly")}
       >
         سنوي
-        <span className="save-badge mr-[6px]">وفّر 15%</span>
+        {yearlyDiscountPercent > 0 && (
+          <span className="save-badge mr-[6px]">وفّر {yearlyDiscountPercent}%</span>
+        )}
       </button>
     </div>
   );

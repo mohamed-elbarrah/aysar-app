@@ -28,6 +28,7 @@ export const homePageUpdateSchema = z.object({
 export const plansPageUpdateSchema = z.object({
   hero: jsonValueSchema.optional(), plans: jsonValueSchema.optional(),
   compareRows: jsonValueSchema.optional(), faqItems: jsonValueSchema.optional(),
+  yearlyDiscountPercent: z.number().min(0).max(100).optional(),
 });
 
 export const contactPageUpdateSchema = z.object({

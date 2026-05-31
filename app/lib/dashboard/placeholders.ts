@@ -2,6 +2,7 @@ import {
   PLANS,
   COMPARE_ROWS,
   FAQ_ITEMS,
+  YEARLY_DISCOUNT_DEFAULT,
 } from "@/lib/plans-data";
 import {
   CONTACT_INFO,

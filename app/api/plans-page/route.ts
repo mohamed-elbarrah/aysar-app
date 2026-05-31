@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/app/lib/db";
 import { plansPageUpdateSchema } from "@/app/lib/shared-types";
 import { deepMerge, requireAdmin } from "@/app/lib/api-utils";
-import { PLANS, COMPARE_ROWS, FAQ_ITEMS, isOldCompareFormat, migrateCompareRows } from "@/lib/plans-data";
+import { PLANS, COMPARE_ROWS, FAQ_ITEMS, isOldCompareFormat, migrateCompareRows, YEARLY_DISCOUNT_DEFAULT, computeYearlyPrice } from "@/lib/plans-data";
+import type { Plan } from "@/lib/plans-data";
 
 const PLANS_HERO_DEFAULTS = {
   badge: "الأسعار والباقات",
@@ -15,6 +16,7 @@ function toSnakeCase(data: Record<string, unknown>): Record<string, unknown> {
   const map: Record<string, string> = {
     compareRows: "compare_rows",
     faqItems: "faq_items",
+    yearlyDiscountPercent: "yearly_discount_percent",
   };
   const result: Record<string, unknown> = {};
   for (const [key, val] of Object.entries(data)) {
@@ -39,6 +41,7 @@ export async function GET() {
         plans: PLANS,
         compare_rows: COMPARE_ROWS,
         faq_items: FAQ_ITEMS,
+        yearly_discount_percent: YEARLY_DISCOUNT_DEFAULT,
         updated_at: new Date().toISOString(),
       },
     });
@@ -80,10 +83,26 @@ export async function PATCH(request: NextRequest) {
       plans: PLANS,
       compare_rows: COMPARE_ROWS,
       faq_items: FAQ_ITEMS,
+      yearly_discount_percent: YEARLY_DISCOUNT_DEFAULT,
     } as unknown as Record<string, unknown>;
   }
 
   const merged = deepMerge(current, toSnakeCase(parsed.data as Record<string, unknown>));
+
+  const discount: number =
+    typeof merged.yearly_discount_percent === "number"
+      ? merged.yearly_discount_percent
+      : YEARLY_DISCOUNT_DEFAULT;
+
+  merged.yearly_discount_percent = discount;
+
+  if (Array.isArray(merged.plans)) {
+    merged.plans = (merged.plans as Plan[]).map((plan) =>
+      !plan.isFree && plan.priceMonthly != null
+        ? { ...plan, priceYearly: computeYearlyPrice(plan.priceMonthly, discount) }
+        : plan,
+    );
+  }
 
   const { data: page, error } = await supabase
     .from("plans_page")

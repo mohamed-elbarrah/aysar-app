@@ -31,7 +31,7 @@ export default function PlansPageContent({ data, platformLinks, contactInfo }: P
         accentColor={hero.accentColor}
         accentOpacity={hero.accentOpacity}
         subtitle={hero.subtitle}
-        toggle={<PricingToggle billing={billing} onChange={setBilling} />}
+        toggle={<PricingToggle billing={billing} onChange={setBilling} yearlyDiscountPercent={data.yearlyDiscountPercent ?? 15} />}
       />
 
       <Section className="bg-[#f7f8fa] !pt-16 !pb-24">

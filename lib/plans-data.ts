@@ -1,5 +1,11 @@
 export type BillingPeriod = "monthly" | "yearly";
 
+export const YEARLY_DISCOUNT_DEFAULT = 15;
+
+export function computeYearlyPrice(monthly: number, discountPercent: number): number {
+  return Math.round(monthly * 12 * (1 - discountPercent / 100));
+}
+
 export interface PlanFeature {
   text: string;
   enabled: boolean;

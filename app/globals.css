@@ -757,22 +757,21 @@
     height: 24px;
     border-radius: 50%;
     background: var(--color-bg);
+    color: var(--color-navy);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     transition:
       transform 0.2s,
-      background 0.2s;
+      background 0.2s,
+      color 0.2s;
   }
 
   .faq-item.open .faq-icon {
     transform: rotate(45deg);
     background: var(--color-navy);
-  }
-
-  .faq-item.open .faq-icon svg {
-    stroke: #fff;
+    color: #fff;
   }
 
   .faq-a {

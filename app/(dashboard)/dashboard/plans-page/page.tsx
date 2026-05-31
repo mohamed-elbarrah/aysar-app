@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
 import { PLANS, FAQ_ITEMS, COMPARE_ROWS } from "@/app/lib/dashboard/placeholders";
+import { YEARLY_DISCOUNT_DEFAULT } from "@/lib/plans-data";
 import type { Plan, FAQItem, CompareTableData, CompareColumn, CompareRow } from "@/lib/plans-data";
 import { ScrollText, ChevronUp, Loader2, Plus, Trash2, GripVertical } from "lucide-react";
 import { ColorPicker } from "@/app/components/dashboard/ColorPicker";
@@ -24,6 +25,7 @@ interface PlansPageData {
   plans: Plan[];
   compareRows: CompareTableData;
   faqItems: FAQItem[];
+  yearlyDiscountPercent: number;
 }
 
 const DEFAULTS: PlansPageData = {
@@ -38,6 +40,7 @@ const DEFAULTS: PlansPageData = {
   plans: PLANS,
   compareRows: COMPARE_ROWS,
   faqItems: FAQ_ITEMS,
+  yearlyDiscountPercent: YEARLY_DISCOUNT_DEFAULT,
 };
 
 export default function PlansPageEditor() {
@@ -95,8 +98,10 @@ export default function PlansPageEditor() {
             onChange={(data) => setPlansData({ hero: data }, "hero")} 
           />
           <PlansSection 
-            data={(plansData.plans as Plan[]) || DEFAULTS.plans} 
-            onChange={(data) => setPlansData({ plans: data }, "plans")} 
+            data={(plansData.plans as Plan[]) || DEFAULTS.plans}
+            yearlyDiscountPercent={plansData.yearlyDiscountPercent ?? DEFAULTS.yearlyDiscountPercent}
+            onPlansChange={(data) => setPlansData({ plans: data }, "plans")}
+            onDiscountChange={(discount) => setPlansData({ yearlyDiscountPercent: discount }, "yearlyDiscountPercent")}
           />
           <CompareSection 
             data={(plansData.compareRows as CompareTableData) || DEFAULTS.compareRows} 
@@ -164,47 +169,80 @@ function BannerSection({ data: initial, onChange }: {
   );
 }
 
-function PlansSection({ data: initial, onChange }: { 
-  data: Plan[]; 
-  onChange: (d: Plan[]) => void;
+function PlansSection({ data: initial, yearlyDiscountPercent, onPlansChange, onDiscountChange }: { 
+  data: Plan[];
+  yearlyDiscountPercent: number;
+  onPlansChange: (d: Plan[]) => void;
+  onDiscountChange: (discount: number) => void;
 }) {
   const [plans, setPlans] = useState<Plan[]>(initial);
+  const [discount, setDiscount] = useState(yearlyDiscountPercent);
 
   useEffect(() => {
     setPlans(initial);
   }, [initial]);
 
+  useEffect(() => {
+    setDiscount(yearlyDiscountPercent);
+  }, [yearlyDiscountPercent]);
+
+  const handleDiscountChange = (v: number) => {
+    setDiscount(v);
+    onDiscountChange(v);
+    const newPlans = plans.map((plan) =>
+      !plan.isFree && plan.priceMonthly != null
+        ? { ...plan, priceYearly: Math.round(plan.priceMonthly * 12 * (1 - v / 100)) }
+        : plan,
+    );
+    setPlans(newPlans);
+    onPlansChange(newPlans);
+  };
+
   const updatePlan = (idx: number, patch: Partial<Plan>) => {
     const newPlans = [...plans];
-    newPlans[idx] = { ...newPlans[idx], ...patch };
+    const updated = { ...newPlans[idx], ...patch };
+    if (patch.priceMonthly !== undefined && !updated.isFree && updated.priceMonthly != null) {
+      updated.priceYearly = Math.round(updated.priceMonthly * 12 * (1 - discount / 100));
+    }
+    newPlans[idx] = updated;
     setPlans(newPlans);
-    onChange(newPlans);
+    onPlansChange(newPlans);
   };
 
   const updateFeature = (pidx: number, fidx: number, patch: Partial<Plan["features"][number]>) => {
     const newPlans = [...plans];
     newPlans[pidx].features[fidx] = { ...newPlans[pidx].features[fidx], ...patch };
     setPlans(newPlans);
-    onChange(newPlans);
+    onPlansChange(newPlans);
   };
 
   const addFeature = (pidx: number) => {
     const newPlans = [...plans];
     newPlans[pidx].features = [...newPlans[pidx].features, { text: "ميزة جديدة", enabled: true }];
     setPlans(newPlans);
-    onChange(newPlans);
+    onPlansChange(newPlans);
   };
 
   const removeFeature = (pidx: number, fidx: number) => {
     const newPlans = [...plans];
     newPlans[pidx].features = newPlans[pidx].features.filter((_, i) => i !== fidx);
     setPlans(newPlans);
-    onChange(newPlans);
+    onPlansChange(newPlans);
   };
 
   return (
     <section id="plans">
       <ContentCard title="الباقات" subtitle="3 باقات: المجانية، المتقدمة، المميزة">
+        <div className="mb-5">
+          <Input 
+            label="نسبة الخصم السنوي (%)" 
+            type="number" 
+            min={0} 
+            max={100} 
+            value={discount} 
+            onChange={(e) => handleDiscountChange(e.target.value ? Number(e.target.value) : 0)} 
+          />
+        </div>
         <div className="space-y-5">
           {plans.map((plan, idx) => (
             <div key={plan.id} className="rounded-xl border border-[#e8edf5] overflow-hidden">
@@ -216,8 +254,15 @@ function PlansSection({ data: initial, onChange }: {
                 <div className="form-grid-2">
                   <Input label="الاسم" value={plan.name} onChange={(e) => updatePlan(idx, { name: e.target.value })} />
                   <Input label="السعر الشهري" type="number" value={plan.priceMonthly ?? ""} onChange={(e) => updatePlan(idx, { priceMonthly: e.target.value ? Number(e.target.value) : null })} />
-                  <Input label="السعر السنوي" type="number" value={plan.priceYearly ?? ""} onChange={(e) => updatePlan(idx, { priceYearly: e.target.value ? Number(e.target.value) : null })} />
                 </div>
+                {!plan.isFree && plan.priceMonthly != null && (
+                  <div className="text-xs text-[#6b7a94] bg-[#f5f6f9] rounded-lg px-3 py-2">
+                    السعر السنوي المحسوب:{" "}
+                    <span className="font-semibold text-[#0c2954]">
+                      {Math.round(plan.priceMonthly * 12 * (1 - discount / 100)).toLocaleString("en-US")} ر.س
+                    </span>
+                  </div>
+                )}
                 <Textarea label="الوصف" value={plan.description} onChange={(e) => updatePlan(idx, { description: e.target.value })} rows={2} />
                 <div className="flex items-center gap-6">
                   <label className="flex items-center gap-2 text-sm"><Checkbox checked={plan.isFree} onCheckedChange={(v) => updatePlan(idx, { isFree: !!v })} /> مجانية</label>

@@ -32,9 +32,6 @@ export function PricingCard({ plan, billing }: PricingCardProps) {
     : isYearly
       ? plan.priceYearly
       : plan.priceMonthly;
-  const monthlyEquiv = plan.isFree || !isYearly
-    ? null
-    : Math.round((plan.priceYearly ?? 0) / 12);
 
   return (
     <div className={`plan-card fade-up ${plan.isFeatured ? "featured" : ""}`}>
@@ -61,11 +58,6 @@ export function PricingCard({ plan, billing }: PricingCardProps) {
               </span>
             </div>
             <div className="text-[12px] text-muted mt-1">شامل الضريبة</div>
-            {isYearly && monthlyEquiv && (
-              <div className="text-[12px] text-muted mt-1">
-                يعادل <span className="text-green font-semibold">{monthlyEquiv.toLocaleString("en-US")}</span> ر.س شهرياً · <span className="text-green font-bold">وفّر 15%</span>
-              </div>
-            )}
           </>
         )}
       </div>

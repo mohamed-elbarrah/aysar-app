@@ -17,6 +17,7 @@ interface PlansPageData {
   plans: unknown;
   compareRows: unknown;
   faqItems: unknown;
+  yearlyDiscountPercent: number;
 }
 
 interface ContactPageData {
@@ -67,6 +68,7 @@ interface DirtyState {
     plans: boolean;
     compareRows: boolean;
     faqItems: boolean;
+    yearlyDiscountPercent: boolean;
   };
   contact: {
     hero: boolean;
@@ -159,7 +161,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   // Dirty tracking
   const [dirty, setDirty] = useState<DirtyState>({
     home: { hero: false, featureSections: false, bentoFeatures: false, projectOverview: false, appSection: false, ctaSection: false },
-    plans: { hero: false, plans: false, compareRows: false, faqItems: false },
+    plans: { hero: false, plans: false, compareRows: false, faqItems: false, yearlyDiscountPercent: false },
     contact: { hero: false, contactInfo: false, channels: false, inquiryOptions: false, successMessage: false, formFields: false, thirdPartyFormScript: false, formReplaced: false },
     policies: { privacy: false, terms: false, returns: false },
     settings: { metadata: false, navLinks: false, footer: false, social: false, apps: false, contact: false, platform: false, hours: false },
@@ -210,6 +212,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
             plans: plansJson.data.plans,
             compareRows: plansJson.data.compareRows || plansJson.data.compare_rows,
             faqItems: plansJson.data.faqItems || plansJson.data.faq_items,
+            yearlyDiscountPercent: plansJson.data.yearlyDiscountPercent ?? plansJson.data.yearly_discount_percent ?? 15,
           };
           setPlansDataState(data as PlansPageData);
           setOriginalData(prev => ({ ...prev, plans: data as PlansPageData }));
@@ -382,11 +385,16 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (page === "plans" && plansData) {
-        const sectionsToSave = [];
+        const sectionsToSave: [string, unknown][] = [];
         if (dirty.plans.hero) sectionsToSave.push(["hero", plansData.hero]);
-        if (dirty.plans.plans) sectionsToSave.push(["plans", plansData.plans]);
         if (dirty.plans.compareRows) sectionsToSave.push(["compareRows", plansData.compareRows]);
         if (dirty.plans.faqItems) sectionsToSave.push(["faqItems", plansData.faqItems]);
+
+        // Always send yearlyDiscountPercent alongside plans (or standalone if only discount changed)
+        if (dirty.plans.plans || dirty.plans.yearlyDiscountPercent) {
+          sectionsToSave.push(["plans", plansData.plans]);
+          sectionsToSave.push(["yearlyDiscountPercent", plansData.yearlyDiscountPercent]);
+        }
 
         for (const [section, data] of sectionsToSave) {
           const sectionKey = String(section);
@@ -541,7 +549,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     setSettingsDataState(originalData.settings);
     setDirty({
       home: { hero: false, featureSections: false, bentoFeatures: false, projectOverview: false, appSection: false, ctaSection: false },
-      plans: { hero: false, plans: false, compareRows: false, faqItems: false },
+    plans: { hero: false, plans: false, compareRows: false, faqItems: false, yearlyDiscountPercent: false },
       contact: { hero: false, contactInfo: false, channels: false, inquiryOptions: false, successMessage: false, formFields: false, thirdPartyFormScript: false, formReplaced: false },
       policies: { privacy: false, terms: false, returns: false },
       settings: { metadata: false, navLinks: false, footer: false, social: false, apps: false, contact: false, platform: false, hours: false },
