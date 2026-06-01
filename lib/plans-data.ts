@@ -19,7 +19,6 @@ export interface Plan {
   ctaLabel: string;
   ctaHref: string;
   features: PlanFeature[];
-  featuresTitle: string;
 }
 
 const PLATFORM_REGISTER_URL = "https://platform.aysar.sa/ar/company/dashboard/register";
@@ -35,7 +34,6 @@ export const PLANS: Plan[] = [
     isFeatured: false,
     ctaLabel: "ابدأ مجاناً",
     ctaHref: PLATFORM_REGISTER_URL,
-    featuresTitle: "ما تحصل عليه",
     features: [
       { text: "مشروع واحد فقط", enabled: true },
       { text: "حتى 10 ملاك", enabled: true },
@@ -57,7 +55,6 @@ export const PLANS: Plan[] = [
     isFeatured: false,
     ctaLabel: "اختر الباقة",
     ctaHref: PLATFORM_REGISTER_URL,
-    featuresTitle: "ما تحصل عليه",
     features: [
       { text: "نماذج مختلفة من المشاريع", enabled: true },
       { text: "حتى 10 مشاريع", enabled: true },
@@ -82,7 +79,6 @@ export const PLANS: Plan[] = [
     isFeatured: true,
     ctaLabel: "اختر الباقة",
     ctaHref: PLATFORM_REGISTER_URL,
-    featuresTitle: "كل شيء في المتقدمة، و+",
     features: [
       { text: "مشاريع غير محدودة", enabled: true },
       { text: "ملاك ومستثمرين غير محدود", enabled: true },

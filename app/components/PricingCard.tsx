@@ -71,7 +71,7 @@ export function PricingCard({ plan, billing }: PricingCardProps) {
         rel="noopener noreferrer"
         className={`block text-center font-bold text-[15px] py-[13px] px-7 rounded-[11px] no-underline mx-7 mb-6 transition-all duration-200 ${
           plan.isFeatured
-            ? "bg-gradient-to-br from-navy to-indigo text-white shadow-[0_4px_16px_rgba(45,46,131,0.3)] hover:opacity-92 hover:-translate-y-px"
+            ? "bg-[var(--color-green)] text-white shadow-[0_4px_16px_rgba(40,201,40,0.3)] hover:opacity-92 hover:-translate-y-px"
             : "bg-[#F4F7FA] text-navy border-2 border-border hover:bg-[#e8ebf3]"
         }`}
       >
@@ -81,9 +81,6 @@ export function PricingCard({ plan, billing }: PricingCardProps) {
       <div className="h-px bg-border mx-7 mb-5" />
 
       <div className="px-7 pb-7 flex flex-col gap-[11px]">
-        <div className="text-[11px] font-bold text-muted tracking-wide mb-1">
-          {plan.featuresTitle}
-        </div>
         {plan.features.map((feature, i) => (
           <div key={i} className={`feature-row ${!feature.enabled ? "disabled" : ""}`}>
             {feature.soon ? (

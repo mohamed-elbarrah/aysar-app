@@ -238,8 +238,7 @@
           "isFeatured": false,
           "description": "لتجربة المنصة والبدء الأول",
           "priceYearly": null,
-          "priceMonthly": null,
-          "featuresTitle": "ما تحصل عليه"
+          "priceMonthly": null
         },
         {
           "id": "advanced",
@@ -296,8 +295,7 @@
           "isFeatured": false,
           "description": "الأمثل للشركات الناشئة",
           "priceYearly": 16100,
-          "priceMonthly": 1379,
-          "featuresTitle": "ما تحصل عليه"
+          "priceMonthly": 1379
         },
         {
           "id": "featured",
@@ -364,8 +362,7 @@
           "isFeatured": true,
           "description": "الأمثل للشركات الكبيرة",
           "priceYearly": 28750,
-          "priceMonthly": 2395,
-          "featuresTitle": "كل شيء في المتقدمة، و+"
+          "priceMonthly": 2395
         }
       ],
       "compareRows": [

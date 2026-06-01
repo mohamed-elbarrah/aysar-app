@@ -44,7 +44,6 @@ export const planSchema = z.object({
   isFeatured: z.boolean(),
   ctaLabel: requiredString,
   ctaHref: urlString,
-  featuresTitle: requiredString,
   features: z.array(
     z.object({
       text: requiredString,

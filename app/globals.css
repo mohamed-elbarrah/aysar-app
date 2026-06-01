@@ -2,18 +2,18 @@
 
 @theme inline {
   /* Colors */
-  --color-navy: #08335D;
-  --color-navy-deep: #08335D;
-  --color-indigo: #28C928;
-  --color-mint: #28C928;
-  --color-green: #28C928;
+  --color-navy: #08335d;
+  --color-navy-deep: #08335d;
+  --color-indigo: #28c928;
+  --color-mint: #28c928;
+  --color-green: #28c928;
   --color-green-light: rgba(40, 201, 40, 0.08);
-  --color-bg: #F4F7FA;
-  --color-bg-alt: #F4F7FA;
+  --color-bg: #f4f7fa;
+  --color-bg-alt: #f4f7fa;
   --color-surface: #ffffff;
-  --color-text: #08335D;
-  --color-text-secondary: #7C8794;
-  --color-muted: #7C8794;
+  --color-text: #08335d;
+  --color-text-secondary: #7c8794;
+  --color-muted: #7c8794;
   --color-border: #e8ebf3;
   --color-border-light: rgba(0, 0, 0, 0.06);
   --color-hero-glow: rgba(40, 201, 40, 0.25);
@@ -50,8 +50,6 @@
   [dir="rtl"] {
     text-align: right;
   }
-
-
 }
 
 @layer components {
@@ -96,7 +94,7 @@
   }
 
   .gradient-hero {
-    background: linear-gradient(160deg, #08335D 0%, #08335D 40%, #08335D 100%);
+    background: linear-gradient(160deg, #08335d 0%, #08335d 40%, #08335d 100%);
   }
 
   .gradient-hero-light {
@@ -540,7 +538,7 @@
 
   /* Featured badge */
   .featured-badge-label {
-    background: linear-gradient(135deg, var(--color-navy), var(--color-green));
+    background: var(--color-green);
     color: #fff;
     text-align: center;
     padding: 10px;
