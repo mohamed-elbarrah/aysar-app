@@ -189,22 +189,11 @@ function PlansSection({ data: initial, yearlyDiscountPercent, onPlansChange, onD
   const handleDiscountChange = (v: number) => {
     setDiscount(v);
     onDiscountChange(v);
-    const newPlans = plans.map((plan) =>
-      !plan.isFree && plan.priceMonthly != null
-        ? { ...plan, priceYearly: Math.round(plan.priceMonthly * 12 * (1 - v / 100)) }
-        : plan,
-    );
-    setPlans(newPlans);
-    onPlansChange(newPlans);
   };
 
   const updatePlan = (idx: number, patch: Partial<Plan>) => {
     const newPlans = [...plans];
-    const updated = { ...newPlans[idx], ...patch };
-    if (patch.priceMonthly !== undefined && !updated.isFree && updated.priceMonthly != null) {
-      updated.priceYearly = Math.round(updated.priceMonthly * 12 * (1 - discount / 100));
-    }
-    newPlans[idx] = updated;
+    newPlans[idx] = { ...newPlans[idx], ...patch };
     setPlans(newPlans);
     onPlansChange(newPlans);
   };
@@ -235,7 +224,7 @@ function PlansSection({ data: initial, yearlyDiscountPercent, onPlansChange, onD
       <ContentCard title="الباقات" subtitle="3 باقات: المجانية، المتقدمة، المميزة">
         <div className="mb-5">
           <Input 
-            label="نسبة الخصم السنوي (%)" 
+            label="نسبة الخصم المعروضة في الشارة (%)" 
             type="number" 
             min={0} 
             max={100} 
@@ -255,14 +244,9 @@ function PlansSection({ data: initial, yearlyDiscountPercent, onPlansChange, onD
                   <Input label="الاسم" value={plan.name} onChange={(e) => updatePlan(idx, { name: e.target.value })} />
                   <Input label="السعر الشهري" type="number" value={plan.priceMonthly ?? ""} onChange={(e) => updatePlan(idx, { priceMonthly: e.target.value ? Number(e.target.value) : null })} />
                 </div>
-                {!plan.isFree && plan.priceMonthly != null && (
-                  <div className="text-xs text-[#6b7a94] bg-[#f5f6f9] rounded-lg px-3 py-2">
-                    السعر السنوي المحسوب:{" "}
-                    <span className="font-semibold text-[#0c2954]">
-                      {Math.round(plan.priceMonthly * 12 * (1 - discount / 100)).toLocaleString("en-US")} ر.س
-                    </span>
-                  </div>
-                )}
+                <div className="form-grid-2">
+                  <Input label="السعر السنوي" type="number" value={plan.priceYearly ?? ""} onChange={(e) => updatePlan(idx, { priceYearly: e.target.value ? Number(e.target.value) : null })} />
+                </div>
                 <Textarea label="الوصف" value={plan.description} onChange={(e) => updatePlan(idx, { description: e.target.value })} rows={2} />
                 <div className="flex items-center gap-6">
                   <label className="flex items-center gap-2 text-sm"><Checkbox checked={plan.isFree} onCheckedChange={(v) => updatePlan(idx, { isFree: !!v })} /> مجانية</label>

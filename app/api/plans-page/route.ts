@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/app/lib/db";
 import { plansPageUpdateSchema } from "@/app/lib/shared-types";
 import { deepMerge, requireAdmin } from "@/app/lib/api-utils";
-import { PLANS, COMPARE_ROWS, FAQ_ITEMS, isOldCompareFormat, migrateCompareRows, YEARLY_DISCOUNT_DEFAULT, computeYearlyPrice } from "@/lib/plans-data";
-import type { Plan } from "@/lib/plans-data";
+import { PLANS, COMPARE_ROWS, FAQ_ITEMS, isOldCompareFormat, migrateCompareRows, YEARLY_DISCOUNT_DEFAULT } from "@/lib/plans-data";
 
 const PLANS_HERO_DEFAULTS = {
   badge: "الأسعار والباقات",
@@ -95,14 +94,6 @@ export async function PATCH(request: NextRequest) {
       : YEARLY_DISCOUNT_DEFAULT;
 
   merged.yearly_discount_percent = discount;
-
-  if (Array.isArray(merged.plans)) {
-    merged.plans = (merged.plans as Plan[]).map((plan) =>
-      !plan.isFree && plan.priceMonthly != null
-        ? { ...plan, priceYearly: computeYearlyPrice(plan.priceMonthly, discount) }
-        : plan,
-    );
-  }
 
   const { data: page, error } = await supabase
     .from("plans_page")

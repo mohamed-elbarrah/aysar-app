@@ -35,6 +35,8 @@ export default async function Home() {
         badge={hero.badge ?? undefined}
         title={hero.title}
         titleAccent={hero.titleAccent ?? undefined}
+        accentColor={hero.accentColor ?? undefined}
+        accentOpacity={hero.accentOpacity ?? undefined}
         subtitle={hero.subtitle}
         primaryCta={
           hero.primaryCtaLabel

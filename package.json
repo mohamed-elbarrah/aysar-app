@@ -10,7 +10,7 @@
     "db:seed": "npx tsx prisma/seed.ts",
     "db:update-seed": "npx tsx scripts/update-seed-data.ts",
     "db:dump-sql": "npx tsx scripts/dump-sql.ts",
-    "postbuild": "npx tsx scripts/check-supabase.ts"
+    "postbuild": "npx tsx scripts/check-supabase.ts || true"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

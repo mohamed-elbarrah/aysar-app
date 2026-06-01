@@ -6,6 +6,8 @@ interface HeroProps {
   badge?: string;
   title: string;
   titleAccent?: string;
+  accentColor?: string;
+  accentOpacity?: number;
   subtitle: string;
   primaryCta?: { label: string; href: string };
   secondaryCta?: { label: string; href: string };
@@ -17,6 +19,8 @@ export default function HeroSection({
   badge,
   title,
   titleAccent,
+  accentColor,
+  accentOpacity,
   subtitle,
   primaryCta,
   secondaryCta,
@@ -44,8 +48,12 @@ export default function HeroSection({
             {titleAccent && (
               <>
                 <br />
-                <span 
-                  className="font-bold leading-[1.15] tracking-tight text-[#8b9cb7]"
+                <span
+                  className="font-bold leading-[1.15] tracking-tight"
+                  style={{
+                    color: accentColor || "#ffffff",
+                    opacity: accentOpacity !== undefined ? accentOpacity : 0.5,
+                  }}
                 >
                   {titleAccent}
                 </span>

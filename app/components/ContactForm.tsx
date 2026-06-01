@@ -202,7 +202,7 @@ export function ContactForm({ inquiryOptions, successMessage, formFields, thirdP
         <form onSubmit={handleSubmit} noValidate>
           {renderFields()}
 
-          <button type="submit" className="btn-submit-contact" disabled={submitting}>
+          <button type="submit" className="btn-submit-contact" disabled={submitting} style={{ background: "var(--color-green)" }}>
             {submitting ? "جاري الإرسال..." : "إرسال الرسالة"}
           </button>
 
