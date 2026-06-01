@@ -1,4 +1,5 @@
 import { Plan, BillingPeriod } from "@/lib/plans-data";
+import { SaudiRiyalIcon } from "@/app/components/ui/SaudiRiyalIcon";
 
 function CheckIcon() {
   return (
@@ -49,12 +50,14 @@ export function PricingCard({ plan, billing }: PricingCardProps) {
         ) : (
           <>
             <div className="plan-price">
-              <span className="text-[18px] font-semibold text-muted mb-0.5">ر.س</span>
               <span className="text-[44px] font-bold text-text tracking-tight leading-none">
                 {displayPrice?.toLocaleString("en-US")}
               </span>
-              <span className="text-[13px] text-muted mr-1">
-                {isYearly ? "/ سنوياً" : "/ شهرياً"}
+              <span className="inline-flex items-center gap-1 text-muted">
+                <SaudiRiyalIcon size={20} />
+                <span className="text-[13px]">
+                  {isYearly ? "/ سنوياً" : "/ شهرياً"}
+                </span>
               </span>
             </div>
             <div className="text-[12px] text-muted mt-1">شامل الضريبة</div>
