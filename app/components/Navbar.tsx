@@ -75,7 +75,6 @@ export default function Navbar({
             width={130}
             height={44}
             className="h-12 w-auto object-contain"
-            style={{ width: "auto" }}
             priority
           />
         </Link>

@@ -69,11 +69,7 @@ export function PricingCard({ plan, billing }: PricingCardProps) {
         href={plan.ctaHref}
         target="_blank"
         rel="noopener noreferrer"
-        className={`block text-center font-bold text-[15px] py-[13px] px-7 rounded-[11px] no-underline mx-7 mb-6 transition-all duration-200 ${
-          plan.isFeatured
-            ? "bg-[var(--color-green)] text-white shadow-[0_4px_16px_rgba(40,201,40,0.3)] hover:opacity-92 hover:-translate-y-px"
-            : "bg-[#F4F7FA] text-navy border-2 border-border hover:bg-[#e8ebf3]"
-        }`}
+        className={`block text-center font-bold text-[15px] py-[13px] px-7 rounded-[11px] no-underline mx-7 mb-6 transition-all duration-200 bg-[var(--color-green)] text-white shadow-[0_4px_16px_rgba(40,201,40,0.3)] hover:opacity-92 hover:-translate-y-px`}
       >
         {plan.ctaLabel}
       </a>
