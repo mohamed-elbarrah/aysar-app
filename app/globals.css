@@ -536,15 +536,20 @@
     box-shadow: 0 32px 72px rgba(45, 46, 131, 0.22);
   }
 
-  /* Featured badge */
-  .featured-badge-label {
+  /* Featured corner ribbon badge */
+  .featured-corner-badge {
+    position: absolute;
+    top: 16px;
+    left: -2px;
+    z-index: 10;
     background: var(--color-green);
     color: #fff;
-    text-align: center;
-    padding: 10px;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    padding: 5px 16px 5px 12px;
+    border-radius: 0 8px 8px 0;
+    box-shadow: 0 2px 8px rgba(26, 154, 90, 0.25);
+    white-space: nowrap;
   }
 
   /* Feature row in plan cards */

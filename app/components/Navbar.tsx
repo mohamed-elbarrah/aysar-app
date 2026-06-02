@@ -16,7 +16,15 @@ interface PlatformLinks {
   supportCenterUrl: string;
 }
 
-export default function Navbar({ navLinks, platformLinks, logoUrl }: { navLinks: NavLinkItem[]; platformLinks: PlatformLinks; logoUrl?: string }) {
+export default function Navbar({
+  navLinks,
+  platformLinks,
+  logoUrl,
+}: {
+  navLinks: NavLinkItem[];
+  platformLinks: PlatformLinks;
+  logoUrl?: string;
+}) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -57,7 +65,7 @@ export default function Navbar({ navLinks, platformLinks, logoUrl }: { navLinks:
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-[200] h-[62px] flex items-center transition-all duration-300 ${navBg}`}
+      className={`fixed top-0 left-0 right-0 z-[200] h-[70px] flex items-center transition-all duration-300 ${navBg}`}
     >
       <div className="container-aysar flex items-center gap-6 w-full">
         <Link href="/" className="flex-shrink-0">
@@ -67,12 +75,15 @@ export default function Navbar({ navLinks, platformLinks, logoUrl }: { navLinks:
             width={130}
             height={44}
             className="h-12 w-auto object-contain"
-            style={{ width: 'auto' }}
+            style={{ width: "auto" }}
             priority
           />
         </Link>
 
-        <ul ref={navRef} className="max-md:hidden md:flex items-center gap-2 me-auto relative">
+        <ul
+          ref={navRef}
+          className="max-md:hidden md:flex items-center gap-2 me-auto relative"
+        >
           {navLinks.map((link) => {
             const active = pathname === link.href;
             return (
@@ -80,7 +91,9 @@ export default function Navbar({ navLinks, platformLinks, logoUrl }: { navLinks:
                 <Link
                   href={link.href}
                   className={`relative text-lg px-3.5 py-1.5 rounded-lg  transition-colors duration-200 ${
-                    active ? "text-white font-bold" : "text-white/70 hover:text-white"
+                    active
+                      ? "text-[#28C928] font-bold"
+                      : "text-white/70 font-bold hover:text-[#28C928]"
                   }`}
                 >
                   {link.label}
@@ -90,7 +103,7 @@ export default function Navbar({ navLinks, platformLinks, logoUrl }: { navLinks:
           })}
           {/* Animated underline */}
           <span
-            className="absolute -bottom-1 h-0.5 bg-white rounded-full transition-all duration-300 ease-out"
+            className="absolute -bottom-1 h-0.5 bg-[#28c928] rounded-full transition-all duration-300 ease-out"
             style={{
               width: underlineStyle.width,
               left: underlineStyle.left,
@@ -104,7 +117,7 @@ export default function Navbar({ navLinks, platformLinks, logoUrl }: { navLinks:
             href={platformLinks.loginUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-ghost-nav text-lg text-white/70 border border-white/18 hover:bg-white/10 hover:text-white"
+            className="btn-ghost-nav rounded-2xl text-lg text-white/70 border border-white/18 hover:bg-white/10 hover:text-white"
           >
             تسجيل دخول
           </a>
@@ -112,7 +125,7 @@ export default function Navbar({ navLinks, platformLinks, logoUrl }: { navLinks:
             href={platformLinks.registerUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-solid-nav text-lg bg-[#28C928] text-white hover:opacity-90"
+            className="btn-solid-nav rounded-2xl text-lg bg-[#28C928] text-white hover:opacity-90"
           >
             ابدأ مجاناً
           </a>
@@ -123,7 +136,14 @@ export default function Navbar({ navLinks, platformLinks, logoUrl }: { navLinks:
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             {mobileOpen ? (
               <>
                 <path d="M18 6L6 18M6 6l12 12" />

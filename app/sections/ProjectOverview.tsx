@@ -75,7 +75,7 @@ const projects: ProjectCardData[] = [
     currentPhase: "تركيب الواجهات",
     nextPhase: "التشطيبات الداخلية",
     phaseColor: "#28C928",
-    progressGradient: "linear-gradient(90deg, #08335D, #28C928)",
+    progressGradient: "linear-gradient(90deg, #28C928, #28C928)",
   },
 ];
 
@@ -318,9 +318,7 @@ export function ProjectOverview({
                       }}
                       initial={{ opacity: 0, x: 20 }}
                       animate={
-                        isInView
-                          ? { opacity: 1, x: 0 }
-                          : { opacity: 0, x: 20 }
+                        isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }
                       }
                       transition={{
                         delay: 0.4 + idx * 0.15,

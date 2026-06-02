@@ -25,7 +25,7 @@ export function BookingsMockup() {
   return (
     <div
       ref={ref}
-      className="bg-gradient-to-br from-[#fff7ed] to-[#ffedd5] rounded-2xl p-3 sm:p-5 lg:p-6 xl:p-8 pb-0 overflow-hidden"
+      className="bg-gradient-to-br from-[#f0f4ff] to-[#e8edf8] rounded-2xl p-3 sm:p-5 lg:p-6 xl:p-8 pb-0 overflow-hidden"
       style={{ boxShadow: "0 4px 24px rgba(249,115,22,0.07)" }}
     >
       <div
@@ -92,7 +92,7 @@ export function BookingsMockup() {
               >
                 {row.status}
               </span>
-              <span className="bg-[#f0f4ff] text-[#28C928] rounded px-1 py-0.5 text-[6px] sm:text-[8px] lg:text-xs font-semibold text-center">
+              <span className="bg-[#f0f4ff] text-navy rounded px-1 py-0.5 text-[6px] sm:text-[8px] lg:text-xs font-semibold text-center">
                 إجراءات ▾
               </span>
             </motion.div>

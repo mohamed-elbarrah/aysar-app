@@ -31,10 +31,12 @@ export default function PlansPageContent({ data, platformLinks, contactInfo }: P
         accentColor={hero.accentColor}
         accentOpacity={hero.accentOpacity}
         subtitle={hero.subtitle}
-        toggle={<PricingToggle billing={billing} onChange={setBilling} yearlyDiscountPercent={data.yearlyDiscountPercent ?? 15} />}
       />
 
       <Section className="bg-[#F4F7FA] !pt-16 !pb-24">
+        <div className="flex justify-center  mb-8">
+          <PricingToggle billing={billing} onChange={setBilling} yearlyDiscountPercent={data.yearlyDiscountPercent ?? 15} />
+        </div>
         <div className="plans-grid max-w-[1140px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
           {plans.map((plan) => (
             <PricingCard key={plan.id} plan={plan} billing={billing} />

@@ -5,6 +5,7 @@ import { Input, Select, Textarea } from "@/app/components/ui/Input";
 import type { InquiryOption } from "@/lib/contact-data";
 import type { FormFieldConfig } from "@/app/lib/form-fields-data";
 import { ThirdPartyForm } from "@/app/components/ThirdPartyForm";
+import Link from "next/link";
 
 interface ContactFormProps {
   inquiryOptions: InquiryOption[];
@@ -27,16 +28,30 @@ function SuccessState({ message }: { message: string }) {
     <div className="form-success-state">
       <div className="success-icon-circle">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-          <path d="M20 6L9 17l-5-5" stroke="#28C928" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M20 6L9 17l-5-5"
+            stroke="#28C928"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </div>
-      <h3 className="text-[20px] font-bold text-navy mb-2">تم إرسال رسالتك بنجاح!</h3>
+      <h3 className="text-[20px] font-bold text-navy mb-2">
+        تم إرسال رسالتك بنجاح!
+      </h3>
       <p className="text-[14px] text-muted leading-[1.7]">{message}</p>
     </div>
   );
 }
 
-export function ContactForm({ inquiryOptions, successMessage, formFields, thirdPartyFormScript, formReplaced }: ContactFormProps) {
+export function ContactForm({
+  inquiryOptions,
+  successMessage,
+  formFields,
+  thirdPartyFormScript,
+  formReplaced,
+}: ContactFormProps) {
   const enabledFields = formFields.filter((f) => f.enabled);
 
   const initialForm = Object.fromEntries(enabledFields.map((f) => [f.key, ""]));
@@ -77,7 +92,9 @@ export function ContactForm({ inquiryOptions, successMessage, formFields, thirdP
       }
 
       if (extraParts.length > 0) {
-        payload.message = (payload.message ? payload.message + "\n\n" : "") + extraParts.join("\n");
+        payload.message =
+          (payload.message ? payload.message + "\n\n" : "") +
+          extraParts.join("\n");
       }
 
       const res = await fetch("/api/contact-messages", {
@@ -118,7 +135,11 @@ export function ContactForm({ inquiryOptions, successMessage, formFields, thirdP
           onChange={(e) => setValue(field.key, e.target.value)}
         >
           {inquiryOptions.map((opt) => (
-            <option key={opt.value} value={opt.value} disabled={opt.value === ""}>
+            <option
+              key={opt.value}
+              value={opt.value}
+              disabled={opt.value === ""}
+            >
               {opt.label}
             </option>
           ))}
@@ -147,7 +168,13 @@ export function ContactForm({ inquiryOptions, successMessage, formFields, thirdP
         label={field.label}
         placeholder={field.placeholder || undefined}
         required={field.required}
-        type={field.type === "tel" ? "tel" : field.type === "email" ? "email" : "text"}
+        type={
+          field.type === "tel"
+            ? "tel"
+            : field.type === "email"
+              ? "email"
+              : "text"
+        }
         value={form[field.key] ?? ""}
         error={errors[field.key]}
         onChange={(e) => setValue(field.key, e.target.value)}
@@ -170,11 +197,15 @@ export function ContactForm({ inquiryOptions, successMessage, formFields, thirdP
           <div key={`pair-${i}`} className="form-grid-2">
             {renderField(cur)}
             {renderField(next)}
-          </div>
+          </div>,
         );
         i += 2;
       } else {
-        rows.push(<div key={cur.key} className="form-grid-single">{renderField(cur)}</div>);
+        rows.push(
+          <div key={cur.key} className="form-grid-single">
+            {renderField(cur)}
+          </div>,
+        );
         i += 1;
       }
     }
@@ -191,7 +222,9 @@ export function ContactForm({ inquiryOptions, successMessage, formFields, thirdP
 
   return (
     <div className="contact-form-card anim-fade-in-up anim-delay-2">
-      <div className="text-[20px] font-bold text-navy mb-2">أرسل لنا رسالتك</div>
+      <div className="text-[20px] font-bold text-navy mb-2">
+        أرسل لنا رسالتك
+      </div>
       <div className="text-[14px] text-muted leading-[1.75] mb-7">
         سيتم التواصل معك خلال 24 ساعة من فريقنا المتخصص.
       </div>
@@ -202,15 +235,20 @@ export function ContactForm({ inquiryOptions, successMessage, formFields, thirdP
         <form onSubmit={handleSubmit} noValidate>
           {renderFields()}
 
-          <button type="submit" className="btn-submit-contact" disabled={submitting} style={{ background: "var(--color-green)" }}>
+          <button
+            type="submit"
+            className="btn-submit-contact"
+            disabled={submitting}
+            style={{ background: "var(--color-green)" }}
+          >
             {submitting ? "جاري الإرسال..." : "إرسال الرسالة"}
           </button>
 
-          <div className="text-[12px] text-muted text-center mt-3">
+          <div className="text-[12px] font-bold text-muted text-center mt-3">
             بإرسال الرسالة، أنت توافق على{" "}
-            <a href="https://www.aysar.sa/privacy-policy" className="text-indigo no-underline">
+            <Link href="/privacy-policy" className="text-indigo no-underline">
               سياسة الخصوصية
-            </a>
+            </Link>
           </div>
         </form>
       )}

@@ -73,7 +73,7 @@ export default function Footer({ columns, socialLinks, contactInfo, appLinks, lo
 
             return (
               <div key={idx}>
-                <h4 className="text-[16px] font-bold text-white/50 tracking-wide uppercase mb-4">{col.title}</h4>
+                <h4 className="text-[16px] font-bold text-white/85 tracking-wide uppercase mb-4">{col.title}</h4>
                 {isAppColumn ? (
                   <div className="flex flex-col gap-3 w-fit">
                     <a

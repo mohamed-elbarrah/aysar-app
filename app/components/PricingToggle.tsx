@@ -10,7 +10,7 @@ interface PricingToggleProps {
 
 export function PricingToggle({ billing, onChange, yearlyDiscountPercent }: PricingToggleProps) {
   return (
-    <div className="billing-toggle fade-up anim-delay-3">
+    <div className="billing-toggle bg-[#08335d]/95 fade-up anim-delay-3">
       <button
         className={`billing-btn ${billing === "monthly" ? "active" : ""}`}
         onClick={() => onChange("monthly")}

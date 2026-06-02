@@ -1,6 +1,5 @@
 import { Container } from "@/app/components/Container";
 import { Badge } from "@/app/components/ui/Badge";
-import { ReactNode } from "react";
 
 interface PlansHeroSectionProps {
   badge: string;
@@ -9,7 +8,6 @@ interface PlansHeroSectionProps {
   accentColor?: string;
   accentOpacity?: number;
   subtitle: string;
-  toggle?: ReactNode;
 }
 
 export function PlansHeroSection({
@@ -19,7 +17,6 @@ export function PlansHeroSection({
   accentColor,
   accentOpacity,
   subtitle,
-  toggle,
 }: PlansHeroSectionProps) {
   return (
     <section className="relative gradient-hero pt-[130px] pb-20 px-6 lg:px-10 text-center overflow-hidden noise-overlay">
@@ -43,7 +40,6 @@ export function PlansHeroSection({
         <p className="text-[17px] text-white/50 leading-[1.75] mb-9 max-w-[580px] mx-auto anim-fade-in-up anim-delay-2">
           {subtitle}
         </p>
-        {toggle && <div className="anim-fade-in-up anim-delay-3">{toggle}</div>}
       </Container>
     </section>
   );

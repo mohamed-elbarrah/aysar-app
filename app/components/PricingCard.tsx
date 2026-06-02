@@ -36,7 +36,7 @@ export function PricingCard({ plan, billing }: PricingCardProps) {
 
   return (
     <div className={`plan-card fade-up ${plan.isFeatured ? "featured" : ""}`}>
-      {plan.isFeatured && <div className="featured-badge-label">الأكثر رواجاً</div>}
+      {plan.isFeatured && <div className="featured-corner-badge">الأكثر رواجاً</div>}
 
       <div className="pt-7 px-7 pb-5">
         <div className="text-[22px] font-bold text-text mb-1">{plan.name}</div>
