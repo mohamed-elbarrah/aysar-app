@@ -5,6 +5,7 @@ import { Input } from "@/app/components/ui/Input";
 import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
 import { SaveBar } from "@/app/components/dashboard/SaveBar";
+import Image from "next/image";
 import { Loader2, Trash2, Plus, Upload, Globe } from "lucide-react";
 import { SOCIAL_LINKS } from "@/app/lib/dashboard/placeholders";
 import type { SocialLink } from "@/app/lib/settings-data";
@@ -135,11 +136,14 @@ export default function SocialSettingsPage() {
                     {(() => {
                       const src = iconPreviewUrl(link.url, link.iconUrl);
                       return src ? (
-                        <img
+                        <Image
                           src={src}
-                          alt=""
+                          alt={link.label || "أيقونة المنصة"}
+                          width={36}
+                          height={36}
                           className="absolute inset-0 w-full h-full object-contain p-1.5"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                          unoptimized
+                          onError={() => {}}
                         />
                       ) : null;
                     })()}

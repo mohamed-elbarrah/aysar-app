@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, useId } from "react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -23,10 +23,11 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 }
 
 export function Input({ label, error, required, className, wrapperClassName, icon, ...rest }: InputProps) {
+  const id = useId();
   return (
     <div className={cn("form-group-contact", wrapperClassName)}>
       {label && (
-        <label>
+        <label htmlFor={id}>
           {label}
           {required && <span className="text-red-500 mr-0.5">*</span>}
         </label>
@@ -34,6 +35,7 @@ export function Input({ label, error, required, className, wrapperClassName, ico
       <div className="relative">
         {icon && <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">{icon}</div>}
         <input
+          id={id}
           className={cn("form-control-contact", error && "error", icon && "pr-10", className)}
           {...rest}
         />
@@ -43,15 +45,16 @@ export function Input({ label, error, required, className, wrapperClassName, ico
 }
 
 export function Select({ label, required, className, wrapperClassName, children, ...rest }: SelectProps) {
+  const id = useId();
   return (
     <div className={cn("form-group-contact", wrapperClassName)}>
       {label && (
-        <label>
+        <label htmlFor={id}>
           {label}
           {required && <span className="text-red-500 mr-0.5">*</span>}
         </label>
       )}
-      <select className={cn("form-control-contact", className)} {...rest}>
+      <select id={id} className={cn("form-control-contact", className)} {...rest}>
         {children}
       </select>
     </div>
@@ -59,15 +62,17 @@ export function Select({ label, required, className, wrapperClassName, children,
 }
 
 export function Textarea({ label, error, required, className, wrapperClassName, ...rest }: TextareaProps) {
+  const id = useId();
   return (
     <div className={cn("form-group-contact full", wrapperClassName)}>
       {label && (
-        <label>
+        <label htmlFor={id}>
           {label}
           {required && <span className="text-red-500 mr-0.5">*</span>}
         </label>
       )}
       <textarea
+        id={id}
         className={cn("form-control-contact", error && "error", className)}
         {...rest}
       />

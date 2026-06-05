@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "aysar-dev-secret-change-in-production";
+export function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === "production") {
+    throw new Error("JWT_SECRET environment variable is required in production");
+  }
+  return secret || "aysar-dev-secret-change-in-production";
+}
+
+const JWT_SECRET = getJwtSecret();
 
 export type JwtPayload = { userId: string; email: string; role: string };
 

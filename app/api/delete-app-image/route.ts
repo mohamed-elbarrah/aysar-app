@@ -4,6 +4,8 @@ import { requireAdmin } from "@/app/lib/api-utils";
 import { existsSync } from "fs";
 import { join } from "path";
 
+export const dynamic = "force-dynamic";
+
 const BUCKET_NAME = "app-section-images";
 
 function getServiceSupabase() {

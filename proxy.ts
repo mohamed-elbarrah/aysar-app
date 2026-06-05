@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "aysar-dev-secret-change-in-production";
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === "production") {
+    throw new Error("JWT_SECRET environment variable is required in production");
+  }
+  return secret || "aysar-dev-secret-change-in-production";
+}
+
+const JWT_SECRET = getJwtSecret();
 
 function verifyToken(request: NextRequest): { userId: string; email: string; role: string } | null {
   const token = request.cookies.get("token")?.value;
@@ -13,8 +21,24 @@ function verifyToken(request: NextRequest): { userId: string; email: string; rol
   }
 }
 
+function redirectToLogin(request: NextRequest): NextResponse {
+  const loginUrl = request.nextUrl.clone();
+  loginUrl.pathname = "/login";
+  loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
+  return NextResponse.redirect(loginUrl);
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Dashboard pages: redirect unauthenticated users to login
+  if (pathname.startsWith("/dashboard")) {
+    const payload = verifyToken(request);
+    if (!payload) {
+      return redirectToLogin(request);
+    }
+    return NextResponse.next();
+  }
 
   if (request.method === "OPTIONS") {
     return NextResponse.next();
@@ -69,5 +93,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: ["/dashboard/:path*", "/api/:path*"],
 };

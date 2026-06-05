@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyAuth } from "@/app/lib/api-utils";
 import { supabase } from "@/app/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const payload = verifyAuth(request);
   if (!payload) {

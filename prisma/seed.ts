@@ -16,6 +16,7 @@ const supabase = createClient(
 async function main() {
   const seedDataPath = path.resolve(__dirname, "seed-data.json");
   const raw = fs.readFileSync(seedDataPath, "utf-8");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: Record<string, any[]> = JSON.parse(raw);
 
   const adminUser = data.users[0];

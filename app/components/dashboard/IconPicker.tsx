@@ -3,6 +3,7 @@
 import { useState, useRef, useMemo, useCallback } from "react";
 import { icons } from "lucide-react";
 import { IconPreview } from "./IconPreview";
+import Image from "next/image";
 import { Upload, X, Search, Loader2 } from "lucide-react";
 
 const DEFAULT_ICONS = [
@@ -138,6 +139,7 @@ export function IconPicker({
                   setOpen(false);
                   setSearch("");
                 }}
+                aria-label="إغلاق"
                 className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#f5f6f9] transition-colors"
               >
                 <X className="w-4 h-4 text-[#6b7a94]" />
@@ -292,10 +294,13 @@ export function IconPicker({
                           className="w-8 h-8 rounded-md flex items-center justify-center mx-auto overflow-hidden"
                           style={{ backgroundColor: iconBg }}
                         >
-                          <img
+                          <Image
                             src={url}
-                            alt=""
+                            alt="أيقونة مرفوعة"
+                            width={32}
+                            height={32}
                             className="max-w-full max-h-full object-contain"
+                            unoptimized
                           />
                         </div>
                       </button>

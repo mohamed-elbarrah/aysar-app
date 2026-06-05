@@ -3,6 +3,8 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 
+export const dynamic = "force-dynamic";
+
 const ALLOWED_TYPES = ["image/svg+xml", "image/png", "image/jpeg", "image/webp"];
 const MAX_SIZE_SVG = 100 * 1024;
 const MAX_SIZE_RASTER = 500 * 1024;

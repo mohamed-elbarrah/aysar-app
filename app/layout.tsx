@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
-import { getSiteSettings } from "@/app/lib/settings-data";
+import { getSiteSettings, resolveAbsoluteUrl } from "@/app/lib/settings-data";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +25,7 @@ function getFaviconMeta(url: string): { type?: string; sizes?: string } {
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const faviconUrl = settings.faviconUrl || undefined;
+  const ogImageUrl = resolveAbsoluteUrl(settings.logoUrl);
 
   const icons: Metadata["icons"] = faviconUrl
     ? {
@@ -40,12 +41,24 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: settings.siteTitle,
-    description: settings.extractedMeta.description || settings.siteDescription,
-    keywords: settings.extractedMeta.keywords || settings.seoKeywords,
+    description: settings.siteDescription,
+    keywords: settings.seoKeywords,
     icons,
-    ...(settings.extractedMeta.openGraph && {
-      openGraph: settings.extractedMeta.openGraph as Metadata["openGraph"],
-    }),
+    openGraph: {
+      siteName: settings.siteTitle,
+      title: settings.siteTitle,
+      description: settings.siteDescription,
+      url: settings.siteUrl,
+      locale: "ar_SA",
+      type: "website",
+      ...(ogImageUrl && { images: [{ url: ogImageUrl }] }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: settings.siteTitle,
+      description: settings.siteDescription,
+      ...(ogImageUrl && { images: [ogImageUrl] }),
+    },
   };
 }
 

@@ -3,13 +3,13 @@
 import { useEffect, useCallback, useState, useRef } from "react";
 import { useDashboard } from "@/app/components/dashboard/DashboardContext";
 import { Input, Textarea } from "@/app/components/ui/Input";
-import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
+
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
 import { PLANS, FAQ_ITEMS, COMPARE_ROWS } from "@/app/lib/dashboard/placeholders";
 import { YEARLY_DISCOUNT_DEFAULT } from "@/lib/plans-data";
-import type { Plan, FAQItem, CompareTableData, CompareColumn, CompareRow } from "@/lib/plans-data";
+import type { Plan, FAQItem, CompareTableData, CompareRow } from "@/lib/plans-data";
 import { ScrollText, ChevronUp, Loader2, Plus, Trash2, GripVertical } from "lucide-react";
 import { ColorPicker } from "@/app/components/dashboard/ColorPicker";
 
@@ -135,10 +135,6 @@ function BannerSection({ data: initial, onChange }: {
   onChange: (d: PlansPageData["hero"]) => void;
 }) {
   const [data, setData] = useState(initial);
-  
-  useEffect(() => {
-    setData(initial);
-  }, [initial]);
 
   const handleChange = useCallback((patch: Partial<PlansPageData["hero"]>) => {
     const newData = { ...data, ...patch };
@@ -177,14 +173,6 @@ function PlansSection({ data: initial, yearlyDiscountPercent, onPlansChange, onD
 }) {
   const [plans, setPlans] = useState<Plan[]>(initial);
   const [discount, setDiscount] = useState(yearlyDiscountPercent);
-
-  useEffect(() => {
-    setPlans(initial);
-  }, [initial]);
-
-  useEffect(() => {
-    setDiscount(yearlyDiscountPercent);
-  }, [yearlyDiscountPercent]);
 
   const handleDiscountChange = (v: number) => {
     setDiscount(v);
@@ -311,10 +299,6 @@ function CompareSection({ data: initial, onChange }: {
 }) {
   const [compare, setCompare] = useState<CompareTableData>(initial);
 
-  useEffect(() => {
-    setCompare(initial);
-  }, [initial]);
-
   const notifyChange = (newData: CompareTableData) => {
     setCompare(newData);
     onChange(newData);
@@ -338,7 +322,8 @@ function CompareSection({ data: initial, onChange }: {
     n.columns = n.columns.filter((c) => c.id !== colId);
     n.rows = n.rows.map((row) => {
       if (row.type === "feature") {
-        const { [colId]: _, ...rest } = row.values;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [colId]: _removed, ...rest } = row.values;
         return { ...row, values: rest };
       }
       return row;
@@ -510,10 +495,6 @@ function FAQSection({ data: initial, onChange }: {
 }) {
   const [items, setItems] = useState<FAQItem[]>(initial);
   const dragIdx = useRef<number | null>(null);
-
-  useEffect(() => {
-    setItems(initial);
-  }, [initial]);
 
   const notifyChange = (newItems: FAQItem[]) => {
     setItems(newItems);

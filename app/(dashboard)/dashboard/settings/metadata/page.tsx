@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { Input, Textarea } from "@/app/components/ui/Input";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
 import { SaveBar } from "@/app/components/dashboard/SaveBar";
+import Image from "next/image";
 import { Loader2, Upload, ImageIcon, X } from "lucide-react";
 import { SITE_SETTINGS } from "@/app/lib/dashboard/placeholders";
 
@@ -164,10 +165,13 @@ export default function MetadataSettingsPage() {
                 <Loader2 className="w-6 h-6 animate-spin text-[#6b7a94]" />
               ) : (
                 <>
-                  <img
+                  <Image
                     src={data.logoUrl || "/logo.png"}
-                    alt="Logo"
+                    alt="شعار الموقع"
+                    width={140}
+                    height={48}
                     className="max-w-[140px] max-h-[48px] object-contain"
+                    unoptimized
                     onError={(e) => {
                       const img = e.target as HTMLImageElement;
                       img.style.display = "none";
@@ -216,10 +220,13 @@ export default function MetadataSettingsPage() {
                 <Loader2 className="w-6 h-6 animate-spin text-[#6b7a94]" />
               ) : (
                 <>
-                  <img
+                  <Image
                     src={data.faviconUrl || "/logo.png"}
-                    alt="Favicon"
+                    alt="أيقونة الموقع"
+                    width={40}
+                    height={40}
                     className="w-10 h-10 object-contain"
+                    unoptimized
                     onError={(e) => {
                       const img = e.target as HTMLImageElement;
                       img.style.display = "none";

@@ -115,10 +115,6 @@ export default function ContactPageEditor() {
 
 function BannerSection({ data: initial, onChange }: { data: typeof CONTACT_HERO; onChange: (d: typeof CONTACT_HERO) => void }) {
   const [data, setData] = useState(initial);
-  
-  useEffect(() => {
-    setData(initial);
-  }, [initial]);
 
   const handleChange = useCallback((patch: Partial<typeof CONTACT_HERO>) => {
     const newData = { ...data, ...patch };
@@ -158,13 +154,6 @@ function FormSection({ data, onFieldsChange, onScriptChange, onReplacedChange, o
   const [script, setScript] = useState(data.thirdPartyFormScript);
   const [replaced, setReplaced] = useState(data.formReplaced);
   const [successMsg, setSuccessMsg] = useState(data.successMessage);
-
-  useEffect(() => {
-    setFields(data.formFields);
-    setScript(data.thirdPartyFormScript);
-    setReplaced(data.formReplaced);
-    setSuccessMsg(data.successMessage);
-  }, [data]);
 
   return (
     <section id="form">
@@ -234,10 +223,6 @@ function FormSection({ data, onFieldsChange, onScriptChange, onReplacedChange, o
 function ContactInfoSection({ data: initial, onChange }: { data: typeof CONTACT_PAGE_INFO; onChange: (d: typeof CONTACT_PAGE_INFO) => void }) {
   const [data, setData] = useState(initial);
 
-  useEffect(() => {
-    setData(initial);
-  }, [initial]);
-
   const handleChange = useCallback((patch: Partial<typeof CONTACT_PAGE_INFO>) => {
     const newData = { ...data, ...patch };
     setData(newData);
@@ -260,11 +245,6 @@ function ContactInfoSection({ data: initial, onChange }: { data: typeof CONTACT_
 
 function InquiryOptionsSection({ data: initial, onChange }: { data: typeof INQUIRY_OPTIONS; onChange: (d: typeof INQUIRY_OPTIONS) => void }) {
   const [items, setItems] = useState(initial);
-  const dragIdx = useRef<number | null>(null);
-
-  useEffect(() => {
-    setItems(initial);
-  }, [initial]);
 
   const notifyChange = (newItems: typeof INQUIRY_OPTIONS) => {
     setItems(newItems);

@@ -13,11 +13,12 @@ export function ColorPicker({ label, color, onChange }: ColorPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [localColor, setLocalColor] = useState(color || "#ffffff");
   const pickerRef = useRef<HTMLDivElement>(null);
+  const [currentColor, setCurrentColor] = useState(color);
 
-  // Update local color when prop changes
-  useEffect(() => {
+  if (currentColor !== color) {
+    setCurrentColor(color);
     setLocalColor(color || "#ffffff");
-  }, [color]);
+  }
 
   // Close picker when clicking outside
   useEffect(() => {
@@ -60,6 +61,7 @@ export function ColorPicker({ label, color, onChange }: ColorPickerProps) {
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
+          aria-label="اختيار لون"
           className="w-10 h-10 rounded-lg border-2 border-[#e8edf5] shadow-sm transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#2d2e83] focus:ring-offset-2"
           style={{ backgroundColor: localColor }}
           title="Click to open color picker"

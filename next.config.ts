@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   turbopack: {},
   webpack: (config, { isServer }) => {
     if (isServer) {
-      config.externals = [...(config.externals as any[]), "jsdom"];
+      config.externals = [...(config.externals as string[]), "jsdom"];
     }
     return config;
   },

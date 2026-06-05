@@ -2,13 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/app/lib/db";
 import { settingsUpdateSchema } from "@/app/lib/shared-types";
 import { deepMerge, requireAdmin } from "@/app/lib/api-utils";
-import {
-  parseJsonScripts,
-  sanitizeScripts,
-  validateScripts,
-  extractMetaFromScripts,
-  type ScriptRecord,
-} from "@/app/lib/scripts";
+import { parseJsonBlocks, type HtmlBlockRecord } from "@/app/lib/scripts";
 import {
   SITE_SETTINGS,
   NAV_LINKS,
@@ -19,6 +13,10 @@ import {
   PLATFORM_LINKS,
   WORK_HOURS,
 } from "@/app/lib/dashboard/placeholders";
+
+export const dynamic = "force-dynamic";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://aysar.sa";
 
 interface SocialLink { key: string; label: string; url: string; iconUrl?: string }
 
@@ -55,7 +53,7 @@ const DEFAULTS = {
   contact_info: SITE_CONTACT_INFO,
   platform_links: PLATFORM_LINKS,
   work_hours: WORK_HOURS,
-  scripts: [] as ScriptRecord[],
+  scripts: [] as HtmlBlockRecord[],
 };
 
 function toSnakeCase(data: Record<string, unknown>): Record<string, unknown> {
@@ -81,8 +79,7 @@ function toSnakeCase(data: Record<string, unknown>): Record<string, unknown> {
 }
 
 function buildSettingsResponse(row: Record<string, unknown>) {
-  const scripts = parseJsonScripts(row.scripts);
-  const extractedMeta = extractMetaFromScripts(scripts);
+  const scripts = parseJsonBlocks(row.scripts);
 
   return {
     id: row.id,
@@ -91,6 +88,7 @@ function buildSettingsResponse(row: Record<string, unknown>) {
     faviconUrl: row.favicon_url,
     logoUrl: row.logo_url || SITE_SETTINGS.logoUrl,
     seoKeywords: row.seo_keywords,
+    siteUrl: SITE_URL,
     navLinks: Array.isArray(row.nav_links) ? row.nav_links : [...NAV_LINKS],
     socialLinks: normalizeSocialLinks(row.social_links),
     appLinks: normalizeObjectField(row.app_links, APP_LINKS_DEFAULTS),
@@ -99,7 +97,6 @@ function buildSettingsResponse(row: Record<string, unknown>) {
     platformLinks: normalizeObjectField(row.platform_links, PLATFORM_LINKS),
     workHours: normalizeObjectField(row.work_hours, WORK_HOURS),
     scripts,
-    extractedMeta,
     updatedAt: row.updated_at,
   };
 }
@@ -119,6 +116,7 @@ export async function GET() {
       faviconUrl: SITE_SETTINGS.faviconUrl,
       logoUrl: SITE_SETTINGS.logoUrl,
       seoKeywords: SITE_SETTINGS.seoKeywords,
+      siteUrl: SITE_URL,
       navLinks: NAV_LINKS,
       socialLinks: [...SOCIAL_LINKS],
       appLinks: APP_LINKS_DEFAULTS,
@@ -127,7 +125,6 @@ export async function GET() {
       platformLinks: PLATFORM_LINKS,
       workHours: WORK_HOURS,
       scripts: [],
-      extractedMeta: {},
       updatedAt: new Date().toISOString(),
     };
     return NextResponse.json({ success: true, data });
@@ -160,18 +157,7 @@ export async function PATCH(request: NextRequest) {
   const snakeData = toSnakeCase(parsed.data as Record<string, unknown>);
 
   if (Array.isArray(snakeData.scripts)) {
-    const scripts = parseJsonScripts(snakeData.scripts);
-    const sanitized = sanitizeScripts(scripts);
-    const { valid, warnings } = validateScripts(sanitized);
-
-    if (warnings.length > 0) {
-      return NextResponse.json(
-        { success: false, error: "سكريبتات غير صالحة", warnings },
-        { status: 422 }
-      );
-    }
-
-    snakeData.scripts = valid;
+    snakeData.scripts = parseJsonBlocks(snakeData.scripts);
   }
 
   const merged = deepMerge(current, snakeData);

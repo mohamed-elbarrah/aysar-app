@@ -155,6 +155,7 @@ function NavItemComponent({
               e.stopPropagation();
               onToggle();
             }}
+            aria-label="توسيع القائمة"
             className="p-0.5 rounded hover:bg-white/10 transition-colors"
           >
             <ChevronDown

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { StatCard } from "@/app/components/dashboard/StatCard";
-import { LayoutGrid, MessageCircle, Layers, CreditCard, Home, FileText, Phone, Settings, BookOpen } from "lucide-react";
+import { LayoutGrid, MessageCircle, Layers, CreditCard } from "lucide-react";
 
 export default function DashboardPage() {
   const [unreadCount, setUnreadCount] = useState<number | null>(null);
@@ -47,7 +47,7 @@ export default function DashboardPage() {
         <ul className="space-y-3 text-sm text-[#6b7a94]">
           <li className="flex items-start gap-2">
             <span className="text-[#1a9a5a] font-bold mt-0.5">1.</span>
-            <span>أضغط على زر "حفظ التغييرات" الموجود في الزاوية السفلية بعد إتمام أي تعديل</span>
+            <span>أضغط على زر &ldquo;حفظ التغييرات&rdquo; الموجود في الزاوية السفلية بعد إتمام أي تعديل</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-[#1a9a5a] font-bold mt-0.5">2.</span>
@@ -89,34 +89,5 @@ function QuickAccessCard({ title, href, description }: { title: string; href: st
       <h3 className="font-bold text-[#0c2954] mb-1">{title}</h3>
       <p className="text-sm text-[#6b7a94]">{description}</p>
     </a>
-  );
-}
-
-function InstructionCard({
-  title,
-  description,
-  icon: Icon,
-  color,
-}: {
-  title: string;
-  description: string;
-  icon: typeof Home;
-  color: string;
-}) {
-  return (
-    <div className="bg-[#f8f9fc] rounded-xl border border-[#e8edf5] p-5">
-      <div className="flex items-start gap-3">
-        <div
-          className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-          style={{ backgroundColor: `${color}15` }}
-        >
-          <Icon className="w-5 h-5" style={{ color }} />
-        </div>
-        <div>
-          <h3 className="font-bold text-[#0c2954] mb-1">{title}</h3>
-          <p className="text-sm text-[#6b7a94] leading-relaxed">{description}</p>
-        </div>
-      </div>
-    </div>
   );
 }

@@ -11,6 +11,8 @@ import {
   CTA_SECTION,
 } from "@/app/lib/dashboard/placeholders";
 
+export const dynamic = "force-dynamic";
+
 const DEFAULTS = {
   hero: HOME_HERO,
   feature_sections: FEATURE_SECTIONS,

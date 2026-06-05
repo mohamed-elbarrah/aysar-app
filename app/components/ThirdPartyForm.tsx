@@ -1,77 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Script from "next/script";
-import DOMPurify from "isomorphic-dompurify";
-
-interface ParsedNode {
-  id: string;
-  type: "external" | "inline" | "html";
-  src?: string;
-  code?: string;
-  html?: string;
-}
-
-const SANITIZE_CONFIG = {
-  ALLOWED_TAGS: ["script", "link", "div", "span", "form", "input", "button", "textarea", "select", "option", "label", "style", "iframe"],
-  ALLOWED_ATTR: [
-    "src", "href", "rel", "type", "async", "defer", "id", "class",
-    "name", "value", "placeholder", "action", "method", "target",
-    "style", "width", "height", "frameborder", "loading",
-    "sandbox", "referrerpolicy", "data-", "aria-",
-    "onsubmit", "onclick", "onload",
-  ],
-  ALLOW_DATA_ATTR: true,
-};
-
-let nodeIdCounter = 0;
-function nextNodeId(): string {
-  return `tpf_${++nodeIdCounter}_${Date.now().toString(36)}`;
-}
-
-function parseFormScript(scriptHtml: string): ParsedNode[] {
-  if (!scriptHtml || !scriptHtml.trim()) return [];
-
-  const nodes: ParsedNode[] = [];
-  const doc = DOMPurify.sanitize(scriptHtml, SANITIZE_CONFIG);
-
-  const parser = typeof DOMParser !== "undefined" ? new DOMParser() : null;
-  if (!parser) return [];
-
-  const parsed = parser.parseFromString(`<div>${doc}</div>`, "text/html");
-  const container = parsed.body.firstElementChild;
-  if (!container) return [];
-
-  for (let i = 0; i < container.children.length; i++) {
-    const el = container.children[i] as HTMLElement;
-    const tag = el.tagName.toLowerCase();
-
-    if (tag === "script") {
-      const src = el.getAttribute("src");
-      if (src) {
-        nodes.push({
-          id: nextNodeId(),
-          type: "external",
-          src,
-        });
-      } else {
-        nodes.push({
-          id: nextNodeId(),
-          type: "inline",
-          code: el.textContent || "",
-        });
-      }
-    } else {
-      nodes.push({
-        id: nextNodeId(),
-        type: "html",
-        html: el.outerHTML,
-      });
-    }
-  }
-
-  return nodes;
-}
+import { useEffect, useRef, useState, useCallback } from "react";
 
 function LoadingSkeleton() {
   return (
@@ -86,72 +15,79 @@ function LoadingSkeleton() {
 }
 
 export function ThirdPartyForm({ scriptHtml }: { scriptHtml: string }) {
-  const [nodes, setNodes] = useState<ParsedNode[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [loaded, setLoaded] = useState(false);
-  const prevScriptRef = useRef(scriptHtml);
+  const mountedRef = useRef(true);
+
+  const hasVisibleContent = useCallback((container: HTMLElement): boolean => {
+    for (const child of container.children) {
+      const tag = child.tagName.toLowerCase();
+      if (tag === "script") continue;
+      if ((child as HTMLElement).offsetHeight > 0) return true;
+    }
+    return false;
+  }, []);
 
   useEffect(() => {
-    if (prevScriptRef.current === scriptHtml && nodes.length > 0) return;
-    prevScriptRef.current = scriptHtml;
+    mountedRef.current = true;
+    if (!scriptHtml?.trim()) return;
 
-    if (!scriptHtml) {
-      setNodes([]);
+    const container = containerRef.current;
+    if (!container) return;
+
+    setLoaded(false);
+    container.innerHTML = scriptHtml;
+
+    if (hasVisibleContent(container)) {
       setLoaded(true);
       return;
     }
 
-    const parsed = parseFormScript(scriptHtml);
-    setNodes(parsed);
-    setLoaded(parsed.filter((n) => n.type === "html").length > 0 || parsed.length === 0);
-  }, [scriptHtml, nodes.length]);
+    const observer = new MutationObserver(() => {
+      if (!mountedRef.current) return;
+      if (hasVisibleContent(container)) {
+        setLoaded(true);
+        observer.disconnect();
+        clearTimeout(fallback);
+      }
+    });
+    observer.observe(container, { childList: true, subtree: true });
 
-  function handleScriptLoad() {
-    setLoaded(true);
+    const fallback = setTimeout(() => {
+      if (!mountedRef.current) return;
+      setLoaded(true);
+      observer.disconnect();
+    }, 3000);
+
+    const scripts = container.querySelectorAll("script");
+    scripts.forEach((oldScript) => {
+      const newScript = document.createElement("script");
+      Array.from(oldScript.attributes).forEach((attr) => {
+        newScript.setAttribute(attr.name, attr.value);
+      });
+      newScript.textContent = oldScript.textContent;
+      oldScript.parentNode?.replaceChild(newScript, oldScript);
+    });
+
+    return () => {
+      mountedRef.current = false;
+      observer.disconnect();
+      clearTimeout(fallback);
+    };
+  }, [scriptHtml, hasVisibleContent]);
+
+  if (!scriptHtml?.trim()) {
+    return null;
   }
-
-  const htmlNodes = nodes.filter((n) => n.type === "html");
 
   return (
     <div className="relative">
       {!loaded && <LoadingSkeleton />}
       <div
+        ref={containerRef}
         className="transition-opacity duration-300"
-        style={{
-          opacity: loaded ? 1 : 0,
-          height: loaded ? "auto" : 0,
-          overflow: loaded ? "visible" : "hidden",
-        }}
-      >
-        {htmlNodes.map((node) => (
-          <div key={node.id} dangerouslySetInnerHTML={{ __html: node.html || "" }} />
-        ))}
-      </div>
-      {nodes.map((node) => {
-        if (node.type === "external" && node.src) {
-          return (
-            <Script
-              key={node.id}
-              src={node.src}
-              strategy="lazyOnload"
-              onLoad={handleScriptLoad}
-              onError={handleScriptLoad}
-            />
-          );
-        }
-        if (node.type === "inline" && node.code) {
-          return (
-            <Script
-              key={node.id}
-              strategy="lazyOnload"
-              onLoad={handleScriptLoad}
-              onError={handleScriptLoad}
-            >
-              {node.code}
-            </Script>
-          );
-        }
-        return null;
-      })}
+        style={{ opacity: loaded ? 1 : 0 }}
+      />
     </div>
   );
 }

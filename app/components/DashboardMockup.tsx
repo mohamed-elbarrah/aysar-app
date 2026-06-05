@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import {
@@ -159,6 +159,7 @@ function AnimatedProgressBar({
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function DashboardMockup({ logoUrl }: { logoUrl?: string }) {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });

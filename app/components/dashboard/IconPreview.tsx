@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { icons } from "lucide-react";
 
 interface IconPreviewProps {
@@ -23,10 +24,13 @@ export function IconPreview({
         className={`flex items-center justify-center ${className}`}
         style={{ width: size, height: size }}
       >
-        <img
+        <Image
           src={iconUrl}
-          alt=""
+          alt="أيقونة"
+          width={size}
+          height={size}
           className="max-w-full max-h-full object-contain"
+          unoptimized
         />
       </div>
     );

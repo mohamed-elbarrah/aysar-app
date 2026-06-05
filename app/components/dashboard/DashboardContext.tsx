@@ -527,7 +527,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       const pagesToSave = ["home", "plans", "contact", "policies", "settings"] as const;
       
       for (const page of pagesToSave) {
-        const pageResults = await savePage(page);
+        await savePage(page);
         // Note: savePage updates results internally
       }
 

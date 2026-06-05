@@ -3,7 +3,7 @@
 import { useEffect, useCallback, useState, useRef } from "react";
 import { useDashboard } from "@/app/components/dashboard/DashboardContext";
 import { Input, Textarea } from "@/app/components/ui/Input";
-import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
+
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
 import { DynamicList } from "@/app/components/dashboard/DynamicList";
 import { IconPicker } from "@/app/components/dashboard/IconPicker";
@@ -157,10 +157,6 @@ function BannerSection({ data: initial, onChange }: {
   onChange: (data: typeof HOME_HERO) => void;
 }) {
   const [data, setData] = useState(initial);
-  
-  useEffect(() => {
-    setData(initial);
-  }, [initial]);
 
   const handleChange = useCallback((patch: Partial<typeof HOME_HERO>) => {
     const newData = { ...data, ...patch };
@@ -210,10 +206,6 @@ function FeaturesSection({ data: initial, onChange }: {
 }) {
   const [sectionsData, setSectionsData] = useState(initial);
 
-  useEffect(() => {
-    setSectionsData(initial);
-  }, [initial]);
-
   const updateSection = useCallback((idx: number, patch: Partial<(typeof FEATURE_SECTIONS)[number]>) => {
     const newData = [...sectionsData];
     newData[idx] = { ...newData[idx], ...patch };
@@ -259,10 +251,6 @@ function BentoSection({ data: initial, onChange }: {
   onChange: (data: typeof BENTO_FEATURES) => void;
 }) {
   const [features, setFeatures] = useState(initial);
-
-  useEffect(() => {
-    setFeatures(initial);
-  }, [initial]);
 
   const handleChange = useCallback((idx: number, patch: Partial<BentoFeature>) => {
     const newData = [...features];
@@ -369,10 +357,6 @@ function OverviewSection({ data: initial, onChange }: {
 }) {
   const [data, setData] = useState(initial);
 
-  useEffect(() => {
-    setData(initial);
-  }, [initial]);
-
   const handleChange = useCallback((patch: Partial<typeof PROJECT_OVERVIEW>) => {
     const newData = { ...data, ...patch };
     setData(newData);
@@ -416,12 +400,6 @@ function AppSectionEditor({ data: initial, onChange }: {
   const [data, setData] = useState(initial);
   const [leftPhoneImage, setLeftPhoneImage] = useState<string | null>(initial.app_images?.left_phone || null);
   const [rightPhoneImage, setRightPhoneImage] = useState<string | null>(initial.app_images?.right_phone || null);
-
-  useEffect(() => {
-    setData(initial);
-    setLeftPhoneImage(initial.app_images?.left_phone || null);
-    setRightPhoneImage(initial.app_images?.right_phone || null);
-  }, [initial]);
 
   const handleChange = useCallback((patch: Partial<typeof APP_SECTION>) => {
     const newData = { ...data, ...patch };
@@ -550,10 +528,6 @@ function CTASectionEditor({ data: initial, onChange }: {
   onChange: (data: typeof CTA_SECTION) => void;
 }) {
   const [data, setData] = useState(initial);
-
-  useEffect(() => {
-    setData(initial);
-  }, [initial]);
 
   const handleChange = useCallback((patch: Partial<typeof CTA_SECTION>) => {
     const newData = { ...data, ...patch };

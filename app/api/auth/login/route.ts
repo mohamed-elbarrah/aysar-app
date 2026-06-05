@@ -3,16 +3,11 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { supabase } from "@/app/lib/db";
 import { loginSchema } from "@/app/lib/shared-types";
+import { setAuthCookie, getJwtSecret } from "@/app/lib/api-utils";
 
-const JWT_SECRET = process.env.JWT_SECRET || "aysar-dev-secret-change-in-production";
+export const dynamic = "force-dynamic";
 
-const COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const,
-  path: "/",
-  maxAge: 7 * 24 * 60 * 60,
-};
+const JWT_SECRET = getJwtSecret();
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,8 +48,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    response.cookies.set("token", token, COOKIE_OPTIONS);
-    return response;
+    return setAuthCookie(token, response);
   } catch (error) {
     console.error("[auth/login error]", error);
     return NextResponse.json({ success: false, error: "حدث خطأ في الخادم" }, { status: 500 });

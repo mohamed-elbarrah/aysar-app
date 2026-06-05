@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { PolicyData } from "@/lib/policy-data";
 import { Badge } from "@/app/components/ui/Badge";
@@ -144,7 +145,7 @@ export default function PolicyTemplate({ data }: { data: PolicyData }) {
         <div className="glow-orb glow-orb-mint w-[400px] h-[300px] bottom-0 left-[20%]" />
         <div className="policy-hero-inner">
           <div className="page-breadcrumb anim-fade-in-up">
-            <a href="/">الرئيسية</a>
+            <Link href="/">الرئيسية</Link>
             <span className="page-breadcrumb-sep">›</span>
             <span>{data.breadcrumb}</span>
           </div>

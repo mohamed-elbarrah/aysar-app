@@ -146,7 +146,7 @@ function FeatureContent({
         variants={itemVariants}
         className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-[5px] text-xs font-semibold mb-5"
         style={{
-          backgroundColor: "rgb(240, 244, 255)",
+          backgroundColor: badgeBgColor,
           color: "rgb(45, 46, 131)",
           opacity: 1,
           transform: "none",

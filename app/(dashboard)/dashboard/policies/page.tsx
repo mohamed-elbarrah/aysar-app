@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDashboard } from "@/app/components/dashboard/DashboardContext";
 import { Input, Textarea } from "@/app/components/ui/Input";
 import { DashboardButton } from "@/app/components/dashboard/DashboardButton";
@@ -135,8 +135,6 @@ function VersionSection({ data, onChange }: { data: PolicyData; onChange: (v: Pa
 
 function PartsSection({ parts, onChange }: { parts: PolicyPart[]; onChange: (parts: PolicyPart[]) => void }) {
   const [local, setLocal] = useState<PolicyPart[]>(parts);
-
-  useEffect(() => { setLocal(parts); }, [parts]);
 
   const addPart = () => {
     const num = local.length + 1;

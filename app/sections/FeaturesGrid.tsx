@@ -2,6 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import Image from "next/image";
 import {
   Bell,
   Globe,
@@ -133,10 +134,13 @@ export function FeaturesGrid({ features: featureData }: FeaturesGridProps) {
                     style={{ backgroundColor: feat.iconBg }}
                   >
                     {feat.iconUrl ? (
-                      <img
+                      <Image
                         src={feat.iconUrl}
-                        alt=""
-                        className="w-5 h-5 object-contain"
+                        alt={feat.title}
+                        width={20}
+                        height={20}
+                        className="object-contain"
+                        unoptimized
                       />
                     ) : (
                       <Icon

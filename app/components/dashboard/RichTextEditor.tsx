@@ -13,12 +13,12 @@ export function RichTextEditor({ value, onChange, className, placeholder }: Rich
   const editorRef = useRef<HTMLDivElement>(null);
   const [focused, setFocused] = useState(false);
   const lastValueRef = useRef(value);
-  const didMount = useRef(false);
 
-  if (!didMount.current && editorRef.current) {
-    editorRef.current.innerHTML = value;
-    didMount.current = true;
-  }
+  useEffect(() => {
+    if (editorRef.current && !editorRef.current.innerHTML && value) {
+      editorRef.current.innerHTML = value;
+    }
+  }, [value]);
 
   useEffect(() => {
     if (editorRef.current && value !== editorRef.current.innerHTML && value !== lastValueRef.current) {
@@ -72,6 +72,7 @@ export function RichTextEditor({ value, onChange, className, placeholder }: Rich
               type="button"
               onClick={() => exec(btn.cmd, btn.arg || "")}
               title={btn.title}
+              aria-label={btn.title}
               className="px-2 py-1 rounded text-xs font-semibold text-[#6b7a94] hover:bg-white hover:text-[#0c2954] transition-colors border border-transparent hover:border-[#e8edf5]"
             >
               {btn.label}

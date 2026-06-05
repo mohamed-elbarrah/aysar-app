@@ -6,6 +6,8 @@ import { join } from "path";
 import { existsSync } from "fs";
 import sharp from "sharp";
 
+export const dynamic = "force-dynamic";
+
 const BUCKET_NAME = "site-assets";
 const ALLOWED_TYPES = ["image/svg+xml", "image/png", "image/jpeg", "image/webp"];
 const MAX_SIZE = 2 * 1024 * 1024;

@@ -1,7 +1,7 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { getSiteSettings } from "@/app/lib/settings-data";
-import { ScriptRenderer } from "@/app/components/ScriptRenderer";
+import { HtmlBlockRenderer } from "@/app/components/HtmlBlockRenderer";
 import { ScriptErrorBoundary } from "@/app/components/ScriptErrorBoundary";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +16,7 @@ export default async function PublicLayout({
   return (
     <>
       <ScriptErrorBoundary>
-        <ScriptRenderer scripts={settings.scripts} location="head" />
+        <HtmlBlockRenderer blocks={settings.scripts} location="head" />
       </ScriptErrorBoundary>
       <Navbar navLinks={settings.navLinks} platformLinks={settings.platformLinks} logoUrl={settings.logoUrl || undefined} />
       <main className="flex-1 flex flex-col">{children}</main>
@@ -28,7 +28,7 @@ export default async function PublicLayout({
         logoUrl={settings.logoUrl || undefined}
       />
       <ScriptErrorBoundary>
-        <ScriptRenderer scripts={settings.scripts} location="body" />
+        <HtmlBlockRenderer blocks={settings.scripts} location="body" />
       </ScriptErrorBoundary>
     </>
   );

@@ -28,34 +28,6 @@ export interface PolicyData {
   }[];
 }
 
-function sectionToHtml(sec: {
-  id: string; number: string; eyebrow: string; title: string;
-  content: (SecBlock | ListB | TableB | AlertB)[];
-}): PolicyPart {
-  const blocksHtml = sec.content.map((block) => {
-    if (block.type === "section") return block.paragraphs.map((p) => `<p>${p}</p>`).join("");
-    if (block.type === "list") return `<ul class="policy-list">${block.items.map((i) => `<li>${i}</li>`).join("")}</ul>`;
-    if (block.type === "table") {
-      const headers = `<thead><tr>${block.headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead>`;
-      const rows = `<tbody>${block.rows.map((r) => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td></tr>`).join("")}</tbody>`;
-      return `<table class="policy-table">${headers}${rows}</table>`;
-    }
-    if (block.type === "alert") {
-      const emoji = { blue: "&#x2139;&#xFE0F;", green: "&#x2705;", amber: "&#x26A0;&#xFE0F;" }[block.variant];
-      return `<div class="alert-card ${block.variant}"><div class="alert-icon">${emoji}</div><div class="alert-body"><strong>${block.label}</strong><p>${block.text}</p></div></div>`;
-    }
-    return "";
-  }).join("\n");
-
-  return { id: sec.id, headline: sec.title, content: blocksHtml };
-}
-
-// Legacy block types (internal, used only for the conversion below)
-type SecBlock = { type: "section"; paragraphs: string[] };
-type ListB = { type: "list"; items: string[] };
-type TableB = { type: "table"; headers: string[]; rows: [string, string][] };
-type AlertB = { type: "alert"; variant: "blue" | "green" | "amber"; label: string; text: string };
-
 const SHARED_PARTS: PolicyPart[] = [
   {
     id: "sec-intro", headline: "تعريف الأطراف والمنصة",

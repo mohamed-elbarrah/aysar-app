@@ -4,6 +4,8 @@ import { plansPageUpdateSchema } from "@/app/lib/shared-types";
 import { deepMerge, requireAdmin } from "@/app/lib/api-utils";
 import { PLANS, COMPARE_ROWS, FAQ_ITEMS, isOldCompareFormat, migrateCompareRows, YEARLY_DISCOUNT_DEFAULT } from "@/lib/plans-data";
 
+export const dynamic = "force-dynamic";
+
 const PLANS_HERO_DEFAULTS = {
   badge: "الأسعار والباقات",
   title: "اختر الباقة",

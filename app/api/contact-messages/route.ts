@@ -3,6 +3,8 @@ import { supabase } from "@/app/lib/db";
 import { contactMessageSubmitSchema } from "@/app/lib/shared-types";
 import { verifyAuth } from "@/app/lib/api-utils";
 
+export const dynamic = "force-dynamic";
+
 function inquiryLabel(inquiry: string): string {
   const labels: Record<string, string> = {
     demo: "طلب عرض تجريبي",

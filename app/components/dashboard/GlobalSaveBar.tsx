@@ -2,7 +2,7 @@
 
 import { useDashboard } from "./DashboardContext";
 import { DashboardButton } from "./DashboardButton";
-import { Loader2, Check, AlertCircle, X } from "lucide-react";
+import { Loader2, Check, AlertCircle } from "lucide-react";
 import { useState, useCallback } from "react";
 
 const PAGE_LABELS: Record<string, string> = {
@@ -11,35 +11,6 @@ const PAGE_LABELS: Record<string, string> = {
   contact: "صفحة التواصل",
   policies: "الصفحات القانونية",
   settings: "الإعدادات",
-};
-
-const SECTION_LABELS: Record<string, string> = {
-  hero: "البانر",
-  featureSections: "المميزات",
-  bentoFeatures: "شبكة المميزات",
-  projectOverview: "نظرة على المشروع",
-  appSection: "قسم التطبيق",
-  ctaSection: "دعوة للعمل",
-  plans: "الباقات",
-  compareRows: "جدول المقارنة",
-  faqItems: "الأسئلة الشائعة",
-  contactInfo: "معلومات التواصل",
-  channels: "القنوات",
-  inquiryOptions: "خيارات الاستفسار",
-  successMessage: "رسالة النجاح",
-  formFields: "حقول النموذج",
-  thirdPartyFormScript: "كود النموذج الخارجي",
-  formReplaced: "استبدال النموذج",
-  privacy: "سياسة الخصوصية",
-  terms: "شروط الاستخدام",
-  returns: "سياسة الاسترجاع",
-  metadata: "معلومات الموقع",
-  navLinks: "شريط التنقل",
-  footer: "تذييل الموقع",
-  social: "وسائل التواصل",
-  apps: "روابط التطبيق",
-  platform: "روابط المنصة",
-  hours: "ساعات العمل",
 };
 
 export function GlobalSaveBar() {

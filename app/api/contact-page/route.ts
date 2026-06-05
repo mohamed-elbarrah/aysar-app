@@ -6,6 +6,8 @@ import { CONTACT_HERO, CONTACT_PAGE_INFO, CHANNELS } from "@/app/lib/dashboard/p
 import { INQUIRY_OPTIONS } from "@/lib/contact-data";
 import { migrateFormFields, FORM_FIELDS_DEFAULTS, CONTACT_FORM_DEFAULTS } from "@/app/lib/contact-page-data";
 
+export const dynamic = "force-dynamic";
+
 const SUCCESS_MESSAGE_DEFAULT = "تم إرسال رسالتك بنجاح! سنتواصل معك خلال 24 ساعة.";
 
 const CONTACT_DEFAULTS = {

@@ -51,7 +51,9 @@ export function TocMobileAccordion({ data }: { data: PolicyData }) {
   }, [tocItems]);
 
   useEffect(() => {
-    updateActive();
+    requestAnimationFrame(() => {
+      updateActive();
+    });
     window.addEventListener("scroll", updateActive, { passive: true });
     return () => window.removeEventListener("scroll", updateActive);
   }, [updateActive]);

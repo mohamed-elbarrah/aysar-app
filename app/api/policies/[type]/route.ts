@@ -5,6 +5,8 @@ import { deepMerge, requireAdmin } from "@/app/lib/api-utils";
 import { PRIVACY_POLICY, TERMS_OF_USE, RETURN_POLICY } from "@/lib/policy-data";
 import type { PolicyData } from "@/lib/policy-data";
 
+export const dynamic = "force-dynamic";
+
 const TYPE_MAP: Record<string, keyof typeof FALLBACKS> = {
   privacy: "privacy",
   terms: "terms",

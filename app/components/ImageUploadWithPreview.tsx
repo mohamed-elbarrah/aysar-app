@@ -25,34 +25,23 @@ export function ImageUploadWithPreview({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [aspectWarning, setAspectWarning] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const prevCurrentImage = useRef(currentImage);
 
-  /**
-   * When the parent provides a real image URL (after upload & save),
-   * revoke any temporary blob preview so the real image is displayed.
-   *
-   * Note: Setting state inside an effect is generally discouraged by React
-   * lint rules, but this is the standard pattern for synchronizing an
-   * externally-managed value (the prop) with internal derived state (the
-   * temporary blob). The alternative (key-based remount) causes input-ref
-   * loss and UI flicker. We suppress the rule here because the effect has
-   * no external side effects and prevents a stale blob preview.
-   */
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
-    if (currentImage && previewUrl) {
+    if (prevCurrentImage.current !== currentImage && currentImage && previewUrl) {
       URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
     }
-  }, [currentImage]);
+    prevCurrentImage.current = currentImage;
+  }, [currentImage, previewUrl]);
 
-  // Revoke leftover blob on unmount to avoid memory leaks
   useEffect(() => {
     return () => {
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
       }
     };
-  }, []);
+  }, [previewUrl]);
 
   // Display priority: real URL > temp blob > default fallback
   const displayImage = currentImage || previewUrl || defaultImage;
