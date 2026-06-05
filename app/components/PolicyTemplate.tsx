@@ -148,9 +148,11 @@ export default function PolicyTemplate({ data }: { data: PolicyData }) {
             <span className="page-breadcrumb-sep">›</span>
             <span>{data.breadcrumb}</span>
           </div>
-          <div className="page-badge anim-fade-in-up anim-delay-1">
-            <Badge dot>{data.badge}</Badge>
-          </div>
+          {data.badge && (
+            <div className="page-badge anim-fade-in-up anim-delay-1">
+              <Badge dot>{data.badge}</Badge>
+            </div>
+          )}
           <h1 className="text-[clamp(28px,4vw,48px)] font-bold text-white leading-[1.2] mb-4 anim-fade-in-up anim-delay-1" style={{ letterSpacing: "-0.3px" }}>
             {data.title}
           </h1>

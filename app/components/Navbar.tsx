@@ -66,7 +66,7 @@ export default function Navbar({
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-[200] h-[70px] flex items-center transition-all duration-300 ${navBg}`}
-    >
+    >ا
       <div className="container-aysar flex items-center gap-6 w-full">
         <Link href="/" className="flex-shrink-0">
           <Image

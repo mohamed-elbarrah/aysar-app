@@ -25,9 +25,11 @@ function ContactHero({ data }: { data: ContactPageResponse }) {
     <section className="relative gradient-hero pt-[130px] pb-20 px-6 lg:px-10 text-center overflow-hidden noise-overlay">
       <div className="glow-orb glow-orb-indigo w-[600px] h-[400px] -top-[80px] left-1/2 -translate-x-1/2" />
       <Container className="relative z-[1] max-w-[640px] mx-auto">
-        <div className="anim-fade-in-up mb-2">
-          <Badge>{hero.badge}</Badge>
-        </div>
+        {hero.badge && (
+          <div className="anim-fade-in-up mb-2">
+            <Badge>{hero.badge}</Badge>
+          </div>
+        )}
         <h1 className="text-[clamp(32px,5vw,52px)]  font-bold text-white leading-[1.15] tracking-tight mb-4 anim-fade-in-up anim-delay-1">
           {hero.titleLine1}<br />
           <span style={{ color: hero.line2Color || '#ffffff', opacity: hero.line2Opacity !== undefined ? hero.line2Opacity : 0.5 }}>{hero.titleLine2}</span>
