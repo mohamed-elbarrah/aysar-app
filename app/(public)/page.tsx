@@ -1,7 +1,7 @@
 import HeroSection from "../sections/HeroSection";
 import CTASection from "../sections/CTASection";
 import { FeatureSection } from "../components/FeatureSection";
-import { DashboardMockup } from "../components/DashboardMockup";
+import Image from "next/image";
 import { StagesMockup } from "../components/StagesMockup";
 import { MaintenanceMockup } from "../components/MaintenanceMockup";
 import { BookingsMockup } from "../components/BookingsMockup";
@@ -10,8 +10,6 @@ import { FeaturesGrid } from "../sections/FeaturesGrid";
 import { ProjectOverview } from "../sections/ProjectOverview";
 import { AppSection } from "../sections/AppSection";
 import { getHomePageData } from "../lib/home-page-data";
-import { getSiteSettings } from "../lib/settings-data";
-
 export const dynamic = "force-dynamic";
 
 const MOCKUPS = [
@@ -21,13 +19,23 @@ const MOCKUPS = [
   <TemplatesMockup key="templates" />,
 ];
 
-const FEATURE_BG_COLORS = ["bg-white", "bg-[#f7f8fa]", "bg-white", "bg-[#f7f8fa]"];
+const FEATURE_BG_COLORS = [
+  "bg-white",
+  "bg-[#f7f8fa]",
+  "bg-white",
+  "bg-[#f7f8fa]",
+];
 const FEATURE_BADGE_BG_COLORS = ["#f0f4ff", "#feeeee", "#fff7ed", "#fff7ed"];
 
 export default async function Home() {
-  const data = await getHomePageData();
-  const settings = await getSiteSettings();
-  const { hero, featureSections, bentoFeatures, projectOverview, appSection, ctaSection } = data;
+  const {
+    hero,
+    featureSections,
+    bentoFeatures,
+    projectOverview,
+    appSection,
+    ctaSection,
+  } = await getHomePageData();
 
   return (
     <>
@@ -45,11 +53,25 @@ export default async function Home() {
         }
         secondaryCta={
           hero.secondaryCtaLabel
-            ? { label: hero.secondaryCtaLabel, href: hero.secondaryCtaHref || "#" }
+            ? {
+                label: hero.secondaryCtaLabel,
+                href: hero.secondaryCtaHref || "#",
+              }
             : undefined
         }
       >
-        <DashboardMockup logoUrl={settings.logoUrl || undefined} />
+        <Image
+          src="/Screenshot from 2026-07-20 02-04-59.png"
+          alt="نظرة عامة على المنصة"
+          width={1400}
+          height={480}
+          className="w-full max-w-full rounded-lg sm:max-w-[120%] lg:max-w-[1000px] m-auto lg:rounded-t-2xl"
+          style={{
+            boxShadow:
+              "0 8px 40px rgba(26, 154, 90, 0.25), 0 0 60px rgba(26, 154, 90, 0.1)",
+          }}
+          priority
+        />
       </HeroSection>
 
       <div id="features">
@@ -100,12 +122,18 @@ export default async function Home() {
         subtitle={ctaSection.subtitle}
         primaryCta={
           ctaSection.primaryCtaLabel
-            ? { label: ctaSection.primaryCtaLabel, href: ctaSection.primaryCtaHref || "#" }
+            ? {
+                label: ctaSection.primaryCtaLabel,
+                href: ctaSection.primaryCtaHref || "#",
+              }
             : undefined
         }
         secondaryCta={
           ctaSection.secondaryCtaLabel
-            ? { label: ctaSection.secondaryCtaLabel, href: ctaSection.secondaryCtaHref || "#" }
+            ? {
+                label: ctaSection.secondaryCtaLabel,
+                href: ctaSection.secondaryCtaHref || "#",
+              }
             : undefined
         }
         note={ctaSection.note ?? undefined}
