@@ -60,20 +60,18 @@ export default async function Home() {
             : undefined
         }
       >
-        {hero.heroImageUrl && (
-          <Image
-            src={hero.heroImageUrl}
-            alt="نظرة عامة على المنصة"
-            width={1400}
-            height={480}
-            className="w-full max-w-full rounded-lg sm:max-w-[120%] lg:max-w-[1000px] m-auto lg:rounded-t-2xl"
-            style={{
-              boxShadow:
-                "0 8px 40px rgba(26, 154, 90, 0.25), 0 0 60px rgba(26, 154, 90, 0.1)",
-            }}
-            priority
-          />
-        )}
+        <Image
+          src={hero.heroImageUrl || "/aysar-dashboard.png"}
+          alt="نظرة عامة على المنصة"
+          width={1400}
+          height={480}
+          className="w-full max-w-full rounded-lg sm:max-w-[120%] lg:max-w-[1000px] m-auto lg:rounded-t-2xl"
+          style={{
+            boxShadow:
+              "0 8px 40px rgba(26, 154, 90, 0.25), 0 0 60px rgba(26, 154, 90, 0.1)",
+          }}
+          priority
+        />
       </HeroSection>
 
       <div id="features">

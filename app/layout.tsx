@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { getSiteSettings, resolveAbsoluteUrl } from "@/app/lib/settings-data";
+import "@/app/lib/keep-alive";
 
 export const dynamic = "force-dynamic";
 

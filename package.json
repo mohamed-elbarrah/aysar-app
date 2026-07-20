@@ -10,6 +10,7 @@
     "db:seed": "npx tsx prisma/seed.ts",
     "db:update-seed": "npx tsx scripts/update-seed-data.ts",
     "db:dump-sql": "npx tsx scripts/dump-sql.ts",
+    "keep-alive": "npx tsx scripts/keep-alive.ts",
     "postbuild": "npx tsx scripts/check-supabase.ts || true"
   },
   "dependencies": {
@@ -30,6 +31,7 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.16.0",
     "next": "16.2.6",
+    "node-cron": "^4.6.0",
     "react": "19.2.4",
     "react-colorful": "^5.7.0",
     "react-dom": "19.2.4",
@@ -44,6 +46,7 @@
     "@types/bcryptjs": "^3.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
+    "@types/node-cron": "^3.0.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

@@ -12,6 +12,7 @@ interface ImageUploadWithPreviewProps {
   onRemove: () => void;
   aspectRatio?: { width: number; height: number };
   containerClassName?: string;
+  imageClassName?: string;
 }
 
 export function ImageUploadWithPreview({
@@ -22,6 +23,7 @@ export function ImageUploadWithPreview({
   onRemove,
   aspectRatio = { width: 9, height: 19.5 },
   containerClassName = "w-32 h-64",
+  imageClassName = "object-cover",
 }: ImageUploadWithPreviewProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -111,7 +113,7 @@ export function ImageUploadWithPreview({
           src={displayImage}
           alt={label}
           fill
-          className="object-cover"
+          className={imageClassName}
           unoptimized={isExternalUrl(displayImage)}
         />
         {isUploading && (

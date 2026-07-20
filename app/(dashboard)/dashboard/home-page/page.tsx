@@ -228,6 +228,7 @@ function BannerSection({ data: initial, onChange }: {
               handleChange({ heroImageUrl: null });
             }}
             containerClassName="w-full h-52"
+            imageClassName="object-contain"
             aspectRatio={{ width: 1400, height: 480 }}
           />
         </div>
