@@ -11,6 +11,7 @@ interface ImageUploadWithPreviewProps {
   onUpload: (file: File) => Promise<void>;
   onRemove: () => void;
   aspectRatio?: { width: number; height: number };
+  containerClassName?: string;
 }
 
 export function ImageUploadWithPreview({
@@ -20,6 +21,7 @@ export function ImageUploadWithPreview({
   onUpload,
   onRemove,
   aspectRatio = { width: 9, height: 19.5 },
+  containerClassName = "w-32 h-64",
 }: ImageUploadWithPreviewProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -28,7 +30,11 @@ export function ImageUploadWithPreview({
   const prevCurrentImage = useRef(currentImage);
 
   useEffect(() => {
-    if (prevCurrentImage.current !== currentImage && currentImage && previewUrl) {
+    if (
+      prevCurrentImage.current !== currentImage &&
+      currentImage &&
+      previewUrl
+    ) {
       URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
     }
@@ -59,7 +65,7 @@ export function ImageUploadWithPreview({
 
       if (Math.abs(uploadedRatio - expectedRatio) > tolerance) {
         setAspectWarning(
-          `تنبيه: نسبة العرض للارتفاع (${img.width}:${img.height}) تختلف عن نسبة iPhone (${aspectRatio.width}:${aspectRatio.height}). قد يتم قص الصورة أو تمددها.`
+          `تنبيه: نسبة العرض للارتفاع (${img.width}:${img.height}) تختلف عن نسبة iPhone (${aspectRatio.width}:${aspectRatio.height}). قد يتم قص الصورة أو تمددها.`,
         );
       } else {
         setAspectWarning(null);
@@ -98,7 +104,9 @@ export function ImageUploadWithPreview({
       <label className="text-sm font-medium text-navy">{label}</label>
 
       {/* Preview */}
-      <div className="relative w-32 h-64 rounded-2xl overflow-hidden border-2 border-dashed border-[#e8ebf3] bg-[#F4F7FA]">
+      <div
+        className={`relative ${containerClassName} rounded-2xl overflow-hidden border-2 border-dashed border-[#e8ebf3] bg-[#F4F7FA]`}
+      >
         <Image
           src={displayImage}
           alt={label}

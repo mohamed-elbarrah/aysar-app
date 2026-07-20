@@ -157,12 +157,34 @@ function BannerSection({ data: initial, onChange }: {
   onChange: (data: typeof HOME_HERO) => void;
 }) {
   const [data, setData] = useState(initial);
+  const [heroImage, setHeroImage] = useState<string | null>(initial.heroImageUrl || null);
 
   const handleChange = useCallback((patch: Partial<typeof HOME_HERO>) => {
     const newData = { ...data, ...patch };
     setData(newData);
     onChange(newData);
   }, [data, onChange]);
+
+  const handleHeroImageUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (heroImage) {
+      formData.append("previousUrl", heroImage);
+    }
+
+    const res = await fetch("/api/upload-hero-image", {
+      method: "POST",
+      body: formData,
+    });
+    const result = await res.json();
+
+    if (!result.success) {
+      throw new Error(result.error || "Upload failed");
+    }
+
+    setHeroImage(result.imageUrl);
+    handleChange({ heroImageUrl: result.imageUrl });
+  };
 
   return (
     <section id="banner">
@@ -193,6 +215,21 @@ function BannerSection({ data: initial, onChange }: {
           <Input label="زر رئيسي — الرابط" value={data.primaryCtaHref || ""} onChange={(e) => handleChange({ primaryCtaHref: e.target.value })} />
           <Input label="زر ثانوي — النص" value={data.secondaryCtaLabel || ""} onChange={(e) => handleChange({ secondaryCtaLabel: e.target.value })} />
           <Input label="زر ثانوي — الرابط" value={data.secondaryCtaHref || ""} onChange={(e) => handleChange({ secondaryCtaHref: e.target.value })} />
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-[#e8edf5]">
+          <ImageUploadWithPreview
+            label="صورة لوحة التحكم"
+            currentImage={heroImage}
+            defaultImage="/aysar-dashboard.png"
+            onUpload={handleHeroImageUpload}
+            onRemove={async () => {
+              setHeroImage(null);
+              handleChange({ heroImageUrl: null });
+            }}
+            containerClassName="w-full h-52"
+            aspectRatio={{ width: 1400, height: 480 }}
+          />
         </div>
       </ContentCard>
     </section>
