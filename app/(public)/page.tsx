@@ -61,7 +61,7 @@ export default async function Home() {
         }
       >
         <Image
-          src="/Screenshot from 2026-07-20 02-04-59.png"
+          src="/aysar-dashboard.png"
           alt="نظرة عامة على المنصة"
           width={1400}
           height={480}

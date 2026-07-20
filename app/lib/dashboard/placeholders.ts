@@ -22,6 +22,7 @@ export { PLANS, COMPARE_ROWS, FAQ_ITEMS, CHANNELS, INQUIRY_OPTIONS, PRIVACY_POLI
 export { CONTACT_INFO as CONTACT_PAGE_INFO };
 
 export const HOME_HERO = {
+  heroImageUrl: null as string | null,
   badge: "منصة سحابية للتطوير العقاري",
   title: "إدارة مشاريعك العقارية",
   titleAccent: "بسهولة وشفافية كاملة",
