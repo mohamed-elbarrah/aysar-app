@@ -11,7 +11,7 @@ import {
 export interface HomePageResponse {
   id: string;
   hero: {
-    heroImageUrl?: string | null;
+    heroHtml?: string;
     badge?: string | null;
     title: string;
     titleAccent?: string | null;

@@ -1,7 +1,8 @@
 import HeroSection from "../sections/HeroSection";
 import CTASection from "../sections/CTASection";
 import { FeatureSection } from "../components/FeatureSection";
-import Image from "next/image";
+import { DashboardMockup } from "../components/DashboardMockup";
+
 import { StagesMockup } from "../components/StagesMockup";
 import { MaintenanceMockup } from "../components/MaintenanceMockup";
 import { BookingsMockup } from "../components/BookingsMockup";
@@ -60,18 +61,18 @@ export default async function Home() {
             : undefined
         }
       >
-        <Image
-          src={hero.heroImageUrl || "/aysar-dashboard.png"}
-          alt="نظرة عامة على المنصة"
-          width={1400}
-          height={480}
-          className="w-full max-w-full rounded-lg sm:max-w-[120%] lg:max-w-[1000px] m-auto lg:rounded-t-2xl"
-          style={{
-            boxShadow:
-              "0 8px 40px rgba(26, 154, 90, 0.25), 0 0 60px rgba(26, 154, 90, 0.1)",
-          }}
-          priority
-        />
+        {hero.heroHtml ? (
+          <div
+            className="w-full max-w-full rounded-lg  lg:max-w-[1200px] m-auto lg:rounded-t-2xl"
+            style={{
+              boxShadow:
+                "0 8px 40px rgba(26, 154, 90, 0.25), 0 0 60px rgba(26, 154, 90, 0.1)",
+            }}
+            dangerouslySetInnerHTML={{ __html: hero.heroHtml }}
+          />
+        ) : (
+          <DashboardMockup />
+        )}
       </HeroSection>
 
       <div id="features">

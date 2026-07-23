@@ -9,6 +9,7 @@ import { DynamicList } from "@/app/components/dashboard/DynamicList";
 import { IconPicker } from "@/app/components/dashboard/IconPicker";
 import { IconPreview } from "@/app/components/dashboard/IconPreview";
 import { ImageUploadWithPreview } from "@/app/components/ImageUploadWithPreview";
+import { CodeEditor } from "@/app/components/dashboard/CodeEditor";
 import { ColorPicker } from "@/app/components/dashboard/ColorPicker";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Loader2, ScrollText, ChevronUp } from "lucide-react";
@@ -157,7 +158,7 @@ function BannerSection({ data: initial, onChange }: {
   onChange: (data: typeof HOME_HERO) => void;
 }) {
   const [data, setData] = useState(initial);
-  const [heroImage, setHeroImage] = useState<string | null>(initial.heroImageUrl || null);
+  const [heroHtml, setHeroHtml] = useState(initial.heroHtml || "");
 
   const handleChange = useCallback((patch: Partial<typeof HOME_HERO>) => {
     const newData = { ...data, ...patch };
@@ -165,26 +166,10 @@ function BannerSection({ data: initial, onChange }: {
     onChange(newData);
   }, [data, onChange]);
 
-  const handleHeroImageUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    if (heroImage) {
-      formData.append("previousUrl", heroImage);
-    }
-
-    const res = await fetch("/api/upload-hero-image", {
-      method: "POST",
-      body: formData,
-    });
-    const result = await res.json();
-
-    if (!result.success) {
-      throw new Error(result.error || "Upload failed");
-    }
-
-    setHeroImage(result.imageUrl);
-    handleChange({ heroImageUrl: result.imageUrl });
-  };
+  const handleHtmlChange = useCallback((html: string) => {
+    setHeroHtml(html);
+    handleChange({ heroHtml: html });
+  }, [handleChange]);
 
   return (
     <section id="banner">
@@ -218,19 +203,8 @@ function BannerSection({ data: initial, onChange }: {
         </div>
 
         <div className="mt-6 pt-6 border-t border-[#e8edf5]">
-          <ImageUploadWithPreview
-            label="صورة لوحة التحكم"
-            currentImage={heroImage}
-            defaultImage="/aysar-dashboard.png"
-            onUpload={handleHeroImageUpload}
-            onRemove={async () => {
-              setHeroImage(null);
-              handleChange({ heroImageUrl: null });
-            }}
-            containerClassName="w-full h-52"
-            imageClassName="object-contain"
-            aspectRatio={{ width: 1400, height: 480 }}
-          />
+          <label className="block text-sm font-medium text-navy mb-2">كود HTML للوحة التحكم</label>
+          <CodeEditor value={heroHtml} onChange={handleHtmlChange} minHeight="400px" maxHeight="500px" />
         </div>
       </ContentCard>
     </section>

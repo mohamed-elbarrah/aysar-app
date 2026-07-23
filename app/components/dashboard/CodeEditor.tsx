@@ -9,9 +9,11 @@ import { oneDark } from "@codemirror/theme-one-dark";
 interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
+  minHeight?: string;
+  maxHeight?: string;
 }
 
-export function CodeEditor({ value, onChange }: CodeEditorProps) {
+export function CodeEditor({ value, onChange, minHeight = "200px", maxHeight }: CodeEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
@@ -37,7 +39,7 @@ export function CodeEditor({ value, onChange }: CodeEditorProps) {
         oneDark,
         updateListener,
         EditorView.theme({
-          "&": { height: "200px", fontSize: "13px" },
+          "&": { minHeight, maxHeight: maxHeight ?? "none", fontSize: "13px" },
           ".cm-scroller": { overflow: "auto" },
           ".cm-content": { textAlign: "left" },
           ".cm-gutters": { borderRight: "1px solid rgba(255,255,255,0.08)" },
