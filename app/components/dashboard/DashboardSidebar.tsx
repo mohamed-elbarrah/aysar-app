@@ -12,6 +12,7 @@ import {
   FileText,
   MessageCircle,
   Settings,
+  Images,
   Globe,
   LogOut,
   ChevronLeft,
@@ -89,6 +90,11 @@ const navItems: NavItem[] = [
     href: "/dashboard/messages",
     label: "رسائل التواصل",
     icon: MessageCircle,
+  },
+  {
+    href: "/dashboard/media",
+    label: "مكتبة الوسائط",
+    icon: Images,
   },
   {
     href: "/dashboard/settings",

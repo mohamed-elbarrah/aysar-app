@@ -13,6 +13,7 @@ const pageTitles: Record<string, string> = {
   "/dashboard/contact-page": "صفحة التواصل",
   "/dashboard/policies": "الصفحات القانونية",
   "/dashboard/messages": "رسائل التواصل",
+  "/dashboard/media": "مكتبة الوسائط",
   "/dashboard/settings": "الإعدادات العامة",
   "/dashboard/profile": "الملف الشخصي",
 };
