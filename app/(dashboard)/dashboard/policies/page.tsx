@@ -85,9 +85,11 @@ function PolicyEditor({ data: current, onChange }: {
     onChange({ ...current, ...hero });
   };
 
+  /* Metadata fields are intentionally hidden but retained for future use.
   const updateVersion = (version: Partial<PolicyData>) => {
     onChange({ ...current, ...version });
   };
+  */
 
   const updateSidebar = (sidebarCard: PolicyData["sidebarCard"]) => {
     onChange({ ...current, sidebarCard });
@@ -100,7 +102,9 @@ function PolicyEditor({ data: current, onChange }: {
   return (
     <div className="space-y-6">
       <HeroSection data={current} onChange={updateHero} />
+      {/* Metadata editor intentionally hidden; values remain in the database.
       <VersionSection data={current} onChange={updateVersion} />
+      */}
       <PartsSection parts={current.parts} onChange={updateParts} />
       <SidebarSection data={current} onChange={updateSidebar} />
       <FooterSection data={current} onChange={updateFooter} />
@@ -121,6 +125,7 @@ function HeroSection({ data, onChange }: { data: PolicyData; onChange: (hero: Pa
   );
 }
 
+/* Metadata editor intentionally hidden; fields are retained in PolicyData and Supabase.
 function VersionSection({ data, onChange }: { data: PolicyData; onChange: (v: Partial<PolicyData>) => void }) {
   return (
     <ContentCard title="الإصدار والتاريخ" subtitle="رقم الإصدار وتاريخ السريان">
@@ -132,6 +137,7 @@ function VersionSection({ data, onChange }: { data: PolicyData; onChange: (v: Pa
     </ContentCard>
   );
 }
+*/
 
 function PartsSection({ parts, onChange }: { parts: PolicyPart[]; onChange: (parts: PolicyPart[]) => void }) {
   const [local, setLocal] = useState<PolicyPart[]>(parts);

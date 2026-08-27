@@ -160,6 +160,7 @@ export default function PolicyTemplate({ data }: { data: PolicyData }) {
           <p className="text-[17px] text-white/55 leading-[1.75] max-w-[600px] mb-7 anim-fade-in-up anim-delay-2">
             {data.description}
           </p>
+          {/* Policy metadata is intentionally hidden; values remain available in the data model.
           {data.version && data.effectiveDate && data.entity && (
             <div className="page-meta anim-fade-in-up anim-delay-3">
               <div className="meta-item">📄 <strong>الإصدار:</strong> {data.version}</div>
@@ -167,6 +168,7 @@ export default function PolicyTemplate({ data }: { data: PolicyData }) {
               <div className="meta-item">🏢 <strong>الجهة:</strong> {data.entity}</div>
             </div>
           )}
+          */}
         </div>
       </section>
 
