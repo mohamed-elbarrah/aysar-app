@@ -78,6 +78,24 @@ function toSnakeCase(data: Record<string, unknown>): Record<string, unknown> {
   return result;
 }
 
+function validateScripts(raw: unknown): HtmlBlockRecord[] | NextResponse {
+  const scripts = parseJsonBlocks(raw);
+  if (scripts.length > 50) {
+    return NextResponse.json({ success: false, error: "لا يمكن إضافة أكثر من 50 كوداً" }, { status: 422 });
+  }
+  const ids = new Set<string>();
+  for (const script of scripts) {
+    if (ids.has(script.id)) {
+      return NextResponse.json({ success: false, error: "معرّفات الأكواد يجب أن تكون فريدة" }, { status: 422 });
+    }
+    if (script.content.length > 500_000) {
+      return NextResponse.json({ success: false, error: "حجم الكود كبير جداً" }, { status: 422 });
+    }
+    ids.add(script.id);
+  }
+  return scripts;
+}
+
 function buildSettingsResponse(row: Record<string, unknown>) {
   const scripts = parseJsonBlocks(row.scripts);
 
@@ -154,10 +172,24 @@ export async function PATCH(request: NextRequest) {
 
   const current = existing ? (existing as unknown as Record<string, unknown>) : (DEFAULTS as unknown as Record<string, unknown>);
 
-  const snakeData = toSnakeCase(parsed.data as Record<string, unknown>);
+  const inputData = parsed.data as Record<string, unknown>;
+  const expectedUpdatedAt = typeof inputData.expectedUpdatedAt === "string"
+    ? inputData.expectedUpdatedAt
+    : undefined;
+  if (expectedUpdatedAt && existing?.updated_at && expectedUpdatedAt !== existing.updated_at) {
+    return NextResponse.json(
+      { success: false, error: "تم تعديل الإعدادات من جلسة أخرى. أعد تحميل الصفحة قبل الحفظ." },
+      { status: 409 }
+    );
+  }
+
+  const snakeData = toSnakeCase(inputData);
+  delete snakeData.expectedUpdatedAt;
 
   if (Array.isArray(snakeData.scripts)) {
-    snakeData.scripts = parseJsonBlocks(snakeData.scripts);
+    const validated = validateScripts(snakeData.scripts);
+    if (validated instanceof NextResponse) return validated;
+    snakeData.scripts = validated;
   }
 
   const merged = deepMerge(current, snakeData);

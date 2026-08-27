@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
 import { SaveBar } from "@/app/components/dashboard/SaveBar";
-import { Loader2, Plus, Trash2, Code, AlertTriangle, ChevronDown } from "lucide-react";
+import { Loader2, Plus, Trash2, Code, AlertTriangle, ChevronDown, ArrowUp, ArrowDown } from "lucide-react";
 import {
   type HtmlBlockRecord,
   type BlockLocation,
@@ -20,11 +20,15 @@ function BlockCard({
   index,
   onChange,
   onRemove,
+  onMove,
+  total,
 }: {
   record: HtmlBlockRecord;
   index: number;
+  total: number;
   onChange: (index: number, updated: HtmlBlockRecord) => void;
   onRemove: (index: number) => void;
+  onMove: (index: number, direction: -1 | 1) => void;
 }) {
   const locationOption = LOCATION_OPTIONS.find((l) => l.value === record.location);
 
@@ -40,16 +44,24 @@ function BlockCard({
             {locationOption?.label || record.location}
           </span>
         </div>
-        <button
-          type="button"
-          onClick={() => onRemove(index)}
-          className="text-red-400 hover:text-red-600 transition-colors"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button type="button" onClick={() => onMove(index, -1)} disabled={index === 0} aria-label="تحريك لأعلى" className="p-1 text-[#6b7a94] hover:text-[#2d2e83] disabled:opacity-30"><ArrowUp className="w-4 h-4" /></button>
+          <button type="button" onClick={() => onMove(index, 1)} disabled={index === total - 1} aria-label="تحريك لأسفل" className="p-1 text-[#6b7a94] hover:text-[#2d2e83] disabled:opacity-30"><ArrowDown className="w-4 h-4" /></button>
+          <button type="button" onClick={() => onRemove(index)} aria-label="حذف الكود" className="p-1 text-red-400 hover:text-red-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+        </div>
       </div>
 
-      <div className="max-w-[200px]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium text-[#6b7a94] mb-1">اسم الكود</label>
+          <input
+            value={record.name || ""}
+            onChange={(e) => onChange(index, { ...record, name: e.target.value })}
+            placeholder="مثال: نافذة العرض"
+            className="w-full border border-[#e8edf5] rounded-lg px-3 py-2 text-sm bg-white text-[#0c2954] focus:outline-none focus:ring-2 focus:ring-[#2d2e83]/20 focus:border-[#2d2e83]"
+          />
+        </div>
+        <div className="max-w-[200px]">
         <label className="block text-xs font-medium text-[#6b7a94] mb-1">الموقع</label>
         <div className="relative">
           <select
@@ -70,7 +82,43 @@ function BlockCard({
           </select>
           <ChevronDown className="w-4 h-4 text-[#6b7a94] absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
+        </div>
       </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium text-[#6b7a94] mb-1">طريقة التشغيل</label>
+          <select value={record.runMode || "once-per-load"} onChange={(e) => onChange(index, { ...record, runMode: e.target.value as HtmlBlockRecord["runMode"] })} className="w-full border border-[#e8edf5] rounded-lg px-3 py-2 text-sm bg-white text-[#0c2954] focus:outline-none focus:ring-2 focus:ring-[#2d2e83]/20">
+            <option value="once-per-load">مرة واحدة عند تحميل الموقع</option>
+            <option value="once-per-session">مرة واحدة في الجلسة</option>
+            <option value="on-each-mount">عند كل تحميل</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-[#6b7a94] mb-1">النطاق</label>
+          <select value={record.scope || "global"} onChange={(e) => onChange(index, { ...record, scope: e.target.value as HtmlBlockRecord["scope"] })} className="w-full border border-[#e8edf5] rounded-lg px-3 py-2 text-sm bg-white text-[#0c2954] focus:outline-none focus:ring-2 focus:ring-[#2d2e83]/20">
+            <option value="global">كل صفحات الموقع</option>
+            <option value="page">صفحة محددة</option>
+          </select>
+        </div>
+      </div>
+
+      {record.scope === "page" && (
+        <div>
+          <label className="block text-xs font-medium text-[#6b7a94] mb-1">مسار الصفحة</label>
+          <input value={record.pagePath || ""} onChange={(e) => onChange(index, { ...record, pagePath: e.target.value })} placeholder="مثال: /plans" dir="ltr" className="w-full border border-[#e8edf5] rounded-lg px-3 py-2 text-sm bg-white text-[#0c2954] focus:outline-none focus:ring-2 focus:ring-[#2d2e83]/20" />
+        </div>
+      )}
+
+      <label className="inline-flex items-center gap-2 text-sm text-[#0c2954]">
+        <input
+          type="checkbox"
+          checked={record.enabled !== false}
+          onChange={(e) => onChange(index, { ...record, enabled: e.target.checked })}
+          className="h-4 w-4 accent-[#2d2e83]"
+        />
+        تفعيل الكود
+      </label>
 
       <div>
         <label className="block text-xs font-medium text-[#6b7a94] mb-1">الكود</label>
@@ -95,6 +143,8 @@ export default function ScriptsSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [savedBlocks, setSavedBlocks] = useState<HtmlBlockRecord[]>([]);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -103,6 +153,7 @@ export default function ScriptsSettingsPage() {
         const json = await res.json();
         if (json.success && json.data) {
           const loaded = json.data.scripts || [];
+          setUpdatedAt(json.data.updatedAt || null);
           setBlocks(loaded);
           setSavedBlocks(loaded);
         }
@@ -143,28 +194,41 @@ export default function ScriptsSettingsPage() {
   }, []);
 
   const handleSave = useCallback(async () => {
+    const ids = new Set<string>();
+    if (blocks.some((block) => {
+      if (ids.has(block.id)) return true;
+      ids.add(block.id);
+      return block.scope === "page" && !block.pagePath?.trim();
+    })) {
+      setSaveError("تحقق من عدم تكرار المعرّفات وإضافة مسار للصفحات المحددة");
+      return;
+    }
     setSaving(true);
+    setSaveError(null);
     try {
       const res = await fetch("/api/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ scripts: blocks }),
+        body: JSON.stringify({ scripts: blocks, ...(updatedAt ? { expectedUpdatedAt: updatedAt } : {}) }),
       });
       const json = await res.json();
 
       if (res.ok) {
         const saved = json.data?.scripts || blocks;
+        setUpdatedAt(json.data?.updatedAt || updatedAt);
         setBlocks(saved);
         setSavedBlocks(saved);
         setLastSaved(new Date().toLocaleTimeString("ar-SA"));
         setTimeout(() => setLastSaved(null), 5000);
+      } else {
+        setSaveError(json.error || "تعذر حفظ الأكواد المخصصة");
       }
     } catch {
-      /* silent */
+      setSaveError("تعذر الاتصال بالخادم");
     }
     setSaving(false);
-  }, [blocks]);
+  }, [blocks, updatedAt]);
 
   const handleReset = useCallback(() => {
     setBlocks(JSON.parse(JSON.stringify(savedBlocks)));
@@ -211,8 +275,18 @@ export default function ScriptsSettingsPage() {
               key={record.id}
               record={record}
               index={index}
+              total={blocks.length}
               onChange={handleUpdateBlock}
               onRemove={handleRemoveBlock}
+              onMove={(blockIndex, direction) => {
+                setBlocks((prev) => {
+                  const target = blockIndex + direction;
+                  if (target < 0 || target >= prev.length) return prev;
+                  const next = [...prev];
+                  [next[blockIndex], next[target]] = [next[target], next[blockIndex]];
+                  return next.map((item, order) => ({ ...item, order }));
+                });
+              }}
             />
           ))}
 
@@ -226,6 +300,11 @@ export default function ScriptsSettingsPage() {
           </button>
         </div>
 
+        {saveError && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {saveError}
+          </div>
+        )}
         <SaveBar
           isDirty={isDirty}
           isSubmitting={saving}

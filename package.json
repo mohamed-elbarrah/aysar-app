@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:custom-code": "npx tsx scripts/test-custom-code-feature.ts",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:update-seed": "npx tsx scripts/update-seed-data.ts",
     "db:dump-sql": "npx tsx scripts/dump-sql.ts",

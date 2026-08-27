@@ -4,6 +4,12 @@ export interface HtmlBlockRecord {
   id: string;
   location: BlockLocation;
   content: string;
+  name?: string;
+  enabled?: boolean;
+  scope?: "global" | "page";
+  runMode?: "once-per-load" | "once-per-session" | "on-each-mount";
+  order?: number;
+  pagePath?: string;
 }
 
 function generateId(): string {
@@ -15,6 +21,11 @@ export function createDefaultHtmlBlock(location: BlockLocation): HtmlBlockRecord
     id: generateId(),
     location,
     content: "",
+    name: "كود مخصص",
+    enabled: true,
+    scope: "global",
+    runMode: "once-per-load",
+    order: 0,
   };
 }
 
@@ -36,7 +47,19 @@ export function parseJsonBlocks(raw: unknown): HtmlBlockRecord[] {
         (item.location === "head" || item.location === "body") &&
         typeof item.content === "string"
       ) {
-        return { id: item.id, location: item.location, content: item.content };
+        return {
+          id: item.id,
+          location: item.location,
+          content: item.content,
+          name: typeof item.name === "string" ? item.name : undefined,
+          enabled: item.enabled !== false,
+          scope: item.scope === "page" ? "page" : "global",
+          runMode: item.runMode === "once-per-session" || item.runMode === "on-each-mount"
+            ? item.runMode
+            : "once-per-load",
+          order: typeof item.order === "number" ? item.order : undefined,
+          pagePath: typeof item.pagePath === "string" ? item.pagePath : undefined,
+        };
       }
 
       return convertLegacyRecord(item as Record<string, unknown>);

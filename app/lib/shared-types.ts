@@ -48,7 +48,11 @@ export const contactMessageSubmitSchema = z.object({
 
 export const policiesUpdateSchema = jsonValueSchema;
 
-export const settingsUpdateSchema = jsonValueSchema;
+// Settings updates must always be an object. Scripts remain flexible here so
+// legacy block formats can be normalized by parseJsonBlocks on the server.
+export const settingsUpdateSchema = z.object({
+  scripts: z.array(jsonValueSchema).optional(),
+}).catchall(jsonValueSchema);
 
 export type HomePageUpdate = z.infer<typeof homePageUpdateSchema>;
 
