@@ -63,7 +63,7 @@ export default async function Home() {
       >
         {hero.heroHtml ? (
           <div
-            className="w-full max-w-full rounded-lg  lg:max-w-[1200px] m-auto lg:rounded-t-2xl"
+            className="w-full max-w-full rounded-lg   m-auto lg:rounded-t-2xl"
             style={{
               boxShadow:
                 "0 8px 40px rgba(26, 154, 90, 0.25), 0 0 60px rgba(26, 154, 90, 0.1)",
