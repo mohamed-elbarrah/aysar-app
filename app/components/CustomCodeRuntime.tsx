@@ -66,8 +66,17 @@ function renderBlock(block: HtmlBlockRecord, host: HTMLElement) {
   const scripts = Array.from(template.content.querySelectorAll("script"));
   scripts.forEach((script) => script.remove());
 
-  Array.from(template.content.querySelectorAll("style")).forEach((style) => {
+  // Install styles before adding the visible markup. This prevents a flash of
+  // unstyled custom HTML (for example, a popup briefly appearing before its
+  // opacity/visibility rules are available).
+  const styles = Array.from(template.content.querySelectorAll("style"));
+  styles.forEach((source) => {
+    source.remove();
+    const style = document.createElement("style");
+    Array.from(source.attributes).forEach((attribute) => style.setAttribute(attribute.name, attribute.value));
     style.dataset.aysarCustomOwner = owner;
+    style.textContent = source.textContent;
+    document.head.appendChild(style);
   });
 
   host.appendChild(template.content);
