@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { ContentCard } from "@/app/components/dashboard/ContentCard";
+import { CodeEditor } from "@/app/components/dashboard/CodeEditor";
 import { SaveBar } from "@/app/components/dashboard/SaveBar";
 import { Loader2, Plus, Trash2, Code, AlertTriangle, ChevronDown, ArrowUp, ArrowDown } from "lucide-react";
 import {
@@ -122,15 +123,11 @@ function BlockCard({
 
       <div>
         <label className="block text-xs font-medium text-[#6b7a94] mb-1">الكود</label>
-        <textarea
+        <CodeEditor
           value={record.content}
-          onChange={(e) =>
-            onChange(index, { ...record, content: e.target.value })
-          }
-          dir="ltr"
-          rows={6}
-          placeholder={`<!-- مثال: Google Analytics -->\n<script async src="https://www.googletagmanager.com/gtag/js?id=GA_ID"></script>\n<script>\n  window.dataLayer = window.dataLayer || [];\n  function gtag(){dataLayer.push(arguments);}\n  gtag('js', new Date());\n  gtag('config', 'GA_ID');\n</script>`}
-          className="w-full border border-[#e8edf5] rounded-lg px-3 py-2 text-sm font-mono bg-[#1e1e2e] text-[#cdd6f4] focus:outline-none focus:ring-2 focus:ring-[#2d2e83]/20 focus:border-[#2d2e83] resize-y"
+          onChange={(content) => onChange(index, { ...record, content })}
+          minHeight="400px"
+          maxHeight="500px"
         />
       </div>
     </div>
